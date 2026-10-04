@@ -12,11 +12,14 @@ namespace PodcastMetadataGenerator.Tests;
 /// Set PMG_TEST_FFMPEG to choose the ffmpeg used for burning captions. Otherwise the tests try
 /// "ffmpeg" on PATH and then Homebrew's ffmpeg-full. Tests that need ffmpeg are skipped when none
 /// is found, unless PMG_TEST_REQUIRE_FFMPEG is 1, as it is in CI, where they fail instead.
+/// PMG_TEST_FFMPEG_WITHOUT_CAPTIONS names an ffmpeg built without the subtitles filter, for the
+/// test that the app recognizes one.
 /// </remarks>
 internal static class TestFfmpeg
 {
     public const string PathVariable = "PMG_TEST_FFMPEG";
     public const string RequireVariable = "PMG_TEST_REQUIRE_FFMPEG";
+    public const string WithoutCaptionsVariable = "PMG_TEST_FFMPEG_WITHOUT_CAPTIONS";
 
     private static readonly Lazy<(string? WithCaptions, string? WithoutCaptions)> Found = new(Discover);
 
@@ -36,6 +39,7 @@ internal static class TestFfmpeg
         string?[] candidates =
         [
             Environment.GetEnvironmentVariable(PathVariable),
+            Environment.GetEnvironmentVariable(WithoutCaptionsVariable),
             "ffmpeg",
             CaptionBurnService.GetHomebrewFullFfmpegPath()
         ];
@@ -142,7 +146,7 @@ public sealed class FfmpegWithoutCaptionsFactAttribute : FactAttribute
         var expected = TestFfmpeg.IsRequired && RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
         if (TestFfmpeg.WithoutCaptionSupport is null && !expected)
         {
-            Skip = "No ffmpeg without the subtitles filter was found on PATH.";
+            Skip = $"No ffmpeg without the subtitles filter was found. Set {TestFfmpeg.WithoutCaptionsVariable} to one.";
         }
     }
 }

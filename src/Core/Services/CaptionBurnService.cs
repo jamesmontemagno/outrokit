@@ -224,6 +224,9 @@ public partial class CaptionBurnService
             File.Copy(captionPath, Path.Combine(workingDirectory, captionFileName));
 
             progress?.Report(new CaptionBurnProgress(TimeSpan.Zero, video.Duration));
+            // ffmpeg's reported time can step back when the copied audio runs ahead of the encoded
+            // picture, so only ever report forward movement.
+            var furthest = TimeSpan.Zero;
             var result = await FfmpegRunner.RunAsync(
                 _settings.FfmpegPath,
                 BuildBurnArguments(videoPath, captionFileName, partialPath, outputExtension, style, video),
@@ -231,11 +234,12 @@ public partial class CaptionBurnService
                 workingDirectory,
                 line =>
                 {
-                    if (TryParseProgress(line, out var position))
+                    if (TryParseProgress(line, out var position) && position > furthest)
                     {
-                        progress?.Report(new CaptionBurnProgress(
-                            video.Duration > TimeSpan.Zero && position > video.Duration ? video.Duration : position,
-                            video.Duration));
+                        furthest = video.Duration > TimeSpan.Zero && position > video.Duration
+                            ? video.Duration
+                            : position;
+                        progress?.Report(new CaptionBurnProgress(furthest, video.Duration));
                     }
                 });
 

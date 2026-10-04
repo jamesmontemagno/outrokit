@@ -64,11 +64,15 @@ jobs:
         if: runner.os == 'Windows'
         run: choco install ffmpeg-full -y --no-progress
 
-      # The standard formula has no subtitles filter, which the tests use to check that the app
-      # detects it. ffmpeg-full is the build that burns captions.
+      # Two installs in the guide's order. The standard formula has no subtitles filter, which the
+      # tests use to check that the app detects it; ffmpeg-full is the build that burns captions.
       - name: Install ffmpeg (macOS)
         if: runner.os == 'macOS'
-        run: brew install ffmpeg ffmpeg-full
+        run: |
+          brew install ffmpeg
+          brew install ffmpeg-full
+          echo "PMG_TEST_FFMPEG_WITHOUT_CAPTIONS=$(brew --prefix ffmpeg)/bin/ffmpeg" >> "$GITHUB_ENV"
+          echo "ffmpeg on PATH after both installs: $(command -v ffmpeg || echo none)"
 
       - name: Test
         run: dotnet test PodcastMetadataGenerator.sln --configuration Release --verbosity normal
