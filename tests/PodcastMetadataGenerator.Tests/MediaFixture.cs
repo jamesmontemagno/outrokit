@@ -39,6 +39,7 @@ public sealed class MediaFixture : IAsyncLifetime
     public string Srt => InRoot("captions.srt");
     public string Vtt => InRoot("captions.vtt");
     public string StyledAss => InRoot("styled.ass");
+    public string StyledSsa => InRoot("styled.ssa");
     public string GarbageSrt => InRoot("garbage.srt");
     public string EmptySrt => InRoot("empty.srt");
 
@@ -101,6 +102,24 @@ public sealed class MediaFixture : IAsyncLifetime
             [Events]
             Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
             Dialogue: 0,0:00:00.50,0:00:02.00,Default,,0,0,0,,Top right
+
+            """);
+        // The older SubStation Alpha format: its own section names, a Marked field on each line,
+        // and its own alignment numbers, where 7 is top right.
+        await File.WriteAllTextAsync(StyledSsa,
+            """
+            [Script Info]
+            ScriptType: v4.00
+            PlayResX: 640
+            PlayResY: 360
+
+            [V4 Styles]
+            Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, TertiaryColour, BackColour, Bold, Italic, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, AlphaLevel, Encoding
+            Style: Default,Arial,30,16777215,255,0,0,-1,0,1,2,0,7,12,12,12,0,1
+
+            [Events]
+            Format: Marked, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+            Dialogue: Marked=0,0:00:00.50,0:00:02.00,Default,,0,0,0,,Top right
 
             """);
         await File.WriteAllTextAsync(GarbageSrt, "hello this is not captions\n");

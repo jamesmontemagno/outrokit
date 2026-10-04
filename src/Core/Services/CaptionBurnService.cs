@@ -77,12 +77,54 @@ public partial class CaptionBurnService
     }
 
     /// <summary>
-    /// Whether two paths name the same file, so a burn would overwrite its own input.
+    /// Whether two paths lead to the same file, so a burn would overwrite its own input.
+    /// Symbolic links are followed in every part of both paths, so a link to the video, or a
+    /// linked folder that contains it, counts as the video itself.
     /// </summary>
     public static bool IsSameFile(string firstPath, string secondPath) => string.Equals(
-        Path.GetFullPath(firstPath),
-        Path.GetFullPath(secondPath),
+        ResolvePhysicalPath(firstPath),
+        ResolvePhysicalPath(secondPath),
         StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Follows the symbolic links in a path, one part at a time from the root, so that two routes
+    /// to one file come out as the same text. Parts that do not exist yet are kept as written.
+    /// </summary>
+    private static string ResolvePhysicalPath(string path, int linksFollowed = 0)
+    {
+        // The file system gives up on a chain of links long before this.
+        const int maxLinks = 64;
+
+        var fullPath = Path.GetFullPath(path);
+        var root = Path.GetPathRoot(fullPath) ?? string.Empty;
+        var current = root;
+        var parts = fullPath[root.Length..].Split(
+            [Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar],
+            StringSplitOptions.RemoveEmptyEntries);
+
+        foreach (var part in parts)
+        {
+            current = Path.Combine(current, part);
+            try
+            {
+                FileSystemInfo entry = Directory.Exists(current) ? new DirectoryInfo(current) : new FileInfo(current);
+                if (entry.LinkTarget is not null
+                    && linksFollowed < maxLinks
+                    && entry.ResolveLinkTarget(returnFinalTarget: true) is { } target)
+                {
+                    // The target is itself a path that may run through linked folders.
+                    current = ResolvePhysicalPath(target.FullName, linksFollowed + 1);
+                }
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                // A link that cannot be read is compared as it is written.
+            }
+        }
+
+        // Some file systems treat composed and decomposed spellings of a name as one file.
+        return current.Normalize();
+    }
 
     /// <summary>
     /// Where Homebrew installs ffmpeg-full, the macOS build that includes the subtitles filter.

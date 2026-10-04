@@ -40,6 +40,44 @@ public sealed class CaptionBurnPathTests
         Assert.Equal(hasOwnStyling, CaptionBurnService.HasOwnStyling(name));
     }
 
+    [SymbolicLinkFact]
+    public void Treats_links_to_a_file_as_the_file_itself()
+    {
+        var directory = Directory.CreateTempSubdirectory("pmg-links-").FullName;
+        try
+        {
+            var folder = Directory.CreateDirectory(Path.Combine(directory, "videos")).FullName;
+            var video = Path.Combine(folder, "episode.mp4");
+            File.WriteAllText(video, "video");
+            File.WriteAllText(Path.Combine(folder, "other.mp4"), "other");
+            var fileLink = Path.Combine(directory, "link.mp4");
+            File.CreateSymbolicLink(fileLink, video);
+            var relativeLink = Path.Combine(folder, "relative-link.mp4");
+            File.CreateSymbolicLink(relativeLink, "episode.mp4");
+            var linkToLink = Path.Combine(directory, "link-to-link.mp4");
+            File.CreateSymbolicLink(linkToLink, fileLink);
+            var folderLink = Path.Combine(directory, "linked-videos");
+            Directory.CreateSymbolicLink(folderLink, folder);
+
+            Assert.True(CaptionBurnService.IsSameFile(fileLink, video));
+            Assert.True(CaptionBurnService.IsSameFile(video, relativeLink));
+            Assert.True(CaptionBurnService.IsSameFile(linkToLink, video));
+            Assert.True(CaptionBurnService.IsSameFile(Path.Combine(folderLink, "episode.mp4"), video));
+            Assert.True(CaptionBurnService.IsSameFile(Path.Combine(folderLink, "episode.mp4"), fileLink));
+
+            Assert.False(CaptionBurnService.IsSameFile(fileLink, Path.Combine(folder, "other.mp4")));
+            // A new file in a linked folder is still a new file.
+            Assert.False(CaptionBurnService.IsSameFile(Path.Combine(folderLink, "episode-captioned.mp4"), video));
+            Assert.True(CaptionBurnService.IsSameFile(
+                Path.Combine(folderLink, "episode-captioned.mp4"),
+                Path.Combine(folder, "episode-captioned.mp4")));
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
     [Fact]
     public void Treats_different_spellings_of_one_path_as_the_same_file()
     {

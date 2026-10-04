@@ -48,6 +48,7 @@ public sealed class CaptionBurnServiceTests(MediaFixture media)
         Assert.Equal(1, await service.CountCaptionsAsync(media.Srt));
         Assert.Equal(1, await service.CountCaptionsAsync(media.Vtt));
         Assert.Equal(1, await service.CountCaptionsAsync(media.StyledAss));
+        Assert.Equal(1, await service.CountCaptionsAsync(media.StyledSsa));
         Assert.Equal(0, await service.CountCaptionsAsync(media.GarbageSrt));
         Assert.Equal(0, await service.CountCaptionsAsync(media.EmptySrt));
     }
@@ -101,13 +102,16 @@ public sealed class CaptionBurnServiceTests(MediaFixture media)
         Assert.True((await media.ReadFrameAsync(output, MediaFixture.DuringCaption)).BottomThird > 50);
     }
 
-    [CaptionFfmpegFact]
-    public async Task Keeps_the_styling_of_an_ass_file()
+    [CaptionFfmpegTheory]
+    [InlineData("styled.ass")]
+    [InlineData("styled.ssa")]
+    public async Task Keeps_the_styling_of_a_file_that_has_its_own(string captionsName)
     {
+        var captions = Path.Combine(Path.GetDirectoryName(media.Landscape)!, captionsName);
         var output = Path.Combine(media.NewDirectory(), "captioned.mp4");
 
         // The file puts its text top right; the requested bottom-centre style must not win.
-        await media.CreateBurnService().BurnAsync(media.Landscape, media.StyledAss, output, Default);
+        await media.CreateBurnService().BurnAsync(media.Landscape, captions, output, Default);
 
         var frame = await media.ReadFrameAsync(output, MediaFixture.DuringCaption);
         Assert.True(frame.BrightPixels(left: 0.5, bottom: 1 / 3.0) > 50);
@@ -252,6 +256,32 @@ public sealed class CaptionBurnServiceTests(MediaFixture media)
 
         Assert.Contains("original video", error.Message);
         Assert.True(await HasAudioAsync(media.Landscape));
+    }
+
+    [SymbolicLinkFact(NeedsCaptionFfmpeg = true)]
+    public async Task Refuses_to_save_over_the_original_reached_through_a_link()
+    {
+        // The video is picked through links, and the output is the real file they lead to.
+        var directory = media.NewDirectory();
+        var original = Path.Combine(directory, "original.mp4");
+        File.Copy(media.Landscape, original);
+        var originalLength = new FileInfo(original).Length;
+        var fileLink = Path.Combine(directory, "link-to-video.mp4");
+        File.CreateSymbolicLink(fileLink, original);
+        var folderLink = Path.Combine(media.NewDirectory(), "link-to-folder");
+        Directory.CreateSymbolicLink(folderLink, directory);
+        var service = media.CreateBurnService();
+
+        foreach (var video in new[] { fileLink, Path.Combine(folderLink, "original.mp4") })
+        {
+            var error = await Assert.ThrowsAsync<InvalidOperationException>(
+                () => service.BurnAsync(video, media.Srt, original, Default));
+
+            Assert.Contains("original video", error.Message);
+            Assert.Equal(originalLength, new FileInfo(original).Length);
+        }
+
+        Assert.Equal(0, (await media.ReadFrameAsync(original, MediaFixture.DuringCaption)).BrightPixels());
     }
 
     [CaptionFfmpegTheory]

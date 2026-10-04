@@ -136,6 +136,57 @@ public sealed class CaptionFfmpegTheoryAttribute : TheoryAttribute
 }
 
 /// <summary>
+/// A test that creates symbolic links. Windows only allows that for administrators and in
+/// Developer Mode, so the test is skipped where the system refuses.
+/// </summary>
+public sealed class SymbolicLinkFactAttribute : FactAttribute
+{
+    private static readonly Lazy<bool> CanCreateLinks = new(() =>
+    {
+        var directory = Directory.CreateTempSubdirectory("pmg-linkprobe-").FullName;
+        try
+        {
+            File.CreateSymbolicLink(Path.Combine(directory, "link"), Path.Combine(directory, "target"));
+            return true;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return false;
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    });
+
+    private bool _needsCaptionFfmpeg;
+
+    public SymbolicLinkFactAttribute()
+    {
+        if (!CanCreateLinks.Value)
+        {
+            Skip = "This system does not allow creating symbolic links.";
+        }
+    }
+
+    /// <summary>
+    /// Set when the test also burns captions, so it is skipped like <see cref="CaptionFfmpegFactAttribute"/>.
+    /// </summary>
+    public bool NeedsCaptionFfmpeg
+    {
+        get => _needsCaptionFfmpeg;
+        set
+        {
+            _needsCaptionFfmpeg = value;
+            if (value && Skip is null && TestFfmpeg.WithCaptionSupport is null && !TestFfmpeg.IsRequired)
+            {
+                Skip = TestFfmpeg.MissingMessage;
+            }
+        }
+    }
+}
+
+/// <summary>
 /// A test that needs an ffmpeg built without the subtitles filter, such as Homebrew's standard formula.
 /// </summary>
 public sealed class FfmpegWithoutCaptionsFactAttribute : FactAttribute
