@@ -1,0 +1,14 @@
+{
+  "name": "outrokit-hype-video",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Renders the OutroKit hype video from hype-video.html",
+  "scripts": {
+    "render": "node render.js",
+    "gif": "node render.js gif",
+    "stills": "node render.js stills"
+  },
+  "dependencies": {
+    "puppeteer-core": "^24.0.0"
+  }
+}
