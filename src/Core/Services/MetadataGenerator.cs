@@ -8,7 +8,7 @@ using PodcastMetadataGenerator.Core.Prompts;
 namespace PodcastMetadataGenerator.Core.Services;
 
 /// <summary>
-/// Generates podcast metadata using the GitHub Copilot SDK.
+/// Generates episode metadata using the GitHub Copilot SDK.
 /// </summary>
 public partial class MetadataGenerator : IAsyncDisposable
 {
@@ -52,7 +52,7 @@ public partial class MetadataGenerator : IAsyncDisposable
     }
     
     /// <summary>
-    /// Generates title suggestions for the podcast episode with streaming support.
+    /// Generates title suggestions for the episode with streaming support.
     /// </summary>
     /// <param name="style">Title style for this run; falls back to the default in settings when null.</param>
     public async Task<List<string>> GenerateTitlesAsync(

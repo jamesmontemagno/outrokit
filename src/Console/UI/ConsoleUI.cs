@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Spectre.Console;
 using PodcastMetadataGenerator.Core.Models;
 using PodcastMetadataGenerator.Core.Services;
@@ -10,33 +11,31 @@ namespace PodcastMetadataGenerator.Console.UI;
 public static class ConsoleUI
 {
     /// <summary>
-    /// Shows the application header/banner with ASCII art.
+    /// Shows the OutroKit banner.
     /// </summary>
     public static void ShowHeader(CopilotAuthService.CopilotStatus? copilotStatus = null)
     {
         AnsiConsole.Clear();
         
-        // ASCII art logo
-        var asciiArt = @"
-[blue]    ██████╗  ██████╗ ██████╗  ██████╗ █████╗ ███████╗████████╗[/]
-[blue]    ██╔══██╗██╔═══██╗██╔══██╗██╔════╝██╔══██╗██╔════╝╚══██╔══╝[/]
-[cyan]    ██████╔╝██║   ██║██║  ██║██║     ███████║███████╗   ██║   [/]
-[cyan]    ██╔═══╝ ██║   ██║██║  ██║██║     ██╔══██║╚════██║   ██║   [/]
-[magenta]    ██║     ╚██████╔╝██████╔╝╚██████╗██║  ██║███████║   ██║   [/]
-[magenta]    ╚═╝      ╚═════╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝╚══════╝   ╚═╝   [/]
-[grey]           ╔╦╗┌─┐┌┬┐┌─┐┌┬┐┌─┐┌┬┐┌─┐  ╔═╗┌─┐┌┐┌[/]
-[grey]           ║║║├┤  │ ├─┤ ││├─┤ │ ├─┤  ║ ╦├┤ │││[/]
-[grey]           ╩ ╩└─┘ ┴ ┴ ┴─┴┘┴ ┴ ┴ ┴ ┴  ╚═╝└─┘┘└┘[/]
+        // The wordmark sits under three bands, like the card on outrokit.com.
+        var banner = @"
+[#f2543a]  ████████████████████████████████████████████████████████████████[/]
+[#ffd22e]  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[/]
+[#6f7ef7]  ────────────────────────────────────────────────────────────────[/]
+
+[bold]   ██████╗ ██╗   ██╗████████╗██████╗  ██████╗ ██╗  ██╗██╗████████╗[/]
+[bold]  ██╔═══██╗██║   ██║╚══██╔══╝██╔══██╗██╔═══██╗██║ ██╔╝██║╚══██╔══╝[/]
+[bold]  ██║   ██║██║   ██║   ██║   ██████╔╝██║   ██║█████╔╝ ██║   ██║   [/]
+[bold]  ██║   ██║██║   ██║   ██║   ██╔══██╗██║   ██║██╔═██╗ ██║   ██║   [/]
+[bold]  ╚██████╔╝╚██████╔╝   ██║   ██║  ██║╚██████╔╝██║  ██╗██║   ██║   [/]
+[bold]   ╚═════╝  ╚═════╝    ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚═╝   ╚═╝   [/]
 ";
-        AnsiConsole.Markup(asciiArt);
+        AnsiConsole.Markup(banner);
         AnsiConsole.WriteLine();
-        
-        var rule = new Rule("[bold blue]🎙️ Podcast Metadata Generator[/]")
-        {
-            Justification = Justify.Center,
-            Style = Style.Parse("blue")
-        };
-        AnsiConsole.Write(rule);
+        AnsiConsole.MarkupLine("  [bold]The episode is done.[/] [bold #f2543a]The label isn't.[/]");
+        AnsiConsole.MarkupLine("  [grey]Titles, descriptions, chapters, and subtitles for your episode.[/]");
+        AnsiConsole.WriteLine();
+        AnsiConsole.Write(new Rule { Style = Style.Parse("grey") });
         AnsiConsole.WriteLine();
         
         // Show Copilot status if provided
@@ -46,6 +45,20 @@ public static class ConsoleUI
         }
     }
     
+    /// <summary>
+    /// Tells someone running the original package how to move to the renamed one.
+    /// </summary>
+    public static void ShowRenamedPackageNotice()
+    {
+        AnsiConsole.MarkupLine(
+            $"[yellow]![/] [bold]This package has a new name: {PackageIdentity.PackageId}.[/] Switch to it to keep getting updates.");
+        AnsiConsole.MarkupLine($"  Next time, start the app with: [cyan]dnx {PackageIdentity.PackageId}[/]");
+        AnsiConsole.MarkupLine(
+            $"  Installed it as a tool? Run [cyan]dotnet tool uninstall -g {PackageIdentity.LegacyPackageId}[/], then [cyan]dotnet tool install -g {PackageIdentity.PackageId}[/], and start it with [cyan]outrokit[/].");
+        AnsiConsole.MarkupLine("  [grey]Your settings and downloaded models carry over.[/]");
+        AnsiConsole.WriteLine();
+    }
+
     /// <summary>
     /// Shows Copilot SDK runtime status.
     /// </summary>
@@ -88,7 +101,19 @@ public static class ConsoleUI
             AnsiConsole.WriteLine();
         }
         
-        if (!status.IsInstalled)
+        if (status.IsCliMissing)
+        {
+            var installCommand = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                ? "winget install GitHub.Copilot"
+                : "curl -fsSL https://gh.io/copilot-install | bash";
+            AnsiConsole.MarkupLine("[yellow]To install the Copilot CLI:[/]");
+            AnsiConsole.MarkupLine($"  [cyan]{Markup.Escape(installCommand)}[/]");
+            AnsiConsole.MarkupLine("  Then sign in with [cyan]copilot login[/] and start OutroKit again.");
+            AnsiConsole.MarkupLine("  [dim]Step-by-step guide: https://outrokit.com/#a3[/]");
+            AnsiConsole.MarkupLine("  [dim]Already installed? Set COPILOT_CLI_PATH to the copilot executable.[/]");
+            AnsiConsole.WriteLine();
+        }
+        else if (!status.IsInstalled)
         {
             AnsiConsole.MarkupLine("[yellow]To start the Copilot runtime:[/]");
             AnsiConsole.MarkupLine("  [cyan]Restart the app, or set COPILOT_CLI_PATH to a known working Copilot CLI executable.[/]");
@@ -341,9 +366,17 @@ public static class ConsoleUI
     }
 
     /// <summary>
-    /// Prompts for where to save an SRT file, confirming before overwriting an existing one.
+    /// Prompts for where to save a file, confirming before overwriting an existing one.
     /// </summary>
-    public static string AskSaveFilePath(string prompt, string defaultPath)
+    /// <param name="extensions">
+    /// The extensions the file may have, such as ".srt". The first is added when the path has none of them.
+    /// </param>
+    /// <param name="validate">Returns why a path cannot be used, or null when it can.</param>
+    public static string AskSaveFilePath(
+        string prompt,
+        string defaultPath,
+        IReadOnlyList<string> extensions,
+        Func<string, string?>? validate = null)
     {
         while (true)
         {
@@ -355,9 +388,10 @@ public static class ConsoleUI
                     .HideDefaultValue());
             path = CleanFilePath(path);
 
-            if (!string.Equals(Path.GetExtension(path), ".srt", StringComparison.OrdinalIgnoreCase))
+            if (extensions.Count > 0
+                && !extensions.Contains(Path.GetExtension(path), StringComparer.OrdinalIgnoreCase))
             {
-                path += ".srt";
+                path += extensions[0];
             }
 
             var fullPath = Path.GetFullPath(path);
@@ -365,6 +399,12 @@ public static class ConsoleUI
             if (string.IsNullOrWhiteSpace(directory) || !Directory.Exists(directory))
             {
                 ShowError($"Directory not found: {directory}");
+                continue;
+            }
+
+            if (validate?.Invoke(fullPath) is { } problem)
+            {
+                ShowError(problem);
                 continue;
             }
 
@@ -491,7 +531,7 @@ public static class ConsoleUI
     }
     
     /// <summary>
-    /// Checks if a file is likely a transcript file based on extension.
+    /// Checks whether the file browser should list a file for the kind of input being picked.
     /// </summary>
     private static bool IsDiscoverableFile(string fileName, FileDiscoveryType discoveryType)
     {
@@ -500,6 +540,8 @@ public static class ConsoleUI
         {
             FileDiscoveryType.Transcript => ext is ".txt" or ".srt" or ".vtt" or ".json" or ".md" or ".csv",
             FileDiscoveryType.Media => MediaTranscriptService.HasMediaExtension(fileName),
+            FileDiscoveryType.Video => MediaTranscriptService.HasVideoExtension(fileName),
+            FileDiscoveryType.Captions => CaptionBurnService.HasCaptionExtension(fileName),
             _ => false
         };
     }
@@ -554,6 +596,38 @@ public static class ConsoleUI
     }
     
     /// <summary>
+    /// Prompts for a caption text size, listing the default first so Enter accepts it.
+    /// </summary>
+    public static CaptionSize SelectCaptionSize(CaptionSize defaultSize, string title = "Caption text size:")
+    {
+        return SelectFromList(
+            title,
+            CaptionStyles.AllSizes.OrderByDescending(size => size == defaultSize).ToList(),
+            size =>
+            {
+                var suffix = size == defaultSize ? " [green](default)[/]" : "";
+                return $"{Markup.Escape(size.GetDisplayName())}{suffix} [grey]- {Markup.Escape(size.GetDescription())}[/]";
+            });
+    }
+
+    /// <summary>
+    /// Prompts for where captions sit in the picture, listing the default first so Enter accepts it.
+    /// </summary>
+    public static CaptionPosition SelectCaptionPosition(
+        CaptionPosition defaultPosition,
+        string title = "Caption position:")
+    {
+        return SelectFromList(
+            title,
+            CaptionStyles.AllPositions.OrderByDescending(position => position == defaultPosition).ToList(),
+            position =>
+            {
+                var suffix = position == defaultPosition ? " [green](default)[/]" : "";
+                return $"{Markup.Escape(position.GetDisplayName())}{suffix} [grey]- {Markup.Escape(position.GetDescription())}[/]";
+            });
+    }
+    
+    /// <summary>
     /// Shows descriptions in a formatted way.
     /// </summary>
     public static void ShowDescriptions(Dictionary<DescriptionLength, string> descriptions)
@@ -575,7 +649,9 @@ public static class ConsoleUI
     public enum FileDiscoveryType
     {
         Transcript,
-        Media
+        Media,
+        Video,
+        Captions
     }
     
     /// <summary>

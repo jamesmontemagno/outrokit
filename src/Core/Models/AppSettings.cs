@@ -144,7 +144,7 @@ public class AppSettings
     #region Transcription Settings
 
     /// <summary>
-    /// Path or command name used to launch ffmpeg.
+    /// Path or command name used to launch ffmpeg, for transcription and for burning captions.
     /// </summary>
     public string FfmpegPath { get; set; } = "ffmpeg";
 
@@ -157,6 +157,20 @@ public class AppSettings
     /// Path to the downloaded and initialized GGML model.
     /// </summary>
     public string? WhisperModelPath { get; set; }
+
+    #endregion
+
+    #region Caption Settings
+
+    /// <summary>
+    /// Default text size for captions burned into a video. Confirmed each time captions are burned.
+    /// </summary>
+    public CaptionSize CaptionSize { get; set; } = CaptionStyles.DefaultSize;
+
+    /// <summary>
+    /// Default placement for captions burned into a video. Confirmed each time captions are burned.
+    /// </summary>
+    public CaptionPosition CaptionPosition { get; set; } = CaptionStyles.DefaultPosition;
 
     #endregion
     
@@ -240,7 +254,7 @@ public class AppSettings
     public string? EpisodeContext { get; set; }
     
     /// <summary>
-    /// Default podcast name (persisted for reuse).
+    /// Default show name (persisted for reuse). The property keeps its name so saved settings still load.
     /// </summary>
     public string? PodcastName { get; set; }
     

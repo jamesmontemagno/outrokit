@@ -2,12 +2,12 @@
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 @inject CopilotAuthService CopilotAuth
 
-<PageTitle>Podcast Metadata Generator</PageTitle>
+<PageTitle>OutroKit</PageTitle>
 
-<h1>🎙️ Podcast Metadata Generator</h1>
+<h1>📼 OutroKit</h1>
 
 <p class="lead">
-    Generate titles, descriptions, chapters, and SRT files from your podcast transcripts using AI.
+    Generate titles, descriptions, chapters, and SRT files from your episode transcripts using AI.
 </p>
 
 @if (_isLoading)
@@ -102,7 +102,15 @@ else if (_copilotStatus != null)
             <h5>Setup Required</h5>
             <p>Please complete the following steps to use this application:</p>
             <ol>
-                @if (!_copilotStatus.IsInstalled)
+                @if (_copilotStatus.IsCliMissing)
+                {
+                    <li>
+                        <strong>Install the GitHub Copilot CLI:</strong>
+                        follow <a href="https://outrokit.com/#a3" target="_blank">step A3 of the guide</a>, then restart the app.
+                        If it is already installed, set <code>COPILOT_CLI_PATH</code> to the copilot executable.
+                    </li>
+                }
+                else if (!_copilotStatus.IsInstalled)
                 {
                     <li>
                         <strong>Start Copilot runtime:</strong>

@@ -109,6 +109,8 @@ public class SettingsService
         FfmpegPath = settings.FfmpegPath,
         WhisperModel = settings.WhisperModel,
         WhisperModelPath = settings.WhisperModelPath,
+        CaptionSize = settings.CaptionSize,
+        CaptionPosition = settings.CaptionPosition,
         OutputDirectory = settings.OutputDirectory,
         TitleCount = settings.TitleCount,
         TitleMaxWords = settings.TitleMaxWords,
@@ -145,6 +147,16 @@ public class SettingsService
         if (!Enum.IsDefined(settings.TitleStyle))
         {
             settings.TitleStyle = TitleStyles.Default;
+        }
+
+        if (!Enum.IsDefined(settings.CaptionSize))
+        {
+            settings.CaptionSize = CaptionStyles.DefaultSize;
+        }
+
+        if (!Enum.IsDefined(settings.CaptionPosition))
+        {
+            settings.CaptionPosition = CaptionStyles.DefaultPosition;
         }
 
         return settings;

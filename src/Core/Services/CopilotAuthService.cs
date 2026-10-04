@@ -21,7 +21,11 @@ public class CopilotAuthService
         string? ErrorMessage,
         string? AuthType = null,
         string? Host = null,
-        string? Login = null);
+        string? Login = null,
+        bool IsCliMissing = false);
+
+    private const string CliMissingMessage =
+        "The GitHub Copilot CLI was not found. The app needs it to reach Copilot.";
     
     /// <summary>
     /// Checks if Copilot CLI is ready to use.
@@ -32,6 +36,18 @@ public class CopilotAuthService
         // Check GH_TOKEN environment variable
         var ghToken = Environment.GetEnvironmentVariable("GH_TOKEN");
         var isTokenSet = !string.IsNullOrEmpty(ghToken);
+
+        // Nothing is bundled to fall back on, so say what is missing rather than letting the
+        // SDK report the internal path it looked in.
+        if (!CopilotClientFactory.IsCliInstalled)
+        {
+            return new CopilotStatus(
+                IsInstalled: false,
+                IsTokenSet: isTokenSet,
+                IsAuthenticated: false,
+                ErrorMessage: CliMissingMessage,
+                IsCliMissing: true);
+        }
 
         var authResult = await CheckCopilotAuthAsync();
         

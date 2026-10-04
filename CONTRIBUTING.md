@@ -1,6 +1,6 @@
-# Contributing to Podcast Metadata Generator
+# Contributing to OutroKit
 
-First off, thank you for considering contributing to Podcast Metadata Generator! It's people like you that make this tool better for everyone.
+First off, thank you for considering contributing to OutroKit! It's people like you that make this tool better for everyone.
 
 ## Code of Conduct
 
@@ -54,12 +54,14 @@ cd podcast-metadata-generator
 # Build the project
 dotnet build
 
-# Run tests (when available)
+# Run tests
 dotnet test
 
 # Run the application
 dotnet run
 ```
+
+The tests in `tests/` burn captions into short clips that ffmpeg generates on the spot, so most of them need an ffmpeg that includes libass. They look for `ffmpeg` on your `PATH`, then for Homebrew's `ffmpeg-full`; set `PMG_TEST_FFMPEG` to use a different one. Tests that cannot find a suitable ffmpeg are skipped locally. CI sets `PMG_TEST_REQUIRE_FFMPEG=1`, which makes them fail instead, and runs them on Linux, Windows, and both kinds of Mac.
 
 ### Project Structure
 
@@ -68,6 +70,17 @@ dotnet run
 - `Prompts/` - AI prompt templates
 - `UI/` - Console UI components
 - `Program.cs` - Application entry point
+
+### NuGet Packages
+
+The console app is published as two tool packages, and `.github/scripts/pack-tool.sh` packs and checks both:
+
+- **`OutroKit`** is the app, with the command `outrokit`.
+- **`PodcastMetadataGenerator`** is the app's original package. A tool package cannot depend on another package, so it carries the same app under its old ID and old command, and tells people at startup to move to `OutroKit`.
+
+Releases publish through nuget.org [Trusted Publishing](https://learn.microsoft.com/nuget/nuget-org/trusted-publishing), so there is no API key to store. The policy on nuget.org names this repository and the workflow file `release.yml`, with no environment, and has to cover both package IDs. If the repository is renamed, update the policy to match.
+
+When the old package is no longer needed, deprecate it on nuget.org with `OutroKit` as the alternate package, and remove it from the push step in `.github/workflows/release.yml`.
 
 ## Style Guidelines
 

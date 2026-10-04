@@ -10,13 +10,25 @@ FORM: Blank Tape J-Card, 6th of 7 grounded directions; staged as the unfolded ca
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Podcast Metadata Generator: titles, descriptions, chapters, and subtitles from your episode</title>
-  <meta name="description" content="A free terminal app that reads your podcast transcript, video, or audio file and writes the titles, descriptions, YouTube chapters, and SRT subtitles. Works with the free GitHub Copilot plan. Step-by-step install and usage guide.">
+  <title>OutroKit: titles, descriptions, chapters, and subtitles from your episode</title>
+  <meta name="description" content="OutroKit is a free terminal app that reads your episode&rsquo;s transcript, video, or audio file and writes the titles, descriptions, YouTube chapters, and SRT subtitles. Works with the free GitHub Copilot plan. Step-by-step install and usage guide.">
   <meta name="theme-color" content="#2438c9">
+  <link rel="canonical" href="https://outrokit.com/">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Podcast Metadata Generator">
+  <meta property="og:site_name" content="OutroKit">
+  <meta property="og:title" content="OutroKit: the episode is done, the label isn&rsquo;t">
   <meta property="og:description" content="Hand it your episode. Get back titles, descriptions, YouTube chapters, and subtitles. Install and usage guide.">
-  <meta property="og:url" content="https://jamesmontemagno.github.io/podcast-metadata-generator/">
+  <meta property="og:url" content="https://outrokit.com/">
+  <meta property="og:image" content="https://outrokit.com/og.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="An unfolded cassette inlay card. The front reads: The episode is done. The label isn&rsquo;t. The index side is filled in with a title, description, chapters, and subtitles for a made-up example episode.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="OutroKit: the episode is done, the label isn&rsquo;t">
+  <meta name="twitter:description" content="Hand it your episode. Get back titles, descriptions, YouTube chapters, and subtitles. Install and usage guide.">
+  <meta name="twitter:image" content="https://outrokit.com/og.png">
+  <meta name="twitter:image:alt" content="An unfolded cassette inlay card. The front reads: The episode is done. The label isn&rsquo;t. The index side is filled in with a title, description, chapters, and subtitles for a made-up example episode.">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="preload" href="fonts/archivo-variable.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/sometype-mono-variable.woff2" as="font" type="font/woff2" crossorigin>
@@ -36,7 +48,7 @@ FORM: Blank Tape J-Card, 6th of 7 grounded directions; staged as the unfolded ca
   <a class="skip" href="#main">Skip to content</a>
 
   <header class="topbar">
-    <a class="brand" href="#top" aria-label="Podcast Metadata Generator, back to top">Podcast Metadata Generator</a>
+    <a class="brand" href="#top" aria-label="OutroKit, back to top">OutroKit</a>
     <nav aria-label="Sections">
       <ul>
         <li><a href="#side-a"><span class="chip chip--a" aria-hidden="true">A</span>Install</a></li>
@@ -54,15 +66,15 @@ FORM: Blank Tape J-Card, 6th of 7 grounded directions; staged as the unfolded ca
         <div class="jcard__front">
           <div class="bands" aria-hidden="true"><i></i><i></i><i></i></div>
           <h1 id="hero-title"><span>The episode is done.</span> <span class="turn">The label isn&rsquo;t.</span></h1>
-          <p class="pitch">Podcast Metadata Generator reads your transcript, video, or audio file and writes the titles, descriptions, YouTube chapters, and subtitles for it.</p>
+          <p class="pitch">OutroKit reads your transcript, video, or audio file and writes the titles, descriptions, YouTube chapters, and subtitles for it.</p>
 
           <div class="cassette" id="cassette">
             <div class="cassette__label">
               <div class="cassette__write">
                 <span class="cassette__side" aria-hidden="true">A</span>
                 <p class="printed" id="hero-cmd-label">Have .NET 10? Run this</p>
-                <button class="copy copy--label" type="button" data-copy="dnx PodcastMetadataGenerator" hidden>Copy</button>
-                <code class="cassette__cmd">dnx PodcastMetadataGenerator</code>
+                <button class="copy copy--label" type="button" data-copy="dnx OutroKit" hidden>Copy</button>
+                <code class="cassette__cmd">dnx OutroKit</code>
               </div>
               <div class="cassette__window" aria-hidden="true">
                 <svg class="reel reel--full" viewBox="0 0 100 100"><circle class="reel__tape" cx="50" cy="50" r="49"/><g class="reel__hub"><circle cx="50" cy="50" r="19"/><path d="M50 31v9M50 60v9M33.5 40.5l7.8 4.5M58.7 55l7.8 4.5M33.5 59.5l7.8-4.5M58.7 45l7.8-4.5"/></g></svg>
@@ -205,7 +217,7 @@ FORM: Blank Tape J-Card, 6th of 7 grounded directions; staged as the unfolded ca
             <div class="track__name"><span class="track__no">A3</span><h3>Sign in to GitHub Copilot</h3></div>
             <div class="track__body">
               <p>GitHub Copilot does the writing, so you need a GitHub account with Copilot. <strong>The free Copilot plan works.</strong> You do not need a paid subscription. <a href="https://github.com/features/copilot/plans">See the Copilot plans</a>.</p>
-              <p>Install the Copilot command-line app. The app uses it to reach Copilot, and it is how you sign in:</p>
+              <p>Install the Copilot command-line app. OutroKit needs it on every computer: it is how the app reaches Copilot, and how you sign in:</p>
               <div data-os="windows">
                 <p class="os-name"><b>Windows</b></p>
                 <div class="cmd"><pre><code>winget install GitHub.Copilot</code></pre></div>
@@ -228,21 +240,21 @@ FORM: Blank Tape J-Card, 6th of 7 grounded directions; staged as the unfolded ca
           <li class="track" id="a4">
             <div class="track__name"><span class="track__no">A4</span><h3>Run it</h3></div>
             <div class="track__body">
-              <div class="cmd cmd--lead"><pre><code>dnx PodcastMetadataGenerator</code></pre></div>
+              <div class="cmd cmd--lead"><pre><code>dnx OutroKit</code></pre></div>
               <p><span class="mono">dnx</span> comes with .NET 10. It fetches the latest version and starts it, with nothing left to maintain. If it asks whether to download the package, answer yes.</p>
-              <p class="expect">You should see the app&rsquo;s banner, then a Copilot status table ending in <span class="mono">Copilot runtime is ready to use!</span></p>
+              <p class="expect">You should see the OutroKit banner, then a Copilot status table ending in <span class="mono">Copilot runtime is ready to use!</span></p>
               <h4>Prefer to keep it installed?</h4>
-              <div class="cmd"><pre><code>dotnet tool install -g PodcastMetadataGenerator</code></pre></div>
+              <div class="cmd"><pre><code>dotnet tool install -g OutroKit</code></pre></div>
               <p>From then on, start it with:</p>
-              <div class="cmd"><pre><code>podcast-metadata-generator</code></pre></div>
-              <p class="aside">Update later with <span class="mono">dotnet tool update -g PodcastMetadataGenerator</span>.</p>
+              <div class="cmd"><pre><code>outrokit</code></pre></div>
+              <p class="aside">Update later with <span class="mono">dotnet tool update -g OutroKit</span>.</p>
             </div>
           </li>
 
           <li class="track track--bonus" id="a5">
             <div class="track__name"><span class="track__no">Bonus</span><h3>ffmpeg, for video and audio</h3></div>
             <div class="track__body">
-              <p>Skip this if you already have a transcript. ffmpeg is a free tool that pulls the sound out of a video or audio file so the app can transcribe it.</p>
+              <p>Skip this if you already have a transcript and are not burning captions into a video. ffmpeg is a free tool the app uses to pull the sound out of a video or audio file so it can be transcribed, and to <a href="#b5">burn captions into a video</a>.</p>
               <div data-os="windows">
                 <p class="os-name"><b>Windows</b></p>
                 <div class="cmd"><pre><code>winget install ffmpeg</code></pre></div>
@@ -250,6 +262,9 @@ FORM: Blank Tape J-Card, 6th of 7 grounded directions; staged as the unfolded ca
               <div data-os="macos">
                 <p class="os-name"><b>macOS</b>, with <a href="https://brew.sh">Homebrew</a></p>
                 <div class="cmd"><pre><code>brew install ffmpeg</code></pre></div>
+                <p>Want to burn captions into a video? Homebrew&rsquo;s standard ffmpeg leaves that part out, so install the fuller build as well:</p>
+                <div class="cmd"><pre><code>brew install ffmpeg-full</code></pre></div>
+                <p class="aside">It sits beside the standard one. The first time you choose <strong>Burn Captions into Video</strong>, the app offers to switch to it. Answer yes, then press <kbd>Return</kbd> to accept the location it suggests.</p>
               </div>
               <div data-os="linux">
                 <p class="os-name"><b>Linux</b>, Debian or Ubuntu</p>
@@ -278,7 +293,7 @@ FORM: Blank Tape J-Card, 6th of 7 grounded directions; staged as the unfolded ca
             <div class="track__body">
               <p>Start the app, choose <strong>Load Transcript, Video, or Audio</strong>, then say which kind of file you have. <strong>Browse for file</strong> lets you walk your folders with the arrow keys. <strong>Type or paste path</strong> also accepts a file dragged onto the terminal window.</p>
               <p>Or hand it the file as you start:</p>
-              <div class="cmd"><pre><code>dnx PodcastMetadataGenerator "my episode.mp3"</code></pre></div>
+              <div class="cmd"><pre><code>dnx OutroKit "my episode.mp3"</code></pre></div>
               <dl class="accepts">
                 <div><dt>Transcripts</dt><dd>Zencastr, time-range, SRT, or plain text. <a href="#formats">See the formats</a>.</dd></div>
                 <div><dt>Video</dt><dd><span class="mono">.mp4 .mov .mkv .avi .webm .m4v .wmv .mpeg .mpg</span></dd></div>
@@ -310,7 +325,7 @@ FORM: Blank Tape J-Card, 6th of 7 grounded directions; staged as the unfolded ca
             <div class="track__name"><span class="track__no">B3</span><h3>Generate</h3></div>
             <div class="track__body">
               <figure class="screen">
-                <div class="screen__glass" role="img" aria-label="The app's main menu: Load Different Transcript, Video, or Audio; Generate All Metadata, which is selected; Generate Titles; Generate Descriptions; Generate Chapters; Convert to SRT; What's New; Settings; Exit.">
+                <div class="screen__glass" role="img" aria-label="The app's main menu: Load Different Transcript, Video, or Audio; Generate All Metadata, which is selected; Generate Titles; Generate Descriptions; Generate Chapters; Convert to SRT; Burn Captions into Video; What's New; Settings; Exit.">
                   <p class="screen__title">Main Menu</p>
                   <ul>
                     <li>📂 Load Different Transcript, Video, or Audio</li>
@@ -319,6 +334,7 @@ FORM: Blank Tape J-Card, 6th of 7 grounded directions; staged as the unfolded ca
                     <li>📄 Generate Descriptions</li>
                     <li>📑 Generate Chapters</li>
                     <li>🎬 Convert to SRT</li>
+                    <li>🔥 Burn Captions into Video</li>
                     <li>✨ What's New</li>
                     <li>⚙️ Settings</li>
                     <li>❌ Exit</li>
@@ -361,6 +377,36 @@ FORM: Blank Tape J-Card, 6th of 7 grounded directions; staged as the unfolded ca
                 </tbody>
               </table>
               <p class="aside" data-os="linux"><b class="os-name">Linux:</b> copying to the clipboard needs <span class="mono">xsel</span> installed.</p>
+            </div>
+          </li>
+
+          <li class="track track--bonus" id="b5">
+            <div class="track__name"><span class="track__no">Bonus</span><h3>Burn captions into your video</h3></div>
+            <div class="track__body">
+              <p>Burning draws the captions onto the picture itself, so they show wherever the video plays, with no subtitle file to upload. Choose <strong>Burn Captions into Video</strong> from the main menu. It is there whether or not an episode is loaded.</p>
+              <p>It uses ffmpeg, so do the <a href="#a5">bonus track on Side A</a> first.</p>
+              <p data-os="macos"><b class="os-name">macOS:</b> that includes the second, fuller install.</p>
+              <p>Pick the video, then the captions file. The <span class="mono">.srt</span> the app saved in <a href="#b2">step B2</a> works.</p>
+              <dl class="accepts">
+                <div><dt>Video</dt><dd><span class="mono">.mp4 .mov .mkv .avi .webm .m4v .wmv .mpeg .mpg</span></dd></div>
+                <div><dt>Captions</dt><dd><span class="mono">.srt .vtt .ass .ssa</span></dd></div>
+              </dl>
+              <p class="aside">Captions in another format, such as YouTube&rsquo;s <span class="mono">.sbv</span>? <a href="https://captionstack.app/">CaptionStack</a> converts caption files for free in your browser, and is the place to go when captions need more work before you burn them in.</p>
+              <p>The app then asks how the captions should look, starting with the text size. Your default is listed first, so pressing Enter keeps it.</p>
+              <figure class="screen">
+                <div class="screen__glass" role="img" aria-label="The caption text size question. Medium, the default, is selected: readable on most screens. Small: unobtrusive, best for wide shots and screen recordings. Large: easy to read on phones and in social clips.">
+                  <p class="screen__title">Caption text size:</p>
+                  <ul>
+                    <li class="is-on">Medium (default) - Readable on most screens</li>
+                    <li>Small - Unobtrusive, best for wide shots and screen recordings</li>
+                    <li>Large - Easy to read on phones and in social clips</li>
+                  </ul>
+                </div>
+                <figcaption>The text size question. A sketch of the real screen, not a screenshot.</figcaption>
+              </figure>
+              <p>Next it asks whether the captions sit at the <strong>Bottom</strong> or the <strong>Top</strong>, then where to save the result. It suggests <span class="mono">my-episode-captioned.mp4</span> next to the original, and it never writes over the original.</p>
+              <p>The whole video is re-encoded, so a long episode takes a while. A progress bar shows how far along it is. <kbd>Ctrl</kbd> + <kbd>C</kbd> cancels, and nothing is saved.</p>
+              <p class="aside">Captions are white with a dark outline, sized to fit the video. An <span class="mono">.ass</span> or <span class="mono">.ssa</span> file keeps its own fonts, sizes, and positions instead. Change your default size and position under <strong>Settings</strong>, then <strong>Caption Settings</strong>.</p>
             </div>
           </li>
         </ol>
@@ -421,9 +467,11 @@ Thanks for having me!</code></pre>
                 <tr><th scope="row">Chapters</th><td>3 to 12</td></tr>
                 <tr><th scope="row">Chapters per 30 minutes</th><td>5</td></tr>
                 <tr><th scope="row">Longest chapter title</th><td>8 words</td></tr>
+                <tr><th scope="row">Caption text size</th><td>Medium</td></tr>
+                <tr><th scope="row">Caption position</th><td>Bottom</td></tr>
               </tbody>
             </table>
-            <p>Filling in <strong>Podcast Name</strong>, <strong>Host Names</strong>, and <strong>Episode Context</strong> (guests, topics) gives Copilot more to work with. You can also change the AI model and where files are saved.</p>
+            <p>Filling in <strong>Show Name</strong>, <strong>Host Names</strong>, and <strong>Episode Context</strong> (guests, topics) gives Copilot more to work with. You can also change the AI model and where files are saved.</p>
           </div>
 
           <div class="notes__block" id="trouble">
@@ -434,12 +482,20 @@ Thanks for having me!</code></pre>
                 <dd>.NET 10 is missing, or the terminal was open while you installed it. Close it, open it again, and repeat <a href="#a2">step A2</a>.</dd>
               </div>
               <div>
+                <dt>The status table says &ldquo;Unavailable&rdquo;</dt>
+                <dd>OutroKit could not find the Copilot command-line app, which it needs to reach Copilot. Install it from <a href="#a3">step A3</a>, then start the app again.</dd>
+              </div>
+              <div>
                 <dt>The status table says &ldquo;Not Authenticated&rdquo;</dt>
                 <dd>You are not signed in to Copilot yet. A free Copilot account is enough. Run <span class="mono">copilot login</span> from <a href="#a3">step A3</a>, then start the app again.</dd>
               </div>
               <div>
                 <dt>A video or audio file will not load</dt>
                 <dd>ffmpeg is missing or cannot be found. Install it from the <a href="#a5">bonus track</a>, or set its location under Settings.</dd>
+              </div>
+              <div>
+                <dt>The app says your ffmpeg cannot burn captions</dt>
+                <dd>Your ffmpeg was built without the part that draws captions. On macOS with Homebrew, run <span class="mono">brew install ffmpeg-full</span> from the <a href="#a5">bonus track</a>, then say yes when the app offers to switch to it. On Windows or Linux, install a fuller ffmpeg build and set its location under Settings, then Caption Settings.</dd>
               </div>
               <div>
                 <dt>No chapters or subtitles came out</dt>
@@ -459,10 +515,10 @@ Thanks for having me!</code></pre>
   <footer class="outro">
     <div class="wrap">
       <p class="outro__line">That is the whole tape.</p>
-      <div class="cmd cmd--outro"><pre><code>dnx PodcastMetadataGenerator</code></pre></div>
+      <div class="cmd cmd--outro"><pre><code>dnx OutroKit</code></pre></div>
       <ul class="outro__links">
         <li><a href="https://github.com/jamesmontemagno/podcast-metadata-generator">Source on GitHub</a></li>
-        <li><a href="https://www.nuget.org/packages/PodcastMetadataGenerator">Package on NuGet</a></li>
+        <li><a href="https://www.nuget.org/packages/OutroKit">Package on NuGet</a></li>
         <li><a href="https://github.com/jamesmontemagno/podcast-metadata-generator/releases">Release notes</a></li>
         <li><a href="https://github.com/jamesmontemagno/podcast-metadata-generator/blob/main/LICENSE">MIT License</a></li>
       </ul>

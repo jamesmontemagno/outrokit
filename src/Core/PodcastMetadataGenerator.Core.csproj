@@ -5,6 +5,10 @@
     <RootNamespace>PodcastMetadataGenerator.Core</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+
+    <!-- Don't bundle the Copilot runtime: it is most of the package's size and only fits the machine
+         that built it. The app runs the Copilot CLI the user installed; see CopilotClientFactory. -->
+    <CopilotSkipCliDownload>true</CopilotSkipCliDownload>
   </PropertyGroup>
 
   <ItemGroup>

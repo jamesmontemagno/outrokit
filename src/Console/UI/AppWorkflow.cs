@@ -71,6 +71,10 @@ public class AppWorkflow
         
         // Show header with ASCII art and Copilot status
         ConsoleUI.ShowHeader(copilotStatus);
+        if (PackageIdentity.IsLegacyPackage)
+        {
+            ConsoleUI.ShowRenamedPackageNotice();
+        }
         
         // Check if Copilot is not ready
         if (copilotStatus != null && (!copilotStatus.IsInstalled || (!copilotStatus.IsTokenSet && !copilotStatus.IsAuthenticated)))
@@ -148,6 +152,7 @@ public class AppWorkflow
                 choices.Add("💾 Save Results");
             }
             
+            choices.Add("🔥 Burn Captions into Video");
             choices.Add("✨ What's New");
             choices.Add("⚙️ Settings");
             choices.Add("❌ Exit");
@@ -192,6 +197,10 @@ public class AppWorkflow
                     
                 case "💾 Save Results":
                     await SaveResultsAsync();
+                    break;
+                    
+                case "🔥 Burn Captions into Video":
+                    await BurnCaptionsAsync();
                     break;
                     
                 case "✨ What's New":
@@ -278,7 +287,8 @@ public class AppWorkflow
             var defaultPath = Path.Combine(defaultDirectory, $"{Path.GetFileNameWithoutExtension(mediaPath)}.srt");
             var transcriptPath = ConsoleUI.AskSaveFilePath(
                 "Where should the transcript be saved?",
-                defaultPath);
+                defaultPath,
+                [".srt"]);
 
             ConsoleUI.ShowInfo("Transcribing locally with Whisper. Press Ctrl+C to cancel.");
 
@@ -323,6 +333,179 @@ public class AppWorkflow
         }
     }
     
+    private async Task BurnCaptionsAsync()
+    {
+        try
+        {
+            var burnService = new CaptionBurnService(_settings);
+            if (!await EnsureCaptionBurnSupportedAsync(burnService))
+            {
+                return;
+            }
+
+            var videoPath = ConsoleUI.AskFilePath(
+                "Select the video to add captions to:",
+                mustExist: true,
+                discoveryType: ConsoleUI.FileDiscoveryType.Video);
+            if (!MediaTranscriptService.HasVideoExtension(videoPath))
+            {
+                ConsoleUI.ShowError(
+                    "Captions can only be burned into a video file (.mp4, .mov, .mkv, .avi, .webm, .m4v, .wmv, .mpeg, or .mpg).");
+                return;
+            }
+
+            await AnsiConsole.Status()
+                .Spinner(Spinner.Known.Dots)
+                .SpinnerStyle(Style.Parse("blue"))
+                .StartAsync("Checking the video...", _ => burnService.GetVideoDetailsAsync(videoPath));
+
+            AnsiConsole.MarkupLine(
+                $"[grey]Captions in another format, or that need more work first? Try CaptionStack: {CaptionBurnService.CaptionToolsUrl}[/]");
+            var captionPath = ConsoleUI.AskFilePath(
+                "Select the captions file (.srt, .vtt, .ass, or .ssa):",
+                mustExist: true,
+                startDirectory: Path.GetDirectoryName(Path.GetFullPath(videoPath)),
+                discoveryType: ConsoleUI.FileDiscoveryType.Captions);
+            if (!CaptionBurnService.HasCaptionExtension(captionPath))
+            {
+                ConsoleUI.ShowError("Captions must be an .srt, .vtt, .ass, or .ssa file.");
+                ConsoleUI.ShowInfo($"CaptionStack converts other caption formats for free: {CaptionBurnService.CaptionToolsUrl}");
+                return;
+            }
+
+            var captionCount = await AnsiConsole.Status()
+                .Spinner(Spinner.Known.Dots)
+                .SpinnerStyle(Style.Parse("blue"))
+                .StartAsync("Reading the captions...", _ => burnService.CountCaptionsAsync(captionPath));
+            if (captionCount == 0)
+            {
+                ConsoleUI.ShowError("No captions could be read from that file, so there is nothing to burn in.");
+                ConsoleUI.ShowInfo($"If it is in another caption format, convert it with CaptionStack: {CaptionBurnService.CaptionToolsUrl}");
+                return;
+            }
+
+            ConsoleUI.ShowSuccess($"Found {captionCount} captions in {Path.GetFileName(captionPath)}");
+
+            var style = new CaptionStyle(_settings.CaptionSize, _settings.CaptionPosition);
+            if (CaptionBurnService.HasOwnStyling(captionPath))
+            {
+                ConsoleUI.ShowInfo("This captions file sets its own fonts and positions, which are kept as they are.");
+            }
+            else
+            {
+                style = new CaptionStyle(
+                    ConsoleUI.SelectCaptionSize(_settings.CaptionSize),
+                    ConsoleUI.SelectCaptionPosition(_settings.CaptionPosition));
+            }
+
+            var outputPath = ConsoleUI.AskSaveFilePath(
+                "Where should the captioned video be saved?",
+                CaptionBurnService.GetDefaultOutputPath(videoPath),
+                CaptionBurnService.GetOutputExtensions(videoPath),
+                path => CaptionBurnService.IsSameFile(path, videoPath)
+                    ? "That is the original video. Choose a different name so it is not overwritten."
+                    : null);
+
+            ConsoleUI.ShowInfo("Burning captions with ffmpeg. The video is re-encoded, so this can take a while. Press Ctrl+C to cancel.");
+
+            await ConsoleCancellation.RunAsync(cancellationToken => AnsiConsole.Progress()
+                .AutoClear(false)
+                .HideCompleted(false)
+                .Columns(
+                    new TaskDescriptionColumn(),
+                    new ProgressBarColumn(),
+                    new PercentageColumn(),
+                    new RemainingTimeColumn(),
+                    new SpinnerColumn())
+                .StartAsync(async context =>
+                {
+                    var task = context.AddTask("[blue]Preparing the video...[/]", maxValue: 100);
+                    task.IsIndeterminate = true;
+
+                    var progress = new InlineProgress<CaptionBurnProgress>(update =>
+                    {
+                        if (update.IsDurationKnown)
+                        {
+                            task.IsIndeterminate = false;
+                            task.Value = update.Percentage;
+                            task.Description =
+                                $"[blue]Burning captions {FormatDuration(update.Position)} / {FormatDuration(update.Duration)}[/]";
+                        }
+                        else
+                        {
+                            task.Description = $"[blue]Burning captions {FormatDuration(update.Position)}[/]";
+                        }
+                    });
+
+                    await burnService.BurnAsync(videoPath, captionPath, outputPath, style, progress, cancellationToken);
+                    task.IsIndeterminate = false;
+                    task.Value = 100;
+                    return true;
+                }));
+
+            ConsoleUI.ShowSuccess($"Saved captioned video: {outputPath}");
+        }
+        catch (OperationCanceledException)
+        {
+            ConsoleUI.ShowWarning("Caption burn cancelled. No video was saved.");
+        }
+        catch (Exception ex)
+        {
+            ConsoleUI.ShowError($"Could not burn captions: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Checks that the configured ffmpeg can burn captions, offering to point at another one when it cannot.
+    /// </summary>
+    private async Task<bool> EnsureCaptionBurnSupportedAsync(CaptionBurnService burnService)
+    {
+        while (true)
+        {
+            try
+            {
+                var supported = await AnsiConsole.Status()
+                    .Spinner(Spinner.Known.Dots)
+                    .SpinnerStyle(Style.Parse("blue"))
+                    .StartAsync("Checking ffmpeg...", _ => burnService.SupportsCaptionBurnAsync());
+                if (supported)
+                {
+                    return true;
+                }
+
+                ConsoleUI.ShowWarning(
+                    $"The ffmpeg at '{_settings.FfmpegPath}' cannot burn captions. It was built without the subtitles filter, which needs libass.");
+            }
+            catch (FfmpegNotFoundException ex)
+            {
+                ConsoleUI.ShowWarning(ex.Message);
+            }
+
+            var suggestedPath = CaptionBurnService.GetHomebrewFullFfmpegPath();
+            if (suggestedPath is not null)
+            {
+                ConsoleUI.ShowInfo(
+                    "Homebrew's standard ffmpeg leaves the subtitles filter out. Install the full build with: brew install ffmpeg-full");
+                ConsoleUI.ShowInfo($"It installs beside your current ffmpeg, at {suggestedPath}");
+            }
+            else
+            {
+                ConsoleUI.ShowInfo(
+                    "Install an ffmpeg build that includes libass (a \"full\" build), then point the app at it.");
+            }
+
+            if (!AnsiConsole.Confirm("Set the ffmpeg path now?", defaultValue: suggestedPath is not null && File.Exists(suggestedPath)))
+            {
+                return false;
+            }
+
+            _settings.FfmpegPath = ConsoleUI.AskText(
+                "Enter the ffmpeg executable path or command:",
+                defaultValue: suggestedPath is not null && File.Exists(suggestedPath) ? suggestedPath : _settings.FfmpegPath).Trim();
+            await SaveSettingsAsync();
+        }
+    }
+
     private async Task LoadTranscriptAsync(string path)
     {
         try
@@ -813,7 +996,10 @@ public class AppWorkflow
                 installedModelPath is null
                     ? $"{Markup.Escape(whisperModel.DisplayName)} [yellow](not installed)[/]"
                     : $"{Markup.Escape(whisperModel.DisplayName)} [green](initialized)[/]");
-            generalTable.AddRow("[blue]Podcast Name[/]", 
+            generalTable.AddRow(
+                "[blue]Captions[/]",
+                $"{_settings.CaptionSize.GetDisplayName()}, {_settings.CaptionPosition.GetDisplayName().ToLowerInvariant()} [grey](default, confirmed each time you burn captions)[/]");
+            generalTable.AddRow("[blue]Show Name[/]", 
                 string.IsNullOrEmpty(_settings.PodcastName) 
                     ? "[grey](not set)[/]" 
                     : Markup.Escape(_settings.PodcastName));
@@ -857,8 +1043,9 @@ public class AppWorkflow
                 { 
                     "🤖 Change Model", 
                     "🎧 Transcription Settings",
+                    "🔥 Caption Settings",
                     "📁 Change Output Directory", 
-                    "🎙️ Podcast Info (Name & Hosts)",
+                    "🎙️ Show Info (Name & Hosts)",
                     "📝 Episode Context",
                     "🔧 Generation Settings (Titles, Descriptions, Chapters)",
                     "💾 Save Settings",
@@ -903,7 +1090,11 @@ public class AppWorkflow
                     await EditTranscriptionSettingsAsync();
                     break;
                     
-                case "🎙️ Podcast Info (Name & Hosts)":
+                case "🔥 Caption Settings":
+                    await EditCaptionSettingsAsync();
+                    break;
+                    
+                case "🎙️ Show Info (Name & Hosts)":
                     EditPodcastInfo();
                     break;
                     
@@ -1024,6 +1215,52 @@ public class AppWorkflow
         }
     }
 
+    private async Task EditCaptionSettingsAsync()
+    {
+        while (true)
+        {
+            var action = ConsoleUI.SelectFromList(
+                "[bold]Burning Captions into Video[/]\n" +
+                $"Text size: [blue]{Markup.Escape(_settings.CaptionSize.GetDisplayName())}[/]\n" +
+                $"Position: [blue]{Markup.Escape(_settings.CaptionPosition.GetDisplayName())}[/]\n" +
+                $"ffmpeg: [blue]{Markup.Escape(_settings.FfmpegPath)}[/]\n" +
+                "[grey]You confirm size and position each time you burn captions.[/]\n" +
+                $"[grey]To convert or rework a captions file, try CaptionStack: {CaptionBurnService.CaptionToolsUrl}[/]",
+                new[]
+                {
+                    "🔠 Default Text Size",
+                    "↕️ Default Position",
+                    "🛠️ Configure ffmpeg",
+                    "⬅️ Back"
+                });
+
+            switch (action)
+            {
+                case "🔠 Default Text Size":
+                    _settings.CaptionSize = ConsoleUI.SelectCaptionSize(
+                        _settings.CaptionSize,
+                        "Default caption text size:");
+                    break;
+
+                case "↕️ Default Position":
+                    _settings.CaptionPosition = ConsoleUI.SelectCaptionPosition(
+                        _settings.CaptionPosition,
+                        "Default caption position:");
+                    break;
+
+                case "🛠️ Configure ffmpeg":
+                    _settings.FfmpegPath = ConsoleUI.AskText(
+                        "Enter the ffmpeg executable path or command:",
+                        defaultValue: _settings.FfmpegPath);
+                    break;
+
+                case "⬅️ Back":
+                    await SaveSettingsAsync();
+                    return;
+            }
+        }
+    }
+
     private static string FormatDuration(TimeSpan duration)
     {
         return duration.TotalHours >= 1
@@ -1048,7 +1285,7 @@ public class AppWorkflow
     private void EditPodcastInfo()
     {
         _settings.PodcastName = ConsoleUI.AskText(
-            "Enter podcast name (used in prompts for context):",
+            "Enter the name of your show (used in prompts for context):",
             defaultValue: _settings.PodcastName ?? "",
             validator: _ => true);
         if (string.IsNullOrWhiteSpace(_settings.PodcastName))
@@ -1061,7 +1298,7 @@ public class AppWorkflow
         if (string.IsNullOrWhiteSpace(_settings.HostNames))
             _settings.HostNames = null;
         
-        ConsoleUI.ShowSuccess("Podcast info updated");
+        ConsoleUI.ShowSuccess("Show info updated");
     }
     
     private void EditGenerationSettings()
