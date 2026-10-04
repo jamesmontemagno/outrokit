@@ -89,8 +89,8 @@ Then start it with `outrokit`.
 ### From Source
 
 ```bash
-git clone https://github.com/jamesmontemagno/podcast-metadata-generator.git
-cd podcast-metadata-generator
+git clone https://github.com/jamesmontemagno/outrokit.git
+cd outrokit
 dotnet build PodcastMetadataGenerator.sln
 ```
 
@@ -293,7 +293,7 @@ Settings are automatically saved to `~/.podcast-metadata-generator/settings.json
 ## 🏗️ Project Structure
 
 ```
-podcast-metadata-generator/
+outrokit/
 ├── PodcastMetadataGenerator.sln     # Solution file
 ├── src/
 │   ├── Core/                        # Shared class library

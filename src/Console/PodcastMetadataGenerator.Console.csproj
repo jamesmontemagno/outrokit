@@ -18,7 +18,7 @@
     <Description>OutroKit writes the titles, descriptions, chapters, and subtitles for your episode from its transcript, video, or audio, using GitHub Copilot. It can also burn captions into a video.</Description>
     <PackageTags>outrokit;podcast;video;youtube;metadata;ai;copilot;transcripts;chapters;srt;subtitles;captions</PackageTags>
     <PackageProjectUrl>https://outrokit.com/</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/jamesmontemagno/podcast-metadata-generator</RepositoryUrl>
+    <RepositoryUrl>https://github.com/jamesmontemagno/outrokit</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     
