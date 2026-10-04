@@ -31,7 +31,7 @@ It runs on the user's own machine as a single command, uses their GitHub Copilot
 ## Capabilities and Constraints
 
 - Requires the .NET 10 SDK or later.
-- Requires a GitHub Copilot account and sign-in, unless using BYOK. The free Copilot plan works; no paid subscription is needed (confirmed by James Montemagno, 2026-10-04). The Copilot SDK bundles a runtime; installing the Copilot CLI separately is optional and mainly useful for signing in.
+- Requires a GitHub Copilot account and sign-in, unless using BYOK. The free Copilot plan works; no paid subscription is needed (confirmed by James Montemagno, 2026-10-04). The NuGet tool only bundles a Copilot runtime for Linux x64; on macOS, Windows, and Linux on Arm the Copilot CLI must be installed and on `PATH` (or `COPILOT_CLI_PATH` set). It is also how users sign in.
 - ffmpeg is required only for video/audio transcription.
 - Chapters and SRT conversion require a transcript with timestamps; plain text supports titles and descriptions only.
 - Nine title styles: Balanced, Descriptive, Curiosity Hook, Question, How-To / Educational, Playful, Professional, SEO Keywords, Mixed Variety.
