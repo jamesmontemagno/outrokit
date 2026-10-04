@@ -9,21 +9,27 @@ namespace PodcastMetadataGenerator.Core.Copilot;
 public static class CopilotClientFactory
 {
     /// <summary>
+    /// Name this app identifies itself with, on both the client connection and each session.
+    /// </summary>
+    public const string ClientName = "podcast-metadata-generator";
+
+    /// <summary>
     /// Creates a CopilotClient, using the SDK-bundled CLI unless an explicit CLI path is configured.
     /// </summary>
     public static CopilotClient CreateClient()
     {
-        var cliPath = ResolveCliPath();
-
-        if (string.IsNullOrWhiteSpace(cliPath))
+        var options = new CopilotClientOptions
         {
-            return new CopilotClient();
+            ClientInfo = new CopilotClientInfo { ApplicationName = ClientName }
+        };
+
+        var cliPath = ResolveCliPath();
+        if (!string.IsNullOrWhiteSpace(cliPath))
+        {
+            options.Connection = RuntimeConnection.ForStdio(path: cliPath);
         }
 
-        return new CopilotClient(new CopilotClientOptions
-        {
-            Connection = RuntimeConnection.ForStdio(path: cliPath)
-        });
+        return new CopilotClient(options);
     }
 
     private static string ResolveCliPath()

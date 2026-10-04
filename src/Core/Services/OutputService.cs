@@ -120,6 +120,38 @@ public class OutputService
         return content;
     }
     
+    /// <summary>
+    /// Formats all generated metadata as one plain-text block (for clipboard use).
+    /// </summary>
+    public string FormatCombinedText(GenerationResult result)
+    {
+        var sections = new List<string>();
+        
+        if (!string.IsNullOrWhiteSpace(result.SelectedTitle))
+        {
+            sections.Add($"TITLE{Environment.NewLine}{result.SelectedTitle}");
+        }
+        else if (result.Titles.Count > 0)
+        {
+            sections.Add($"TITLES{Environment.NewLine}{string.Join(Environment.NewLine, result.Titles)}");
+        }
+        
+        foreach (var length in Enum.GetValues<DescriptionLength>())
+        {
+            if (result.Descriptions.TryGetValue(length, out var description))
+            {
+                sections.Add($"{length.ToString().ToUpperInvariant()} DESCRIPTION{Environment.NewLine}{description}");
+            }
+        }
+        
+        if (result.Chapters.Count > 0)
+        {
+            sections.Add($"CHAPTERS{Environment.NewLine}{_srtConverter.FormatChaptersForYouTube(result.Chapters)}");
+        }
+        
+        return string.Join(Environment.NewLine + Environment.NewLine, sections);
+    }
+    
     private static Manifest CreateManifest(
         Transcript transcript, 
         GenerationResult result, 
@@ -132,6 +164,7 @@ public class OutputService
             Model = settings.Model,
             EpisodeContext = settings.EpisodeContext,
             Titles = result.Titles,
+            TitleStyle = result.Titles.Count > 0 ? result.TitleStyle : null,
             SelectedTitle = result.SelectedTitle,
             Descriptions = new ManifestDescriptions
             {

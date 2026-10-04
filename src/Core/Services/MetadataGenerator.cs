@@ -16,6 +16,7 @@ public partial class MetadataGenerator : IAsyncDisposable
     private readonly Func<PermissionRequest, PermissionInvocation, Task<bool>>? _permissionApprovalCallback;
     private CopilotClient? _client;
     private bool _isInitialized;
+    private string? _resolvedModel;
     
     [GeneratedRegex(@"^\d+\.\s*", RegexOptions.Multiline)]
     private static partial Regex NumberedListRegex();
@@ -53,8 +54,10 @@ public partial class MetadataGenerator : IAsyncDisposable
     /// <summary>
     /// Generates title suggestions for the podcast episode with streaming support.
     /// </summary>
+    /// <param name="style">Title style for this run; falls back to the default in settings when null.</param>
     public async Task<List<string>> GenerateTitlesAsync(
         Transcript transcript,
+        TitleStyle? style = null,
         Action<string>? onChunk = null,
         CancellationToken cancellationToken = default)
     {
@@ -62,7 +65,7 @@ public partial class MetadataGenerator : IAsyncDisposable
         
         var response = await SendPromptWithStreamingAsync(
             PromptTemplates.TitleSystemPrompt,
-            PromptTemplates.GetTitleUserPrompt(transcript.GetFullText(), _settings),
+            PromptTemplates.GetTitleUserPrompt(transcript.GetFullText(), _settings, style),
             onChunk,
             cancellationToken);
         
@@ -198,7 +201,7 @@ public partial class MetadataGenerator : IAsyncDisposable
         CopilotSession? session = null;
         try
         {
-            _settings.Model = await AvailableModels.ResolveModelAsync(_settings.Model, cancellationToken);
+            _settings.Model = await ResolveModelAsync(_client, cancellationToken);
 
             if (string.IsNullOrWhiteSpace(_settings.Model))
             {
@@ -209,6 +212,7 @@ public partial class MetadataGenerator : IAsyncDisposable
             // in some SDK versions, so we use streaming only when an onChunk handler is provided
             session = await _client.CreateSessionAsync(new SessionConfig
             {
+                ClientName = CopilotClientFactory.ClientName,
                 Model = _settings.Model,
                 OnPermissionRequest = HandlePermissionRequestAsync,
                 Streaming = true, // Always use streaming for better responsiveness
@@ -270,6 +274,36 @@ public partial class MetadataGenerator : IAsyncDisposable
         await done.Task;
         
         return responseBuilder.ToString();
+    }
+
+    /// <summary>
+    /// Validates the configured model against the running client's model list.
+    /// The result is reused until the configured model changes, so a multi-prompt
+    /// run does not re-list models (or start another runtime) for every prompt.
+    /// </summary>
+    private async Task<string> ResolveModelAsync(CopilotClient client, CancellationToken cancellationToken)
+    {
+        var requested = _settings.Model?.Trim();
+
+        if (!string.IsNullOrWhiteSpace(_resolvedModel) &&
+            string.Equals(requested, _resolvedModel, StringComparison.OrdinalIgnoreCase))
+        {
+            return _resolvedModel;
+        }
+
+        List<ModelInfo> models;
+        try
+        {
+            models = (await client.ListModelsAsync(cancellationToken)).ToList();
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            models = [];
+        }
+
+        var resolved = AvailableModels.SelectModel(models, requested);
+        _resolvedModel = models.Count > 0 ? resolved : null;
+        return resolved;
     }
 
     public static string DescribePermissionRequest(PermissionRequest request, PermissionInvocation invocation)
@@ -371,6 +405,7 @@ public partial class MetadataGenerator : IAsyncDisposable
             _client = null;
         }
         _isInitialized = false;
+        _resolvedModel = null;
         GC.SuppressFinalize(this);
     }
 }

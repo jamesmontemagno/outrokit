@@ -8,7 +8,7 @@ namespace PodcastMetadataGenerator.Core.Models;
 /// </summary>
 public static class AvailableModels
 {
-    public const string PreferredDefaultModelId = "gpt-5.4-mini";
+    public const string PreferredDefaultModelId = "gpt-6-luna";
 
     /// <summary>
     /// Fetches the list of available models from the Copilot SDK.
@@ -40,8 +40,16 @@ public static class AvailableModels
     /// </summary>
     public static async Task<string> ResolveModelAsync(string? selectedModel, CancellationToken cancellationToken = default)
     {
-        var normalizedModel = selectedModel?.Trim();
         var models = await GetModelsWithMetadataAsync(cancellationToken);
+        return SelectModel(models, selectedModel);
+    }
+
+    /// <summary>
+    /// Picks a valid model id from an already-fetched model list, preferring the provided selection.
+    /// </summary>
+    public static string SelectModel(IReadOnlyList<ModelInfo> models, string? selectedModel)
+    {
+        var normalizedModel = selectedModel?.Trim();
 
         if (models.Count == 0)
         {
@@ -121,6 +129,11 @@ public class AppSettings
     /// Maximum words per title.
     /// </summary>
     public int TitleMaxWords { get; set; } = 10;
+    
+    /// <summary>
+    /// Default style for generated titles. Can be overridden each time titles are generated.
+    /// </summary>
+    public TitleStyle TitleStyle { get; set; } = TitleStyles.Default;
     
     #endregion
     

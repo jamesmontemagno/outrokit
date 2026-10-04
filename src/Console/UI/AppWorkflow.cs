@@ -1,5 +1,8 @@
+using System.Collections.Concurrent;
+using System.Text;
 using GitHub.Copilot;
 using Spectre.Console;
+using Spectre.Console.Rendering;
 using PodcastMetadataGenerator.Core.Models;
 using PodcastMetadataGenerator.Core.Services;
 
@@ -20,39 +23,31 @@ public class AppWorkflow
     private Transcript? _transcript;
     private GenerationResult _result = new();
 
-    private static string BuildStreamSeparator()
+    private readonly ConcurrentQueue<PendingPermission> _pendingPermissions = new();
+
+    private sealed record PendingPermission(
+        PermissionRequest Request,
+        PermissionInvocation Invocation,
+        TaskCompletionSource<bool> Completion);
+
+    [Flags]
+    private enum CopyScope
     {
-        var width = Math.Max(20, AnsiConsole.Profile.Width);
-        return new string('-', width);
+        Titles = 1,
+        Descriptions = 2,
+        Chapters = 4,
+        All = Titles | Descriptions | Chapters
     }
 
-    private static string BuildStreamBlock(string content)
-    {
-        var separator = BuildStreamSeparator();
-        return $"{separator}{Environment.NewLine}{content}{Environment.NewLine}{separator}";
-    }
+    private const string CopyDoneChoice = "✅ Done";
 
-    private static Panel CreateStreamingPanel(string header, string content, bool isMarkupContent)
+    private static IRenderable BuildStreamingView(string header, string content, int frame)
     {
-        var block = BuildStreamBlock(content);
-        if (isMarkupContent)
-        {
-            return new Panel(new Markup(block))
-            {
-                Header = new PanelHeader($"[bold] {Markup.Escape(header)} [/]"),
-                Border = BoxBorder.None,
-                Padding = new Padding(0, 0),
-                Expand = true
-            };
-        }
+        IRenderable body = string.IsNullOrEmpty(content)
+            ? new Markup($"[grey]Waiting for response{new string('.', (frame / 6 % 3) + 1)}[/]")
+            : new Text(content);
 
-        return new Panel(new Text(block))
-        {
-            Header = new PanelHeader($"[bold] {Markup.Escape(header)} [/]"),
-            Border = BoxBorder.None,
-            Padding = new Padding(0, 0),
-            Expand = true
-        };
+        return new Rows(new Markup($"[bold]{Markup.Escape(header)}[/]"), body);
     }
     
     public AppWorkflow()
@@ -139,6 +134,7 @@ public class AppWorkflow
             if (_result.Titles.Count > 0 || _result.Descriptions.Count > 0 || _result.Chapters.Count > 0)
             {
                 choices.Add("👁️ View Results");
+                choices.Add("📋 Copy to Clipboard");
                 choices.Add("💾 Save Results");
             }
             
@@ -177,6 +173,10 @@ public class AppWorkflow
                     
                 case "👁️ View Results":
                     await ViewResultsMenuAsync();
+                    break;
+                    
+                case "📋 Copy to Clipboard":
+                    await OfferCopyAsync(CopyScope.All);
                     break;
                     
                 case "💾 Save Results":
@@ -251,11 +251,13 @@ public class AppWorkflow
         
         try
         {
+            var titleStyle = ConsoleUI.SelectTitleStyle(_settings.TitleStyle);
+            
             await EnsureGeneratorInitializedAsync();
             
             // Generate titles
             ConsoleUI.ShowInfo("Generating titles...");
-            await GenerateTitlesInternalAsync();
+            await GenerateTitlesInternalAsync(titleStyle);
             
             // Select a title for description context
             if (_result.Titles.Count > 0 && string.IsNullOrEmpty(_result.SelectedTitle))
@@ -292,6 +294,8 @@ public class AppWorkflow
             summaryTable.AddRow("SRT", string.IsNullOrEmpty(_result.SrtContent) ? "[red]Not generated[/]" : "[green]Ready[/]");
             
             AnsiConsole.Write(summaryTable);
+            
+            await OfferCopyAsync(CopyScope.All);
         }
         catch (Exception ex)
         {
@@ -312,8 +316,10 @@ public class AppWorkflow
         
         try
         {
+            var titleStyle = ConsoleUI.SelectTitleStyle(_settings.TitleStyle);
+            
             await EnsureGeneratorInitializedAsync();
-            await GenerateTitlesInternalAsync();
+            await GenerateTitlesInternalAsync(titleStyle);
             
             // Show titles and allow selection
             _result.SelectedTitle = ConsoleUI.SelectTitle(_result.Titles);
@@ -322,6 +328,8 @@ public class AppWorkflow
             {
                 ConsoleUI.ShowSuccess($"Selected: {_result.SelectedTitle}");
             }
+            
+            await OfferCopyAsync(CopyScope.Titles);
         }
         catch (Exception ex)
         {
@@ -329,68 +337,16 @@ public class AppWorkflow
         }
     }
     
-    private async Task GenerateTitlesInternalAsync()
+    private async Task GenerateTitlesInternalAsync(TitleStyle style)
     {
-        var responseText = "";
-        var lockObj = new object();
-        var generationTask = default(Task<List<string>>);
-        var animationFrame = 0;
+        _result.Titles = await RunStreamingGenerationAsync(
+            $"Titles ({style.GetDisplayName()})",
+            onChunk => _generator!.GenerateTitlesAsync(_transcript!, style, onChunk));
         
-        await AnsiConsole.Live(new Panel(""))
-            .AutoClear(false)
-            .StartAsync(async ctx =>
-            {
-                var panel = CreateStreamingPanel("Generating Titles", "[grey]Waiting for response...[/]", true);
-                ctx.UpdateTarget(panel);
-                
-                // Start generation on a background thread
-                generationTask = Task.Run(async () =>
-                {
-                    return await _generator!.GenerateTitlesAsync(
-                        _transcript!,
-                        chunk =>
-                        {
-                            lock (lockObj)
-                            {
-                                responseText += chunk;
-                            }
-                        });
-                });
-                
-                // Poll and update UI while generation is running
-                while (!generationTask.IsCompleted)
-                {
-                    string currentText;
-                    lock (lockObj)
-                    {
-                        currentText = responseText;
-                    }
-                    
-                    if (!string.IsNullOrEmpty(currentText))
-                    {
-                        panel = CreateStreamingPanel("Generating Titles", currentText, false);
-                        ctx.UpdateTarget(panel);
-                    }
-                    else
-                    {
-                        // Animate waiting message
-                        var dots = new string('.', (animationFrame % 3) + 1).PadRight(3);
-                        panel = CreateStreamingPanel("Generating Titles", $"[grey]Waiting for response{dots}[/]", true);
-                        ctx.UpdateTarget(panel);
-                        animationFrame++;
-                    }
-                    
-                    await Task.Delay(50); // Update every 50ms
-                }
-                
-                // Final update
-                _result.Titles = await generationTask;
-                
-                panel = CreateStreamingPanel("Generating Titles", responseText, false);
-                ctx.UpdateTarget(panel);
-            });
+        // A previously selected title belongs to the old list
+        _result.TitleStyle = style;
+        _result.SelectedTitle = null;
         
-        AnsiConsole.WriteLine();
         ConsoleUI.ShowSuccess($"Generated {_result.Titles.Count} title suggestions");
     }
     
@@ -403,7 +359,7 @@ public class AppWorkflow
             await EnsureGeneratorInitializedAsync();
             await GenerateDescriptionsInternalAsync();
             
-            ConsoleUI.ShowDescriptions(_result.Descriptions);
+            await OfferCopyAsync(CopyScope.Descriptions);
         }
         catch (Exception ex)
         {
@@ -415,68 +371,14 @@ public class AppWorkflow
     {
         foreach (var length in Enum.GetValues<DescriptionLength>())
         {
-            var responseText = "";
-            var lockObj = new object();
-            var generationTask = default(Task<string>);
-            var animationFrame = 0;
+            _result.Descriptions[length] = await RunStreamingGenerationAsync(
+                $"{length} Description",
+                onChunk => _generator!.GenerateDescriptionAsync(
+                    _transcript!,
+                    length,
+                    _result.SelectedTitle,
+                    onChunk));
             
-            await AnsiConsole.Live(new Panel(""))
-                .AutoClear(false)
-                .StartAsync(async ctx =>
-                {
-                    var panel = CreateStreamingPanel($"Generating {length} Description", "[grey]Waiting for response...[/]", true);
-                    ctx.UpdateTarget(panel);
-                    
-                    // Start generation on a background thread
-                    generationTask = Task.Run(async () =>
-                    {
-                        return await _generator!.GenerateDescriptionAsync(
-                            _transcript!,
-                            length,
-                            _result.SelectedTitle,
-                            chunk =>
-                            {
-                                lock (lockObj)
-                                {
-                                    responseText += chunk;
-                                }
-                            });
-                    });
-                    
-                    // Poll and update UI while generation is running
-                    while (!generationTask.IsCompleted)
-                    {
-                        string currentText;
-                        lock (lockObj)
-                        {
-                            currentText = responseText;
-                        }
-                        
-                        if (!string.IsNullOrEmpty(currentText))
-                        {
-                            panel = CreateStreamingPanel($"Generating {length} Description", currentText, false);
-                            ctx.UpdateTarget(panel);
-                        }
-                        else
-                        {
-                            // Animate waiting message
-                            var dots = new string('.', (animationFrame % 3) + 1).PadRight(3);
-                            panel = CreateStreamingPanel($"Generating {length} Description", $"[grey]Waiting for response{dots}[/]", true);
-                            ctx.UpdateTarget(panel);
-                            animationFrame++;
-                        }
-                        
-                        await Task.Delay(50); // Update every 50ms
-                    }
-                    
-                    // Final update
-                    _result.Descriptions[length] = await generationTask;
-                    
-                    panel = CreateStreamingPanel($"Generating {length} Description", responseText, false);
-                    ctx.UpdateTarget(panel);
-                });
-            
-            AnsiConsole.WriteLine();
             ConsoleUI.ShowSuccess($"Generated {length.ToString().ToLower()} description");
         }
     }
@@ -491,6 +393,8 @@ public class AppWorkflow
             await GenerateChaptersInternalAsync();
             
             ConsoleUI.ShowChapters(_result.Chapters);
+            
+            await OfferCopyAsync(CopyScope.Chapters);
         }
         catch (Exception ex)
         {
@@ -500,67 +404,147 @@ public class AppWorkflow
     
     private async Task GenerateChaptersInternalAsync()
     {
-        var responseText = "";
-        var lockObj = new object();
-        var generationTask = default(Task<List<Chapter>>);
-        var animationFrame = 0;
+        _result.Chapters = await RunStreamingGenerationAsync(
+            "Chapters",
+            onChunk => _generator!.GenerateChaptersAsync(_transcript!, onChunk));
         
-        await AnsiConsole.Live(new Panel(""))
-            .AutoClear(false)
-            .StartAsync(async ctx =>
-            {
-                var panel = CreateStreamingPanel("Generating Chapters", "[grey]Waiting for response...[/]", true);
-                ctx.UpdateTarget(panel);
-                
-                // Start generation on a background thread
-                generationTask = Task.Run(async () =>
-                {
-                    return await _generator!.GenerateChaptersAsync(
-                        _transcript!,
-                        chunk =>
-                        {
-                            lock (lockObj)
-                            {
-                                responseText += chunk;
-                            }
-                        });
-                });
-                
-                // Poll and update UI while generation is running
-                while (!generationTask.IsCompleted)
-                {
-                    string currentText;
-                    lock (lockObj)
-                    {
-                        currentText = responseText;
-                    }
-                    
-                    if (!string.IsNullOrEmpty(currentText))
-                    {
-                        panel = CreateStreamingPanel("Generating Chapters", currentText, false);
-                        ctx.UpdateTarget(panel);
-                    }
-                    else
-                    {
-                        // Animate waiting message
-                        var dots = new string('.', (animationFrame % 3) + 1).PadRight(3);
-                        panel = CreateStreamingPanel("Generating Chapters", $"[grey]Waiting for response{dots}[/]", true);
-                        ctx.UpdateTarget(panel);
-                        animationFrame++;
-                    }
-                    
-                    await Task.Delay(50); // Update every 50ms
-                }
-                
-                // Final update
-                _result.Chapters = await generationTask;
-                
-                panel = CreateStreamingPanel("Generating Chapters", responseText, false);
-                ctx.UpdateTarget(panel);
-            });
-        
-        AnsiConsole.WriteLine();
         ConsoleUI.ShowSuccess($"Generated {_result.Chapters.Count} chapters");
+    }
+    
+    /// <summary>
+    /// Runs a generation while streaming the response into a live region, then replaces
+    /// that region with the final text written unwrapped so it can be selected and copied
+    /// from the terminal without hard line breaks.
+    /// </summary>
+    private async Task<T> RunStreamingGenerationAsync<T>(
+        string label,
+        Func<Action<string>, Task<T>> generate)
+    {
+        var response = new StringBuilder();
+        var header = $"Generating {label}";
+        var frame = 0;
+        
+        var generationTask = Task.Run(() => generate(chunk =>
+        {
+            lock (response)
+            {
+                response.Append(chunk);
+            }
+        }));
+        
+        try
+        {
+            while (!generationTask.IsCompleted)
+            {
+                await AnsiConsole.Live(BuildStreamingView(header, "", frame))
+                    .AutoClear(true)
+                    .Overflow(VerticalOverflow.Crop)
+                    .Cropping(VerticalOverflowCropping.Top)
+                    .StartAsync(async ctx =>
+                    {
+                        while (!generationTask.IsCompleted && _pendingPermissions.IsEmpty)
+                        {
+                            string currentText;
+                            lock (response)
+                            {
+                                currentText = response.ToString();
+                            }
+                            
+                            ctx.UpdateTarget(BuildStreamingView(header, currentText, frame++));
+                            await Task.Delay(50);
+                        }
+                    });
+                
+                // Prompts cannot run inside a live display, so it is closed while the user decides
+                while (_pendingPermissions.TryDequeue(out var pending))
+                {
+                    pending.Completion.TrySetResult(PromptForPermission(pending));
+                }
+            }
+            
+            var result = await generationTask;
+            
+            string finalText;
+            lock (response)
+            {
+                finalText = response.ToString();
+            }
+            
+            if (!string.IsNullOrWhiteSpace(finalText))
+            {
+                ConsoleUI.ShowCopyableBlock(label, finalText.Trim());
+            }
+            
+            return result;
+        }
+        finally
+        {
+            while (_pendingPermissions.TryDequeue(out var pending))
+            {
+                pending.Completion.TrySetResult(false);
+            }
+        }
+    }
+    
+    private async Task OfferCopyAsync(CopyScope scope)
+    {
+        if (BuildCopyOptions(scope).Count > 0)
+        {
+            AnsiConsole.WriteLine();
+        }
+        
+        while (true)
+        {
+            var options = BuildCopyOptions(scope);
+            if (options.Count == 0) return;
+            
+            var choices = options.ToDictionary(o => $"📋 {o.Name}", o => o);
+            
+            var choice = ConsoleUI.SelectFromList(
+                "[bold]Copy to clipboard[/]",
+                choices.Keys.Append(CopyDoneChoice));
+            
+            if (choice == CopyDoneChoice) return;
+            
+            var (name, text) = choices[choice];
+            await ConsoleUI.CopyToClipboardAsync(name, text);
+            
+            if (options.Count == 1) return;
+        }
+    }
+    
+    private List<(string Name, string Text)> BuildCopyOptions(CopyScope scope)
+    {
+        var options = new List<(string Name, string Text)>();
+        
+        if (scope.HasFlag(CopyScope.Titles) && _result.Titles.Count > 0)
+        {
+            if (!string.IsNullOrWhiteSpace(_result.SelectedTitle))
+                options.Add(("Selected title", _result.SelectedTitle));
+            
+            options.Add(("All titles", string.Join(Environment.NewLine, _result.Titles)));
+        }
+        
+        if (scope.HasFlag(CopyScope.Descriptions))
+        {
+            foreach (var length in Enum.GetValues<DescriptionLength>())
+            {
+                if (_result.Descriptions.TryGetValue(length, out var description))
+                    options.Add(($"{length} description", description));
+            }
+        }
+        
+        if (scope.HasFlag(CopyScope.Chapters) && _result.Chapters.Count > 0)
+        {
+            options.Add(("Chapters (YouTube format)", _srtConverter.FormatChaptersForYouTube(_result.Chapters)));
+        }
+        
+        if (scope == CopyScope.All && options.Count > 1)
+        {
+            options.Add(("Everything", _outputService.FormatCombinedText(_result)));
+        }
+        
+        return options;
     }
     
     private void ConvertToSrt()
@@ -733,6 +717,7 @@ public class AppWorkflow
             
             generationTable.AddRow("[yellow]Title Count[/]", $"{_settings.TitleCount} suggestions");
             generationTable.AddRow("[yellow]Title Max Words[/]", $"{_settings.TitleMaxWords} words");
+            generationTable.AddRow("[yellow]Title Style[/]", $"{_settings.TitleStyle.GetDisplayName()} [grey](default, can be changed per generation)[/]");
             generationTable.AddRow("[yellow]Short Description[/]", $"~{_settings.ShortDescriptionWords} words");
             generationTable.AddRow("[yellow]Medium Description[/]", $"~{_settings.MediumDescriptionWords} words");
             generationTable.AddRow("[yellow]Long Description[/]", $"~{_settings.LongDescriptionWords} words");
@@ -887,6 +872,10 @@ public class AppWorkflow
                                 ? ValidationResult.Success() 
                                 : ValidationResult.Error("Must be between 3 and 25")));
                     
+                    _settings.TitleStyle = ConsoleUI.SelectTitleStyle(
+                        _settings.TitleStyle,
+                        "Default title style (you can still pick a different one each time you generate):");
+                    
                     ConsoleUI.ShowSuccess("Title settings updated");
                     break;
                     
@@ -989,18 +978,28 @@ public class AppWorkflow
             });
     }
 
+    /// <summary>
+    /// Called by the SDK on a background thread. The request is queued and answered by the
+    /// streaming loop, which owns the console and can pause its live display to prompt.
+    /// </summary>
     private Task<bool> RequestPermissionAsync(PermissionRequest request, PermissionInvocation invocation)
     {
+        var completion = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        _pendingPermissions.Enqueue(new PendingPermission(request, invocation, completion));
+        return completion.Task;
+    }
+
+    private static bool PromptForPermission(PendingPermission pending)
+    {
         AnsiConsole.WriteLine();
-        AnsiConsole.Write(new Panel(new Text(MetadataGenerator.DescribePermissionRequest(request, invocation)))
+        AnsiConsole.Write(new Panel(new Text(MetadataGenerator.DescribePermissionRequest(pending.Request, pending.Invocation)))
         {
             Header = new PanelHeader("[yellow]Copilot Permission Request[/]"),
             Border = BoxBorder.Rounded,
             BorderStyle = new Style(Color.Yellow)
         });
 
-        var approved = AnsiConsole.Confirm("Approve this request?", defaultValue: false);
-        return Task.FromResult(approved);
+        return AnsiConsole.Confirm("Approve this request?", defaultValue: false);
     }
     
     private async Task CleanupAsync()

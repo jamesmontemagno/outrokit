@@ -1,6 +1,6 @@
 # Using GitHub Copilot SDK built-in APIs in .NET
 
-This note is based on the `v1.0.7` release of [`github/copilot-sdk`](https://github.com/github/copilot-sdk) and its .NET package, `GitHub.Copilot.SDK`.
+This note is based on the `v1.0.16` release of [`github/copilot-sdk`](https://github.com/github/copilot-sdk) and its .NET package, `GitHub.Copilot.SDK`.
 
 ## Prerequisites
 
@@ -36,6 +36,7 @@ Useful options in `CopilotClientOptions` include:
 - `BaseDirectory`
 - `GitHubToken`
 - `Telemetry`
+- `ClientInfo` to identify your application on the connection
 
 ### `SessionConfig`
 
@@ -43,6 +44,7 @@ Useful options in `CopilotClientOptions` include:
 
 The most useful built-in properties are:
 
+- `ClientName` to identify your application on the session
 - `Model`
 - `ReasoningEffort`
 - `Streaming`
@@ -63,7 +65,7 @@ Core APIs:
 
 - `SendAsync(new MessageOptions { Prompt = ... })`
 - `On(...)` to subscribe to streamed events
-- `GetMessagesAsync()`
+- `GetEventsAsync()`
 - `AbortAsync()`
 
 ## Minimal example
@@ -99,6 +101,27 @@ await session.SendAsync(new MessageOptions
 
 await finished.Task;
 ```
+
+## Identifying your application
+
+Name your app on both the client connection and each session. The connection-level name lets runtime telemetry be attributed to your app, and the session-level name is recorded with the session (for example as `client_name` in its workspace metadata).
+
+```csharp
+const string ClientName = "podcast-metadata-generator";
+
+await using var client = new CopilotClient(new CopilotClientOptions
+{
+    ClientInfo = new CopilotClientInfo { ApplicationName = ClientName }
+});
+
+var session = await client.CreateSessionAsync(new SessionConfig
+{
+    ClientName = ClientName,
+    Model = "gpt-5"
+});
+```
+
+This app sets both from `CopilotClientFactory.ClientName`.
 
 ## Restricting or allowing built-in tools
 

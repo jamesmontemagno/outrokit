@@ -101,6 +101,14 @@ else if (_result == null || _isGenerating)
                             <label class="form-check-label" for="genTitles">
                                 <i class="bi bi-card-heading me-1"></i> Episode Titles
                             </label>
+                            <select class="form-select form-select-sm mt-1" id="titleStyle" aria-label="Title style"
+                                    title="@_titleStyle.GetDescription()"
+                                    @bind="_titleStyle" disabled="@(_isGenerating || !_generateTitles)">
+                                @foreach (var style in TitleStyles.All)
+                                {
+                                    <option value="@style" title="@style.GetDescription()">@style.GetDisplayName()</option>
+                                }
+                            </select>
                         </div>
                         <div class="form-check mb-2">
                             <input class="form-check-input" type="checkbox" id="genShortDesc" 
@@ -529,9 +537,17 @@ else if (_result == null || _isGenerating)
                     @if (!_result!.Titles.Any())
                     {
                         <div class="col-auto">
-                            <button class="btn btn-outline-primary generate-more-btn" @onclick="() => GenerateMore(titles: true)">
-                                <i class="bi bi-card-heading me-1"></i> Generate Titles
-                            </button>
+                            <div class="input-group">
+                                <button class="btn btn-outline-primary generate-more-btn" @onclick="() => GenerateMore(titles: true)">
+                                    <i class="bi bi-card-heading me-1"></i> Generate Titles
+                                </button>
+                                <select class="form-select" aria-label="Title style" title="@_titleStyle.GetDescription()" @bind="_titleStyle">
+                                    @foreach (var style in TitleStyles.All)
+                                    {
+                                        <option value="@style">@style.GetDisplayName()</option>
+                                    }
+                                </select>
+                            </div>
                         </div>
                     }
                     @if (!_result!.Descriptions.ContainsKey(DescriptionLength.Short))
@@ -606,6 +622,7 @@ else if (_result == null || _isGenerating)
     
     // Generation options
     private bool _generateTitles = true;
+    private TitleStyle _titleStyle;
     private bool _generateShortDesc = true;
     private bool _generateMediumDesc = true;
     private bool _generateLongDesc = true;
@@ -636,6 +653,11 @@ else if (_result == null || _isGenerating)
     );
     
     private record GenerationStep(string Name, string Icon, bool IsComplete, bool IsActive);
+    
+    protected override void OnInitialized()
+    {
+        _titleStyle = Settings.TitleStyle;
+    }
     
     private void SelectAllOptions()
     {
@@ -752,13 +774,15 @@ else if (_result == null || _isGenerating)
             {
                 UpdateStep(stepIndex, "Generating catchy episode titles...");
                 AppendToStream("\n═══════════════════════════════════════\n");
-                AppendToStream("📝 GENERATING TITLES\n");
+                AppendToStream($"📝 GENERATING TITLES ({_titleStyle.GetDisplayName().ToUpperInvariant()})\n");
                 AppendToStream("═══════════════════════════════════════\n\n");
                 
                 _result.Titles = await generator.GenerateTitlesAsync(
                     _transcript,
+                    _titleStyle,
                     chunk => AppendToStream(chunk),
                     token);
+                _result.TitleStyle = _titleStyle;
                 
                 token.ThrowIfCancellationRequested();
                 CompleteStep(stepIndex);
@@ -1149,7 +1173,7 @@ else if (_result == null || _isGenerating)
             
             Settings.EpisodeContext = _episodeContext;
             
-            await using var generator = new MetadataGenerator(Settings);
+            await using var generator = new MetadataGenerator(Settings, RequestPermissionAsync);
             
             var stepIndex = 0;
             
@@ -1165,13 +1189,15 @@ else if (_result == null || _isGenerating)
             {
                 UpdateStep(stepIndex, "Generating catchy episode titles...");
                 AppendToStream("\n═══════════════════════════════════════\n");
-                AppendToStream("📝 GENERATING TITLES\n");
+                AppendToStream($"📝 GENERATING TITLES ({_titleStyle.GetDisplayName().ToUpperInvariant()})\n");
                 AppendToStream("═══════════════════════════════════════\n\n");
                 
                 _result.Titles = await generator.GenerateTitlesAsync(
                     _transcript,
+                    _titleStyle,
                     chunk => AppendToStream(chunk),
                     token);
+                _result.TitleStyle = _titleStyle;
                 
                 _exportTitle = true;
                 token.ThrowIfCancellationRequested();

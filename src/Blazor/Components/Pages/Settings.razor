@@ -81,6 +81,18 @@
                     <label class="form-label">Max Words per Title</label>
                     <input type="number" class="form-control" @bind="AppSettings.TitleMaxWords" min="3" max="25" />
                 </div>
+                <div class="mb-3">
+                    <label class="form-label" for="defaultTitleStyle">Default Title Style</label>
+                    <select class="form-select" id="defaultTitleStyle" @bind="AppSettings.TitleStyle">
+                        @foreach (var style in TitleStyles.All)
+                        {
+                            <option value="@style">@style.GetDisplayName() – @style.GetDescription()</option>
+                        }
+                    </select>
+                    <small class="form-text text-muted">
+                        You can still pick a different style each time you generate titles
+                    </small>
+                </div>
             </div>
         </div>
         
@@ -225,6 +237,7 @@
             : AvailableModels.PreferredDefaultModelId;
         AppSettings.TitleCount = defaults.TitleCount;
         AppSettings.TitleMaxWords = defaults.TitleMaxWords;
+        AppSettings.TitleStyle = defaults.TitleStyle;
         AppSettings.ShortDescriptionWords = defaults.ShortDescriptionWords;
         AppSettings.MediumDescriptionWords = defaults.MediumDescriptionWords;
         AppSettings.LongDescriptionWords = defaults.LongDescriptionWords;
