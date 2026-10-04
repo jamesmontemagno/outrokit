@@ -316,6 +316,7 @@ podcast-metadata-generator/
 │       ├── wwwroot/
 │       │   └── css/app.css
 │       └── Program.cs                  # Blazor entry point
+├── tests/                           # xUnit tests, run on Linux, Windows, and macOS in CI
 └── data/                            # Sample transcripts
 ```
 

@@ -54,12 +54,14 @@ cd podcast-metadata-generator
 # Build the project
 dotnet build
 
-# Run tests (when available)
+# Run tests
 dotnet test
 
 # Run the application
 dotnet run
 ```
+
+The tests in `tests/` burn captions into short clips that ffmpeg generates on the spot, so most of them need an ffmpeg that includes libass. They look for `ffmpeg` on your `PATH`, then for Homebrew's `ffmpeg-full`; set `PMG_TEST_FFMPEG` to use a different one. Tests that cannot find a suitable ffmpeg are skipped locally. CI sets `PMG_TEST_REQUIRE_FFMPEG=1`, which makes them fail instead, and runs them on Linux, Windows, and both kinds of Mac.
 
 ### Project Structure
 

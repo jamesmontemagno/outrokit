@@ -24,9 +24,54 @@ jobs:
       - name: Build Solution
         run: dotnet build PodcastMetadataGenerator.sln --no-restore --configuration Release
 
+  test:
+    name: Test (${{ matrix.name }})
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Linux
+            os: ubuntu-latest
+          - name: Windows
+            os: windows-latest
+          - name: macOS Apple silicon
+            os: macos-latest
+          - name: macOS Intel
+            os: macos-15-intel
+
+    env:
+      # Without an ffmpeg that can burn captions those tests fail here, where locally they are skipped.
+      PMG_TEST_REQUIRE_FFMPEG: "1"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      # Each install follows the guide in site/index.html, so a pass here also means the guide's
+      # ffmpeg can burn captions on that system.
+      - name: Install ffmpeg (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      # The guide uses winget, which installs the same gyan.dev full build as this package.
+      - name: Install ffmpeg (Windows)
+        if: runner.os == 'Windows'
+        run: choco install ffmpeg-full -y --no-progress
+
+      # The standard formula has no subtitles filter, which the tests use to check that the app
+      # detects it. ffmpeg-full is the build that burns captions.
+      - name: Install ffmpeg (macOS)
+        if: runner.os == 'macOS'
+        run: brew install ffmpeg ffmpeg-full
+
       - name: Test
-        run: dotnet test PodcastMetadataGenerator.sln --no-build --configuration Release --verbosity normal
-        continue-on-error: true # No tests yet
+        run: dotnet test PodcastMetadataGenerator.sln --configuration Release --verbosity normal
 
   pack:
     runs-on: ubuntu-latest

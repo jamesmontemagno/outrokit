@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using PodcastMetadataGenerator.Core.Models;
 
@@ -76,6 +77,21 @@ public partial class CaptionBurnService
         Path.GetFullPath(firstPath),
         Path.GetFullPath(secondPath),
         StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Where Homebrew installs ffmpeg-full, the macOS build that includes the subtitles filter.
+    /// It is not linked onto PATH, so the app has to be pointed at it. Null on other systems.
+    /// </summary>
+    public static string? GetHomebrewFullFfmpegPath()
+    {
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            return null;
+        }
+
+        var prefix = RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ? "/opt/homebrew" : "/usr/local";
+        return $"{prefix}/opt/ffmpeg-full/bin/ffmpeg";
+    }
 
     /// <summary>
     /// Whether the configured ffmpeg was built with the subtitles filter, which needs libass.

@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using System.Runtime.InteropServices;
 using System.Text;
 using GitHub.Copilot;
 using Spectre.Console;
@@ -474,8 +473,8 @@ public class AppWorkflow
                 ConsoleUI.ShowWarning(ex.Message);
             }
 
-            var suggestedPath = GetSuggestedFullFfmpegPath();
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            var suggestedPath = CaptionBurnService.GetHomebrewFullFfmpegPath();
+            if (suggestedPath is not null)
             {
                 ConsoleUI.ShowInfo(
                     "Homebrew's standard ffmpeg leaves the subtitles filter out. Install the full build with: brew install ffmpeg-full");
@@ -499,20 +498,6 @@ public class AppWorkflow
         }
     }
 
-    /// <summary>
-    /// Where Homebrew puts ffmpeg-full, which is not linked onto PATH.
-    /// </summary>
-    private static string? GetSuggestedFullFfmpegPath()
-    {
-        if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-        {
-            return null;
-        }
-
-        var prefix = RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ? "/opt/homebrew" : "/usr/local";
-        return $"{prefix}/opt/ffmpeg-full/bin/ffmpeg";
-    }
-    
     private async Task LoadTranscriptAsync(string path)
     {
         try
