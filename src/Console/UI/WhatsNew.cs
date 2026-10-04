@@ -28,6 +28,8 @@ public static class WhatsNew
         [
             new("📼", "Now called OutroKit",
                 "Podcast Metadata Generator is now OutroKit, with a new look and a home at outrokit.com. It works the same for podcasts and videos alike. The package has a new name too: start it with dnx OutroKit, or run dotnet tool install -g OutroKit and then outrokit. The old package still works and shows how to switch, and your settings carry over."),
+            new("📦", "A much smaller download",
+                "OutroKit no longer carries its own copy of the Copilot runtime, so the download is about 11 MB, down from more than 100 MB. It uses the GitHub Copilot CLI installed on your computer, which every system now needs. If the app cannot find it, it shows how to install it."),
             new("🔥", "Burn captions into video",
                 "Pick a video and a captions file (.srt, .vtt, .ass, or .ssa) from Burn Captions into Video on the main menu and get a new video with the captions drawn into the picture. You confirm the text size and position each time; set your defaults under Settings → Caption Settings. This needs an ffmpeg that includes libass, such as Homebrew's ffmpeg-full, and the app tells you if yours does not. For captions in another format, or that need more work first, try captionstack.app."),
             new("🤖", "Change Model no longer crashes",

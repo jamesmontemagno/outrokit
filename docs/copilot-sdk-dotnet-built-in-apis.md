@@ -9,6 +9,8 @@ This note is based on the `v1.0.16` release of [`github/copilot-sdk`](https://gi
 
 The .NET package bundles the compatible Copilot runtime. You can optionally install the Copilot CLI separately to authenticate interactively or set `COPILOT_CLI_PATH` to use a specific executable.
 
+OutroKit opts out of the bundled runtime with `<CopilotSkipCliDownload>true</CopilotSkipCliDownload>` in `src/Core`, which keeps its package small, and runs the installed Copilot CLI instead.
+
 Install the SDK:
 
 ```bash

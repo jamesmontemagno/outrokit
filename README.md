@@ -36,16 +36,11 @@ OutroKit writes the titles, descriptions, chapters, and SRT subtitles for your e
 
 - [.NET 10.0 SDK](https://dotnet.microsoft.com/download) or later
 - A GitHub Copilot account and authentication, unless using BYOK. The free Copilot plan works
-- [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/set-up/install-copilot-cli) installed, when running the NuGet tool on macOS, Windows, or Linux on Arm (see below)
+- [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/set-up/install-copilot-cli) installed (see below)
 - [ffmpeg](https://ffmpeg.org/download.html) available on `PATH`, or its executable path configured in Settings (only needed to transcribe video or audio files and to burn captions into video)
   - Burning captions needs an ffmpeg built with libass, which provides the `subtitles` filter. Homebrew's standard `ffmpeg` formula leaves it out; `brew install ffmpeg-full` includes it
 
-The app talks to Copilot through a Copilot runtime, and whether you need to install one depends on how you run the app:
-
-- **NuGet tool (`dnx` or `dotnet tool install`)** - The package only bundles the runtime for Linux x64. On macOS, Windows, and Linux on Arm, install the Copilot CLI and make sure `copilot` is on your `PATH`, or set `COPILOT_CLI_PATH` to the executable.
-- **From source** - The `GitHub.Copilot.SDK` package bundles a runtime for the machine you build on, so the Copilot CLI is optional. It is still useful for signing in interactively.
-
-If a Copilot CLI is found on your `PATH`, the app uses it in preference to the bundled runtime.
+The app reaches Copilot through the Copilot CLI installed on your computer, on every system and whether you run the NuGet tool or build from source. It does not bundle a Copilot runtime, which keeps the package to about 11 MB. Make sure `copilot` is on your `PATH`, or set `COPILOT_CLI_PATH` to the executable. If the app cannot find it, it shows how to install it.
 
 ### Installing GitHub Copilot CLI
 

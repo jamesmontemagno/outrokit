@@ -31,7 +31,7 @@ It runs on the user's own machine as a single command, uses their GitHub Copilot
 ## Capabilities and Constraints
 
 - Requires the .NET 10 SDK or later.
-- Requires a GitHub Copilot account and sign-in, unless using BYOK. The free Copilot plan works; no paid subscription is needed (confirmed by James Montemagno, 2026-10-04). The NuGet tool only bundles a Copilot runtime for Linux x64; on macOS, Windows, and Linux on Arm the Copilot CLI must be installed and on `PATH` (or `COPILOT_CLI_PATH` set). It is also how users sign in.
+- Requires a GitHub Copilot account and sign-in, unless using BYOK. The free Copilot plan works; no paid subscription is needed (confirmed by James Montemagno, 2026-10-04). The app does not bundle a Copilot runtime (`CopilotSkipCliDownload`, set at James Montemagno's request, 2026-10-04, to shrink the package from about 116 MB to about 11 MB). On every system the Copilot CLI must be installed and on `PATH` (or `COPILOT_CLI_PATH` set). It is also how users sign in.
 - ffmpeg is required only for video/audio transcription and for burning captions into a video.
 - Burning captions needs an ffmpeg built with libass. Homebrew's standard `ffmpeg` formula lacks it; `ffmpeg-full` has it but is not put on `PATH`. The app detects an ffmpeg that cannot burn captions and offers to switch to another one.
 - Burned captions default to Medium text at the Bottom, confirmed on every burn; `.ass` and `.ssa` files keep their own styling. Burning always re-encodes the picture.

@@ -14,7 +14,14 @@ public static class CopilotClientFactory
     public const string ClientName = "outrokit";
 
     /// <summary>
-    /// Creates a CopilotClient, using the SDK-bundled CLI unless an explicit CLI path is configured.
+    /// Whether a Copilot CLI was found on this machine. The app does not bundle one, so it cannot
+    /// reach Copilot without it.
+    /// </summary>
+    public static bool IsCliInstalled => !string.IsNullOrWhiteSpace(ResolveCliPath());
+
+    /// <summary>
+    /// Creates a CopilotClient that runs the installed Copilot CLI: the one named by COPILOT_CLI_PATH,
+    /// or else the one on PATH.
     /// </summary>
     public static CopilotClient CreateClient()
     {

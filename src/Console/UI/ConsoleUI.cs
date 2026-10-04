@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Spectre.Console;
 using PodcastMetadataGenerator.Core.Models;
 using PodcastMetadataGenerator.Core.Services;
@@ -100,7 +101,19 @@ public static class ConsoleUI
             AnsiConsole.WriteLine();
         }
         
-        if (!status.IsInstalled)
+        if (status.IsCliMissing)
+        {
+            var installCommand = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                ? "winget install GitHub.Copilot"
+                : "curl -fsSL https://gh.io/copilot-install | bash";
+            AnsiConsole.MarkupLine("[yellow]To install the Copilot CLI:[/]");
+            AnsiConsole.MarkupLine($"  [cyan]{Markup.Escape(installCommand)}[/]");
+            AnsiConsole.MarkupLine("  Then sign in with [cyan]copilot login[/] and start OutroKit again.");
+            AnsiConsole.MarkupLine("  [dim]Step-by-step guide: https://outrokit.com/#a3[/]");
+            AnsiConsole.MarkupLine("  [dim]Already installed? Set COPILOT_CLI_PATH to the copilot executable.[/]");
+            AnsiConsole.WriteLine();
+        }
+        else if (!status.IsInstalled)
         {
             AnsiConsole.MarkupLine("[yellow]To start the Copilot runtime:[/]");
             AnsiConsole.MarkupLine("  [cyan]Restart the app, or set COPILOT_CLI_PATH to a known working Copilot CLI executable.[/]");

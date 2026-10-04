@@ -102,7 +102,15 @@ else if (_copilotStatus != null)
             <h5>Setup Required</h5>
             <p>Please complete the following steps to use this application:</p>
             <ol>
-                @if (!_copilotStatus.IsInstalled)
+                @if (_copilotStatus.IsCliMissing)
+                {
+                    <li>
+                        <strong>Install the GitHub Copilot CLI:</strong>
+                        follow <a href="https://outrokit.com/#a3" target="_blank">step A3 of the guide</a>, then restart the app.
+                        If it is already installed, set <code>COPILOT_CLI_PATH</code> to the copilot executable.
+                    </li>
+                }
+                else if (!_copilotStatus.IsInstalled)
                 {
                     <li>
                         <strong>Start Copilot runtime:</strong>
