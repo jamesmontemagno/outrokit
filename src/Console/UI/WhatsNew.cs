@@ -24,7 +24,7 @@ public static class WhatsNew
 {
     public static IReadOnlyList<WhatsNewRelease> Releases { get; } =
     [
-        new(Version: null,
+        new(Version: "1.5.0",
         [
             new("📼", "Now called OutroKit",
                 "Podcast Metadata Generator is now OutroKit, with a new look and a home at outrokit.com. It works the same for podcasts and videos alike. The package has a new name too: start it with dnx OutroKit, or run dotnet tool install -g OutroKit and then outrokit. The old package still works and shows how to switch, and your settings carry over."),
