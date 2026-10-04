@@ -31,7 +31,7 @@ Generate podcast metadata (titles, descriptions, chapters, SRT subtitles) from t
 ## 📋 Prerequisites
 
 - [.NET 10.0 SDK](https://dotnet.microsoft.com/download) or later
-- A GitHub Copilot subscription and authentication, unless using BYOK
+- A GitHub Copilot account and authentication, unless using BYOK. The free Copilot plan works
 - [ffmpeg](https://ffmpeg.org/download.html) available on `PATH`, or its executable path configured in Settings (only needed to transcribe video or audio files)
 
 The `GitHub.Copilot.SDK` package bundles a compatible Copilot runtime. Installing the Copilot CLI separately is optional, but useful when you want to sign in interactively or use a local CLI override.

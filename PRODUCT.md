@@ -18,7 +18,7 @@ Podcast Metadata Generator is a terminal app that reads an episode transcript an
 
 ## Positioning
 
-It runs on the user's own machine as a single command, uses the GitHub Copilot subscription they already have for generation, and transcribes audio locally with Whisper rather than uploading it to a transcription service.
+It runs on the user's own machine as a single command, uses their GitHub Copilot account for generation, including the free plan, and transcribes audio locally with Whisper rather than uploading it to a transcription service.
 
 ## Operating Context
 
@@ -31,7 +31,7 @@ It runs on the user's own machine as a single command, uses the GitHub Copilot s
 ## Capabilities and Constraints
 
 - Requires the .NET 10 SDK or later.
-- Requires a GitHub Copilot subscription and sign-in, unless using BYOK. The Copilot SDK bundles a runtime; installing the Copilot CLI separately is optional and mainly useful for signing in.
+- Requires a GitHub Copilot account and sign-in, unless using BYOK. The free Copilot plan works; no paid subscription is needed (confirmed by James Montemagno, 2026-10-04). The Copilot SDK bundles a runtime; installing the Copilot CLI separately is optional and mainly useful for signing in.
 - ffmpeg is required only for video/audio transcription.
 - Chapters and SRT conversion require a transcript with timestamps; plain text supports titles and descriptions only.
 - Nine title styles: Balanced, Descriptive, Curiosity Hook, Question, How-To / Educational, Playful, Professional, SEO Keywords, Mixed Variety.
@@ -56,7 +56,7 @@ It runs on the user's own machine as a single command, uses the GitHub Copilot s
 
 1. The visitor's episode file is the starting point; everything is explained in terms of what they hand in and what they get back.
 2. Assume no terminal experience. Every command is shown whole, copyable, and explained in plain words.
-3. Be honest about prerequisites up front: .NET 10, a Copilot subscription, and ffmpeg only when transcribing.
+3. Be honest about prerequisites up front: .NET 10, a Copilot account (the free plan works), and ffmpeg only when transcribing.
 4. Show the output, since titles, descriptions, chapters, and subtitles are the reason to install.
 
 ## Accessibility & Inclusion
