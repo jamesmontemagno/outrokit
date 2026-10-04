@@ -70,15 +70,15 @@
   /* ── Title style tick boxes retype the example title ── */
 
   const exampleTitles = {
-    balanced: 'A Month in the Closet: What Actually Fixed Our Echo',
-    descriptive: 'Recording a Podcast in a Closet for One Month',
-    curiosity: 'The $12 Fix That Beat Our Acoustic Panels',
-    question: 'Do You Really Need Acoustic Panels to Sound Good?',
-    howto: 'How to Cut Room Echo Without Buying Any Gear',
-    playful: 'Hanging Up on Echo: Our Month Among the Coats',
-    professional: 'Practical Room Treatment for Independent Podcast Producers',
-    seo: 'Podcast Echo Fix: Closet Recording, Blankets, and Mic Placement',
-    mixed: 'Is Your Room the Problem? A Closet Recording Experiment',
+    balanced: 'Four Episodes in One Day: Does Batch Recording Work?',
+    descriptive: 'Recording Four Podcast Episodes in a Single Day',
+    curiosity: 'The Episode We Almost Deleted After Hour Six',
+    question: 'Can You Record a Month of Episodes in One Day?',
+    howto: 'How to Batch Record a Month of Episodes',
+    playful: 'Four Episodes, One Day, Zero Voice Left',
+    professional: 'Batch Recording Workflows for Independent Podcast Producers',
+    seo: 'Batch Recording Podcast Episodes: Schedule, Prep, and Energy Tips',
+    mixed: 'One Day, Four Episodes: Was Batch Recording Worth It?',
   };
 
   const titleEl = document.getElementById('demo-title');
