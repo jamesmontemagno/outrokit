@@ -84,28 +84,7 @@ public class SettingsService
             Directory.CreateDirectory(directory);
         }
         
-        // Don't persist episode-specific context
-        var settingsToSave = new AppSettings
-        {
-            Model = settings.Model,
-            OutputDirectory = settings.OutputDirectory,
-            TitleCount = settings.TitleCount,
-            TitleMaxWords = settings.TitleMaxWords,
-            ShortDescriptionWords = settings.ShortDescriptionWords,
-            MediumDescriptionWords = settings.MediumDescriptionWords,
-            LongDescriptionWords = settings.LongDescriptionWords,
-            MinChapters = settings.MinChapters,
-            MaxChapters = settings.MaxChapters,
-            ChaptersPer30Min = settings.ChaptersPer30Min,
-            ChapterTitleMaxWords = settings.ChapterTitleMaxWords,
-            PodcastName = settings.PodcastName,
-            HostNames = settings.HostNames,
-            DefaultSegmentDurationMs = settings.DefaultSegmentDurationMs,
-            PromptForContextOnLoad = settings.PromptForContextOnLoad
-            // EpisodeContext is intentionally not saved
-        };
-        
-        var json = JsonSerializer.Serialize(settingsToSave, JsonOptions);
+        var json = JsonSerializer.Serialize(CreatePersistedCopy(settings), JsonOptions);
         await File.WriteAllTextAsync(_settingsPath, json);
     }
     
@@ -120,34 +99,41 @@ public class SettingsService
             Directory.CreateDirectory(directory);
         }
         
-        var settingsToSave = new AppSettings
-        {
-            Model = settings.Model,
-            OutputDirectory = settings.OutputDirectory,
-            TitleCount = settings.TitleCount,
-            TitleMaxWords = settings.TitleMaxWords,
-            ShortDescriptionWords = settings.ShortDescriptionWords,
-            MediumDescriptionWords = settings.MediumDescriptionWords,
-            LongDescriptionWords = settings.LongDescriptionWords,
-            MinChapters = settings.MinChapters,
-            MaxChapters = settings.MaxChapters,
-            ChaptersPer30Min = settings.ChaptersPer30Min,
-            ChapterTitleMaxWords = settings.ChapterTitleMaxWords,
-            PodcastName = settings.PodcastName,
-            HostNames = settings.HostNames,
-            DefaultSegmentDurationMs = settings.DefaultSegmentDurationMs,
-            PromptForContextOnLoad = settings.PromptForContextOnLoad
-        };
-        
-        var json = JsonSerializer.Serialize(settingsToSave, JsonOptions);
+        var json = JsonSerializer.Serialize(CreatePersistedCopy(settings), JsonOptions);
         File.WriteAllText(_settingsPath, json);
     }
+
+    private static AppSettings CreatePersistedCopy(AppSettings settings) => new()
+    {
+        Model = settings.Model,
+        OutputDirectory = settings.OutputDirectory,
+        TitleCount = settings.TitleCount,
+        TitleMaxWords = settings.TitleMaxWords,
+        TitleStyle = settings.TitleStyle,
+        ShortDescriptionWords = settings.ShortDescriptionWords,
+        MediumDescriptionWords = settings.MediumDescriptionWords,
+        LongDescriptionWords = settings.LongDescriptionWords,
+        MinChapters = settings.MinChapters,
+        MaxChapters = settings.MaxChapters,
+        ChaptersPer30Min = settings.ChaptersPer30Min,
+        ChapterTitleMaxWords = settings.ChapterTitleMaxWords,
+        PodcastName = settings.PodcastName,
+        HostNames = settings.HostNames,
+        DefaultSegmentDurationMs = settings.DefaultSegmentDurationMs,
+        PromptForContextOnLoad = settings.PromptForContextOnLoad
+        // EpisodeContext is per-episode and intentionally not saved
+    };
 
     private static AppSettings Normalize(AppSettings settings)
     {
         settings.Model = string.IsNullOrWhiteSpace(settings.Model)
             ? AvailableModels.PreferredDefaultModelId
             : settings.Model.Trim();
+
+        if (!Enum.IsDefined(settings.TitleStyle))
+        {
+            settings.TitleStyle = TitleStyles.Default;
+        }
 
         return settings;
     }

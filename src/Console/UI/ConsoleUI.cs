@@ -148,10 +148,55 @@ public static class ConsoleUI
         AnsiConsole.Write(new Text(separator, new Style(color)));
         AnsiConsole.WriteLine();
         AnsiConsole.MarkupLine($"[bold]{Markup.Escape(title)}[/]");
-        AnsiConsole.WriteLine(content);
+        WritePlain(content);
         AnsiConsole.Write(new Text(separator, new Style(color)));
         AnsiConsole.WriteLine();
         AnsiConsole.WriteLine();
+    }
+    
+    /// <summary>
+    /// Writes text straight to the terminal without Spectre's word wrapping. Spectre wraps
+    /// by inserting real line breaks, which end up in the clipboard when the text is
+    /// selected; unwrapped text is soft-wrapped by the terminal and copies as written.
+    /// </summary>
+    public static void WritePlain(string text)
+    {
+        var writer = AnsiConsole.Profile.Out.Writer;
+        writer.WriteLine(text);
+        writer.Flush();
+    }
+    
+    /// <summary>
+    /// Shows generated text under a heading in a copy-friendly way.
+    /// </summary>
+    public static void ShowCopyableBlock(string title, string content)
+    {
+        var rule = new Rule { Style = Style.Parse("grey") };
+        
+        AnsiConsole.WriteLine();
+        AnsiConsole.MarkupLine($"[bold]{Markup.Escape(title)}[/]");
+        AnsiConsole.Write(rule);
+        WritePlain(content);
+        AnsiConsole.Write(rule);
+    }
+    
+    /// <summary>
+    /// Copies text to the system clipboard and reports the outcome.
+    /// </summary>
+    public static async Task<bool> CopyToClipboardAsync(string what, string text)
+    {
+        try
+        {
+            await TextCopy.ClipboardService.SetTextAsync(text);
+            ShowSuccess($"Copied {what} to clipboard ({text.Length:N0} characters)");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            var hint = OperatingSystem.IsLinux() ? " (clipboard access on Linux requires xsel)" : "";
+            ShowWarning($"Could not copy to clipboard{hint}: {ex.Message}");
+            return false;
+        }
     }
     
     /// <summary>
@@ -442,6 +487,25 @@ public static class ConsoleUI
     }
     
     /// <summary>
+    /// Prompts for a title style, listing the default first so Enter accepts it.
+    /// </summary>
+    public static TitleStyle SelectTitleStyle(TitleStyle defaultStyle, string title = "Select a title style:")
+    {
+        var styles = TitleStyles.All
+            .OrderByDescending(style => style == defaultStyle)
+            .ToList();
+        
+        return SelectFromList(
+            title,
+            styles,
+            style =>
+            {
+                var suffix = style == defaultStyle ? " [green](default)[/]" : "";
+                return $"{Markup.Escape(style.GetDisplayName())}{suffix} [grey]- {Markup.Escape(style.GetDescription())}[/]";
+            });
+    }
+    
+    /// <summary>
     /// Shows descriptions in a formatted way.
     /// </summary>
     public static void ShowDescriptions(Dictionary<DescriptionLength, string> descriptions)
@@ -493,7 +557,7 @@ public static class ConsoleUI
         
         foreach (var chapter in chapters)
         {
-            AnsiConsole.WriteLine($"{chapter.Timestamp} {chapter.Title}");
+            WritePlain($"{chapter.Timestamp} {chapter.Title}");
         }
         
         AnsiConsole.Write(rule);

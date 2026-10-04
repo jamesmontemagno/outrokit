@@ -14,12 +14,14 @@ Generate podcast metadata (titles, descriptions, chapters, SRT subtitles) from t
 ## ✨ Features
 
 - **🎯 Title Generation** - Get multiple creative title suggestions for your episode
+- **🎨 Title Styles** - Pick a style (balanced, descriptive, curiosity hook, question, how-to, playful, professional, SEO, or mixed) each time you generate titles
 - **📝 Description Generation** - Create short, medium, and long descriptions optimized for different platforms
 - **📑 Chapter Generation** - Auto-generate YouTube-compatible chapter markers with timestamps
 - **🎬 SRT Conversion** - Convert transcripts to valid SRT subtitle format
 - **🔄 Multiple Transcript Formats** - Support for Zencastr, time-range, SRT formats, and plain text
 - **📂 File Browser** - Built-in file browser or drag-and-drop support
 - **⚡ Streaming Responses** - Watch AI responses generate in real-time
+- **📋 Copy to Clipboard** - Copy titles, descriptions, chapters, or everything at once; finished output is printed unwrapped so it also selects cleanly in the terminal
 - **🤖 Model Selection** - Choose from multiple AI models (GPT-5, Claude, Gemini)
 - **⚙️ Configurable Settings** - Customize generation parameters and save preferences
 
@@ -128,6 +130,26 @@ Then open https://localhost:5001 in your browser.
 - Tabbed results view
 - Settings persistence via localStorage
 
+### Title Styles
+
+| Style | What you get |
+|-------|--------------|
+| Balanced | Engaging, descriptive, and SEO-friendly |
+| Descriptive | Clear and straightforward, no hype |
+| Curiosity Hook | Teases a hook that makes people want to listen |
+| Question | Phrased as a question the episode answers |
+| How-To / Educational | Outcome-focused: how-to, guide, lessons learned |
+| Playful | Witty, with wordplay or humor |
+| Professional | Polished and authoritative |
+| SEO Keywords | Leads with the terms people search for |
+| Mixed Variety | A different style for each title |
+
+Set the default under **Settings → Generation Settings → Title Settings** (console) or on the **Settings** page (Blazor). The default is preselected whenever you generate titles, and you can choose a different style for that run.
+
+### Copying Results (Console)
+
+When a generation finishes, the console offers a **Copy to clipboard** menu for the selected title, all titles, each description, chapters, or everything. The same menu is available from the main menu once you have results. On Linux, clipboard access requires `xsel`.
+
 ## 🎯 Supported Transcript Formats
 
 ### Zencastr Format
@@ -187,6 +209,7 @@ Access settings from the main menu to configure:
 ### Generation Settings
 - **Title Count** - Number of title suggestions to generate (default: 5)
 - **Title Max Words** - Maximum words per title (default: 10)
+- **Title Style** - Default style for generated titles (default: Balanced). You are asked to confirm or change it each time you generate titles or all metadata
 - **Description Lengths** - Word counts for short/medium/long descriptions (default: 50/150/300)
 - **Chapter Range** - Min/max chapters to generate (default: 3-12)
 - **Chapters per 30 min** - Target density of chapters (default: 5)
@@ -205,6 +228,7 @@ podcast-metadata-generator/
 │   │   │   ├── AppSettings.cs       # Configuration and generation settings
 │   │   │   ├── GenerationResult.cs  # Results container
 │   │   │   ├── Manifest.cs          # JSON manifest structure
+│   │   │   ├── TitleStyle.cs        # Title style options and prompt guidance
 │   │   │   ├── Transcript.cs        # Transcript model
 │   │   │   └── TranscriptSegment.cs # Segment model
 │   │   ├── Services/

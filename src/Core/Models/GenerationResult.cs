@@ -42,6 +42,11 @@ public class GenerationResult
     public List<string> Titles { get; set; } = [];
     
     /// <summary>
+    /// The style used to generate <see cref="Titles"/>.
+    /// </summary>
+    public TitleStyle? TitleStyle { get; set; }
+    
+    /// <summary>
     /// Generated descriptions by length.
     /// </summary>
     public Dictionary<DescriptionLength, string> Descriptions { get; set; } = [];

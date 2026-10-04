@@ -38,6 +38,13 @@ public class Manifest
     public List<string> Titles { get; init; } = [];
     
     /// <summary>
+    /// Style used to generate the titles.
+    /// </summary>
+    [JsonPropertyName("titleStyle")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public TitleStyle? TitleStyle { get; init; }
+    
+    /// <summary>
     /// The selected/preferred title.
     /// </summary>
     [JsonPropertyName("selectedTitle")]

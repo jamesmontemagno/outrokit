@@ -16,9 +16,10 @@ public static class PromptTemplates
         accurately reflect the content while being compelling and SEO-friendly.
         """;
     
-    public static string GetTitleUserPrompt(string transcript, AppSettings settings)
+    public static string GetTitleUserPrompt(string transcript, AppSettings settings, TitleStyle? style = null)
     {
         var contextSection = BuildContextSection(settings);
+        var styleGuidance = (style ?? settings.TitleStyle).GetPromptGuidance();
         
         return $$"""
             You are generating titles for a podcast episode based on its transcript.
@@ -30,7 +31,7 @@ public static class PromptTemplates
             {{contextSection}}
             Generate {{settings.TitleCount}} creative, concise titles for this podcast episode.
             Keep titles under {{settings.TitleMaxWords}} words each.
-            Make them engaging, descriptive, and SEO-friendly.
+            {{styleGuidance}}
 
             Return ONLY the {{settings.TitleCount}} titles, one per line, numbered 1-{{settings.TitleCount}}. No additional commentary.
 
