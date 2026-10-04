@@ -133,7 +133,7 @@ public class MediaTranscriptService
         }
         finally
         {
-            TemporaryFileCleanup.Delete(temporaryWavPath, transcriptionException);
+            await TemporaryFileCleanup.DeleteAsync(temporaryWavPath, transcriptionException);
         }
     }
 

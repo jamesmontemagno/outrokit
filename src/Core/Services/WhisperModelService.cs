@@ -82,7 +82,7 @@ public class WhisperModelService
             }
             finally
             {
-                TemporaryFileCleanup.Delete(temporaryPath, downloadException);
+                await TemporaryFileCleanup.DeleteAsync(temporaryPath, downloadException);
             }
         }
 

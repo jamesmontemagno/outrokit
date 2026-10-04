@@ -263,8 +263,8 @@ public partial class CaptionBurnService
         }
         finally
         {
-            TemporaryFileCleanup.Delete(partialPath, burnException);
-            TemporaryFileCleanup.DeleteDirectory(workingDirectory, burnException);
+            await TemporaryFileCleanup.DeleteAsync(partialPath, burnException);
+            await TemporaryFileCleanup.DeleteDirectoryAsync(workingDirectory, burnException);
         }
     }
 
