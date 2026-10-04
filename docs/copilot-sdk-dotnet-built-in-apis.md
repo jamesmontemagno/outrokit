@@ -107,7 +107,7 @@ await finished.Task;
 Name your app on both the client connection and each session. The connection-level name lets runtime telemetry be attributed to your app, and the session-level name is recorded with the session (for example as `client_name` in its workspace metadata).
 
 ```csharp
-const string ClientName = "podcast-metadata-generator";
+const string ClientName = "outrokit";
 
 await using var client = new CopilotClient(new CopilotClientOptions
 {

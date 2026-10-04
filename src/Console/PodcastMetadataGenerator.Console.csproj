@@ -4,19 +4,21 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>PodcastMetadataGenerator.Console</RootNamespace>
-    <AssemblyName>podcast-metadata-generator</AssemblyName>
+    <AssemblyName>outrokit</AssemblyName>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     
     <!-- NuGet Package Configuration -->
     <PackAsTool>true</PackAsTool>
-    <ToolCommandName>podcast-metadata-generator</ToolCommandName>
+    <ToolCommandName>outrokit</ToolCommandName>
+    <!-- The package keeps its original ID so existing installs and `dnx PodcastMetadataGenerator` keep working. -->
     <PackageId>PodcastMetadataGenerator</PackageId>
+    <Title>OutroKit</Title>
     <PackageVersion>1.2.1</PackageVersion>
     <Authors>James Montemagno</Authors>
-    <Description>Generate podcast metadata (titles, descriptions, chapters, SRT) from transcripts using GitHub Copilot AI</Description>
-    <PackageTags>podcast;metadata;ai;copilot;transcripts;chapters;srt</PackageTags>
-    <PackageProjectUrl>https://github.com/jamesmontemagno/podcast-metadata-generator</PackageProjectUrl>
+    <Description>OutroKit writes the titles, descriptions, chapters, and subtitles for your episode from its transcript, video, or audio, using GitHub Copilot. It can also burn captions into a video. Formerly Podcast Metadata Generator.</Description>
+    <PackageTags>outrokit;podcast;video;youtube;metadata;ai;copilot;transcripts;chapters;srt;subtitles;captions</PackageTags>
+    <PackageProjectUrl>https://outrokit.com/</PackageProjectUrl>
     <RepositoryUrl>https://github.com/jamesmontemagno/podcast-metadata-generator</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>

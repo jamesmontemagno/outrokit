@@ -1,6 +1,8 @@
-# 🎙️ Podcast Metadata Generator
+# 📼 OutroKit
 
-Generate podcast metadata (titles, descriptions, chapters, SRT subtitles) from transcripts using AI powered by the GitHub Copilot SDK.
+OutroKit writes the titles, descriptions, chapters, and SRT subtitles for your episode from its transcript, video, or audio, using AI powered by the GitHub Copilot SDK. It works for podcasts and videos alike.
+
+> OutroKit was called Podcast Metadata Generator. The NuGet package keeps that name, so `dnx PodcastMetadataGenerator` works as before. If you installed it as a tool, the command is now `outrokit`. Your settings carry over.
 
 ![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet)
 ![License](https://img.shields.io/badge/license-MIT-green)
@@ -22,7 +24,7 @@ Generate podcast metadata (titles, descriptions, chapters, SRT subtitles) from t
 - **🎬 SRT Conversion** - Convert transcripts to valid SRT subtitle format
 - **🔄 Multiple Transcript Formats** - Support for Zencastr, time-range, SRT formats, and plain text
 - **🎧 Video & Audio Transcription** - Start from a video or audio file (`.mp3`, `.wav`) and generate an SRT transcript locally with ffmpeg and Whisper.net
-- **🔥 Burn Captions into Video** - Draw an `.srt`, `.vtt`, `.ass`, or `.ssa` captions file into the picture of a video with ffmpeg
+- **🔥 Burn Captions into Video** - Draw an `.srt`, `.vtt`, `.ass`, or `.ssa` captions file into the picture of a video with ffmpeg. For other caption formats, or captions that need more work first, use [CaptionStack](https://captionstack.app/)
 - **📂 File Browser** - Built-in file browser or drag-and-drop support
 - **⚡ Streaming Responses** - Watch AI responses generate in real-time
 - **📋 Copy to Clipboard** - Copy titles, descriptions, chapters, or everything at once; finished output is printed unwrapped so it also selects cleanly in the terminal
@@ -105,7 +107,7 @@ dotnet build PodcastMetadataGenerator.sln
 
 ```bash
 # If installed as a tool:
-podcast-metadata-generator
+outrokit
 
 # Or from source:
 cd src/Console
@@ -115,7 +117,7 @@ dotnet run
 ### Console App - With a Transcript File
 
 ```bash
-podcast-metadata-generator /path/to/transcript.txt
+outrokit /path/to/transcript.txt
 
 # Or from source:
 dotnet run -- /path/to/transcript.txt
@@ -126,8 +128,8 @@ dotnet run -- /path/to/transcript.txt
 Open **Settings → Transcription Settings**, choose a Whisper GGML model, then download and initialize it. After setup, select **Load Transcript, Video, or Audio → Video or audio file**, or pass the file on the command line:
 
 ```bash
-podcast-metadata-generator /path/to/episode.mp4
-podcast-metadata-generator /path/to/episode.mp3
+outrokit /path/to/episode.mp4
+outrokit /path/to/episode.mp3
 ```
 
 Supported video formats are `.mp4`, `.mov`, `.mkv`, `.avi`, `.webm`, `.m4v`, `.wmv`, `.mpeg`, and `.mpg`. Supported audio formats are `.mp3` and `.wav`.
@@ -143,6 +145,8 @@ Select **Burn Captions into Video** from the main menu, then choose a video and 
 The app asks you to confirm the caption text size (Small, Medium, or Large) and position (Bottom or Top), then where to save the result. The default is `<video name>-captioned` next to the original, and the original is never overwritten. Captions are white with a dark outline and are sized to the video, so they look the same at 720p and 4K and stay proportionate on portrait video. An `.ass` or `.ssa` file keeps its own fonts, sizes, and positions.
 
 Burning captions re-encodes the picture as H.264, so it takes a while on long videos. The result is saved as `.mp4`, `.mov`, `.mkv`, or `.m4v`; a source in another format is saved as `.mp4`. Audio is copied unchanged when the format stays the same and converted to AAC otherwise. Press **Ctrl+C** to cancel and return to the menu; a cancelled or failed burn saves nothing and leaves an existing file as it was.
+
+Captions in another format, such as YouTube's `.sbv` or `.ttml`? [CaptionStack](https://captionstack.app/) converts caption files for free in your browser, and is the place to go when captions need more work before you burn them in.
 
 This feature needs an ffmpeg that includes libass. If yours does not, the app says so and offers to switch to another one. With Homebrew:
 
@@ -274,7 +278,7 @@ Access settings from the main menu to configure:
 - **Whisper GGML Model** - Select, download, and initialize a local Whisper.net model for transcription
 - **Caption Size and Position** - Default text size (default: Medium) and position (default: Bottom) for captions burned into video. You are asked to confirm or change them each time you burn captions
 - **Output Directory** - Default location for saved files
-- **Podcast Name** - Your podcast name (used in prompts for better context)
+- **Show Name** - The name of your show (used in prompts for better context)
 - **Host Names** - Host names (used in prompts)
 - **Episode Context** - Add guest names, topics, or other context to improve generation
 

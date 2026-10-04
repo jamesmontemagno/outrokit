@@ -14,7 +14,7 @@ Secondary: developers who want to see a working GitHub Copilot SDK app in .NET.
 
 ## Product Purpose
 
-Podcast Metadata Generator is a terminal app that reads an episode transcript and writes the publishing metadata for it: title suggestions, short/medium/long descriptions, YouTube-compatible chapters, and an SRT subtitle file. It can also start from a video or audio file by transcribing it locally first, and it can burn a captions file into the picture of a video. Success is a visitor going from "I have an episode file" to saved, paste-ready metadata.
+OutroKit is a terminal app that reads an episode transcript and writes the publishing metadata for it: title suggestions, short/medium/long descriptions, YouTube-compatible chapters, and an SRT subtitle file. It can also start from a video or audio file by transcribing it locally first, and it can burn a captions file into the picture of a video. Success is a visitor going from "I have an episode file" to saved, paste-ready metadata.
 
 ## Positioning
 
@@ -22,7 +22,7 @@ It runs on the user's own machine as a single command, uses their GitHub Copilot
 
 ## Operating Context
 
-- Run from a terminal: `dnx PodcastMetadataGenerator` (no install) or `dotnet tool install -g PodcastMetadataGenerator`, then `podcast-metadata-generator [file]`.
+- Run from a terminal: `dnx PodcastMetadataGenerator` (no install) or `dotnet tool install -g PodcastMetadataGenerator`, then `outrokit [file]`.
 - Interactive, menu-driven UI (Spectre.Console): load a file, generate titles / descriptions / chapters / SRT, copy to clipboard, save results, burn captions into a video, settings.
 - Inputs: transcripts in Zencastr, time-range, SRT, or plain text formats; video (`.mp4`, `.mov`, `.mkv`, `.avi`, `.webm`, `.m4v`, `.wmv`, `.mpeg`, `.mpg`); audio (`.mp3`, `.wav`). Burning captions takes a video and a captions file (`.srt`, `.vtt`, `.ass`, `.ssa`); no transcript needs to be loaded.
 - Outputs, named after the input file (per `OutputService.cs`): `<name>_titles.txt`, `<name>_description_short.txt`, `<name>_description_medium.txt`, `<name>_description_long.txt`, `<name>_chapters.txt`, `<name>.srt`, `<name>_manifest.json`. The README's output table lists older unprefixed names. A burned video is saved as `<video name>-captioned` next to the original, as `.mp4`, `.mov`, `.mkv`, or `.m4v`.
@@ -44,8 +44,9 @@ It runs on the user's own machine as a single command, uses their GitHub Copilot
 
 ## Brand Commitments
 
-- Name: Podcast Metadata Generator. Package ID `PodcastMetadataGenerator`; command `podcast-metadata-generator`.
-- Site: https://outrokit.com, titled OutroKit (domain and title set by James Montemagno, 2026-10-04). The app's banner, NuGet package, and command keep the name Podcast Metadata Generator, and the site says they are the same thing.
+- Name: OutroKit, in the app, README, and site (renamed from Podcast Metadata Generator by James Montemagno, 2026-10-04). Copy says "episode" and "show" and does not assume a podcast. The NuGet package ID stays `PodcastMetadataGenerator`; the command is `outrokit`. The settings folder stays `~/.podcast-metadata-generator` so saved settings and models carry over.
+- Site: https://outrokit.com (domain set by James Montemagno, 2026-10-04).
+- For caption formats the app cannot burn, and for captions that need more work first, the app, README, and site link to CaptionStack (https://captionstack.app/), a free in-browser caption converter (link requested by James Montemagno, 2026-10-04).
 - Author: James Montemagno. MIT licensed, open source on GitHub.
 
 ## Evidence on Hand

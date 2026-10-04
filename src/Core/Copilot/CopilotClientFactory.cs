@@ -11,7 +11,7 @@ public static class CopilotClientFactory
     /// <summary>
     /// Name this app identifies itself with, on both the client connection and each session.
     /// </summary>
-    public const string ClientName = "podcast-metadata-generator";
+    public const string ClientName = "outrokit";
 
     /// <summary>
     /// Creates a CopilotClient, using the SDK-bundled CLI unless an explicit CLI path is configured.

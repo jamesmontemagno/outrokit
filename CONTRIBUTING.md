@@ -1,6 +1,6 @@
-# Contributing to Podcast Metadata Generator
+# Contributing to OutroKit
 
-First off, thank you for considering contributing to Podcast Metadata Generator! It's people like you that make this tool better for everyone.
+First off, thank you for considering contributing to OutroKit! It's people like you that make this tool better for everyone.
 
 ## Code of Conduct
 

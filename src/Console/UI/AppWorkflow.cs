@@ -355,6 +355,8 @@ public class AppWorkflow
                 .SpinnerStyle(Style.Parse("blue"))
                 .StartAsync("Checking the video...", _ => burnService.GetVideoDetailsAsync(videoPath));
 
+            AnsiConsole.MarkupLine(
+                $"[grey]Captions in another format, or that need more work first? Try CaptionStack: {CaptionBurnService.CaptionToolsUrl}[/]");
             var captionPath = ConsoleUI.AskFilePath(
                 "Select the captions file (.srt, .vtt, .ass, or .ssa):",
                 mustExist: true,
@@ -363,6 +365,7 @@ public class AppWorkflow
             if (!CaptionBurnService.HasCaptionExtension(captionPath))
             {
                 ConsoleUI.ShowError("Captions must be an .srt, .vtt, .ass, or .ssa file.");
+                ConsoleUI.ShowInfo($"CaptionStack converts other caption formats for free: {CaptionBurnService.CaptionToolsUrl}");
                 return;
             }
 
@@ -373,6 +376,7 @@ public class AppWorkflow
             if (captionCount == 0)
             {
                 ConsoleUI.ShowError("No captions could be read from that file, so there is nothing to burn in.");
+                ConsoleUI.ShowInfo($"If it is in another caption format, convert it with CaptionStack: {CaptionBurnService.CaptionToolsUrl}");
                 return;
             }
 
@@ -991,7 +995,7 @@ public class AppWorkflow
             generalTable.AddRow(
                 "[blue]Captions[/]",
                 $"{_settings.CaptionSize.GetDisplayName()}, {_settings.CaptionPosition.GetDisplayName().ToLowerInvariant()} [grey](default, confirmed each time you burn captions)[/]");
-            generalTable.AddRow("[blue]Podcast Name[/]", 
+            generalTable.AddRow("[blue]Show Name[/]", 
                 string.IsNullOrEmpty(_settings.PodcastName) 
                     ? "[grey](not set)[/]" 
                     : Markup.Escape(_settings.PodcastName));
@@ -1037,7 +1041,7 @@ public class AppWorkflow
                     "🎧 Transcription Settings",
                     "🔥 Caption Settings",
                     "📁 Change Output Directory", 
-                    "🎙️ Podcast Info (Name & Hosts)",
+                    "🎙️ Show Info (Name & Hosts)",
                     "📝 Episode Context",
                     "🔧 Generation Settings (Titles, Descriptions, Chapters)",
                     "💾 Save Settings",
@@ -1086,7 +1090,7 @@ public class AppWorkflow
                     await EditCaptionSettingsAsync();
                     break;
                     
-                case "🎙️ Podcast Info (Name & Hosts)":
+                case "🎙️ Show Info (Name & Hosts)":
                     EditPodcastInfo();
                     break;
                     
@@ -1216,7 +1220,8 @@ public class AppWorkflow
                 $"Text size: [blue]{Markup.Escape(_settings.CaptionSize.GetDisplayName())}[/]\n" +
                 $"Position: [blue]{Markup.Escape(_settings.CaptionPosition.GetDisplayName())}[/]\n" +
                 $"ffmpeg: [blue]{Markup.Escape(_settings.FfmpegPath)}[/]\n" +
-                "[grey]You confirm size and position each time you burn captions.[/]",
+                "[grey]You confirm size and position each time you burn captions.[/]\n" +
+                $"[grey]To convert or rework a captions file, try CaptionStack: {CaptionBurnService.CaptionToolsUrl}[/]",
                 new[]
                 {
                     "🔠 Default Text Size",
@@ -1276,7 +1281,7 @@ public class AppWorkflow
     private void EditPodcastInfo()
     {
         _settings.PodcastName = ConsoleUI.AskText(
-            "Enter podcast name (used in prompts for context):",
+            "Enter the name of your show (used in prompts for context):",
             defaultValue: _settings.PodcastName ?? "",
             validator: _ => true);
         if (string.IsNullOrWhiteSpace(_settings.PodcastName))
@@ -1289,7 +1294,7 @@ public class AppWorkflow
         if (string.IsNullOrWhiteSpace(_settings.HostNames))
             _settings.HostNames = null;
         
-        ConsoleUI.ShowSuccess("Podcast info updated");
+        ConsoleUI.ShowSuccess("Show info updated");
     }
     
     private void EditGenerationSettings()

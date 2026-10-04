@@ -1,5 +1,5 @@
 ---
-name: Podcast Metadata Generator
+name: OutroKit
 description: Blank Tape J-Card visual system for the public site.
 colors:
   tape-blue: "oklch(41% 0.2 268)"
@@ -94,7 +94,7 @@ components:
     rounded: "{rounded.card}"
 ---
 
-# Design System: Podcast Metadata Generator
+# Design System: OutroKit
 
 ## Overview
 

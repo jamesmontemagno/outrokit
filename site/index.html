@@ -10,8 +10,8 @@ FORM: Blank Tape J-Card, 6th of 7 grounded directions; staged as the unfolded ca
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>OutroKit: titles, descriptions, chapters, and subtitles from your podcast episode</title>
-  <meta name="description" content="OutroKit is a free terminal app that reads your podcast transcript, video, or audio file and writes the titles, descriptions, YouTube chapters, and SRT subtitles. Works with the free GitHub Copilot plan. Step-by-step install and usage guide.">
+  <title>OutroKit: titles, descriptions, chapters, and subtitles from your episode</title>
+  <meta name="description" content="OutroKit is a free terminal app that reads your episode&rsquo;s transcript, video, or audio file and writes the titles, descriptions, YouTube chapters, and SRT subtitles. Works with the free GitHub Copilot plan. Step-by-step install and usage guide.">
   <meta name="theme-color" content="#2438c9">
   <link rel="canonical" href="https://outrokit.com/">
   <meta property="og:type" content="website">
@@ -242,12 +242,12 @@ FORM: Blank Tape J-Card, 6th of 7 grounded directions; staged as the unfolded ca
             <div class="track__body">
               <div class="cmd cmd--lead"><pre><code>dnx PodcastMetadataGenerator</code></pre></div>
               <p><span class="mono">dnx</span> comes with .NET 10. It fetches the latest version and starts it, with nothing left to maintain. If it asks whether to download the package, answer yes.</p>
-              <p class="expect">You should see the app&rsquo;s banner, then a Copilot status table ending in <span class="mono">Copilot runtime is ready to use!</span></p>
-              <p class="aside">The package and the banner use the app&rsquo;s original name, Podcast Metadata Generator. It is the same thing as OutroKit.</p>
+              <p class="expect">You should see the OutroKit banner, then a Copilot status table ending in <span class="mono">Copilot runtime is ready to use!</span></p>
+              <p class="aside">The package is still called <span class="mono">PodcastMetadataGenerator</span>, the app&rsquo;s name before it became OutroKit.</p>
               <h4>Prefer to keep it installed?</h4>
               <div class="cmd"><pre><code>dotnet tool install -g PodcastMetadataGenerator</code></pre></div>
               <p>From then on, start it with:</p>
-              <div class="cmd"><pre><code>podcast-metadata-generator</code></pre></div>
+              <div class="cmd"><pre><code>outrokit</code></pre></div>
               <p class="aside">Update later with <span class="mono">dotnet tool update -g PodcastMetadataGenerator</span>.</p>
             </div>
           </li>
@@ -392,6 +392,7 @@ FORM: Blank Tape J-Card, 6th of 7 grounded directions; staged as the unfolded ca
                 <div><dt>Video</dt><dd><span class="mono">.mp4 .mov .mkv .avi .webm .m4v .wmv .mpeg .mpg</span></dd></div>
                 <div><dt>Captions</dt><dd><span class="mono">.srt .vtt .ass .ssa</span></dd></div>
               </dl>
+              <p class="aside">Captions in another format, such as YouTube&rsquo;s <span class="mono">.sbv</span>? <a href="https://captionstack.app/">CaptionStack</a> converts caption files for free in your browser, and is the place to go when captions need more work before you burn them in.</p>
               <p>The app then asks how the captions should look, starting with the text size. Your default is listed first, so pressing Enter keeps it.</p>
               <figure class="screen">
                 <div class="screen__glass" role="img" aria-label="The caption text size question. Medium, the default, is selected: readable on most screens. Small: unobtrusive, best for wide shots and screen recordings. Large: easy to read on phones and in social clips.">
@@ -471,7 +472,7 @@ Thanks for having me!</code></pre>
                 <tr><th scope="row">Caption position</th><td>Bottom</td></tr>
               </tbody>
             </table>
-            <p>Filling in <strong>Podcast Name</strong>, <strong>Host Names</strong>, and <strong>Episode Context</strong> (guests, topics) gives Copilot more to work with. You can also change the AI model and where files are saved.</p>
+            <p>Filling in <strong>Show Name</strong>, <strong>Host Names</strong>, and <strong>Episode Context</strong> (guests, topics) gives Copilot more to work with. You can also change the AI model and where files are saved.</p>
           </div>
 
           <div class="notes__block" id="trouble">

@@ -11,7 +11,7 @@ public static class PromptTemplates
     #region Title Generation
     
     public const string TitleSystemPrompt = """
-        You are a creative podcast producer who writes engaging, concise episode titles.
+        You are a creative producer who writes engaging, concise episode titles.
         You analyze transcripts carefully to identify the main topics and create titles that 
         accurately reflect the content while being compelling and SEO-friendly.
         """;
@@ -22,14 +22,14 @@ public static class PromptTemplates
         var styleGuidance = (style ?? settings.TitleStyle).GetPromptGuidance();
         
         return $$"""
-            You are generating titles for a podcast episode based on its transcript.
+            You are generating titles for an episode based on its transcript.
 
             Analyze the transcript and identify the topics that are discussed the most.
             Focus primarily on the main topics that take up the majority of the conversation.
             The title should reflect what listeners will spend most of their time hearing about.
             You can mention secondary topics briefly, but prioritize the core subject matter.
             {{contextSection}}
-            Generate {{settings.TitleCount}} creative, concise titles for this podcast episode.
+            Generate {{settings.TitleCount}} creative, concise titles for this episode.
             Keep titles under {{settings.TitleMaxWords}} words each.
             {{styleGuidance}}
 
@@ -45,7 +45,7 @@ public static class PromptTemplates
     #region Description Generation
     
     public const string DescriptionSystemPrompt = """
-        You are a podcast producer who writes compelling episode descriptions.
+        You are a producer who writes compelling episode descriptions.
         You craft descriptions that accurately summarize the content, highlight key insights,
         and entice listeners to tune in. Your descriptions are well-structured and engaging.
         """;
@@ -71,7 +71,7 @@ public static class PromptTemplates
         var contextSection = BuildContextSection(settings);
         
         return $$"""
-            You are writing a compelling podcast episode description based on its transcript.
+            You are writing a compelling episode description based on its transcript.
 
             Analyze the transcript carefully and identify:
             - The main topics that dominate the conversation (what takes up most of the time)
@@ -96,7 +96,7 @@ public static class PromptTemplates
     #region Chapter Generation
     
     public const string ChapterSystemPrompt = """
-        You are a podcast editor who creates chapter markers based on topic transitions.
+        You are an editor who creates chapter markers based on topic transitions.
         You identify natural breakpoints in conversations where topics shift significantly.
         You create descriptive chapter titles that help listeners navigate the episode.
         You must use actual timecodes from the transcript where topics shift.
@@ -111,7 +111,7 @@ public static class PromptTemplates
         var contextSection = BuildContextSection(settings);
         
         return $$"""
-            Create chapter markers for this podcast episode from the timestamped transcript below.
+            Create chapter markers for this episode from the timestamped transcript below.
             {{contextSection}}
             Each line shows a time range followed by the speaker and text for that segment.
             Identify where MAJOR topic shifts occur and create chapters at those points.
@@ -147,14 +147,14 @@ public static class PromptTemplates
     #region Helpers
     
     /// <summary>
-    /// Builds the context section from settings (podcast name, hosts, episode context).
+    /// Builds the context section from settings (show name, hosts, episode context).
     /// </summary>
     private static string BuildContextSection(AppSettings settings)
     {
         var parts = new List<string>();
         
         if (!string.IsNullOrWhiteSpace(settings.PodcastName))
-            parts.Add($"Podcast: {settings.PodcastName}");
+            parts.Add($"Show: {settings.PodcastName}");
         
         if (!string.IsNullOrWhiteSpace(settings.HostNames))
             parts.Add($"Host(s): {settings.HostNames}");

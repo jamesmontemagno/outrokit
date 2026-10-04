@@ -32,7 +32,7 @@ public record Chapter
 }
 
 /// <summary>
-/// Holds all generated metadata for a podcast episode.
+/// Holds all generated metadata for an episode.
 /// </summary>
 public class GenerationResult
 {

@@ -10,33 +10,31 @@ namespace PodcastMetadataGenerator.Console.UI;
 public static class ConsoleUI
 {
     /// <summary>
-    /// Shows the application header/banner with ASCII art.
+    /// Shows the OutroKit banner.
     /// </summary>
     public static void ShowHeader(CopilotAuthService.CopilotStatus? copilotStatus = null)
     {
         AnsiConsole.Clear();
         
-        // ASCII art logo
-        var asciiArt = @"
-[blue]    ██████╗  ██████╗ ██████╗  ██████╗ █████╗ ███████╗████████╗[/]
-[blue]    ██╔══██╗██╔═══██╗██╔══██╗██╔════╝██╔══██╗██╔════╝╚══██╔══╝[/]
-[cyan]    ██████╔╝██║   ██║██║  ██║██║     ███████║███████╗   ██║   [/]
-[cyan]    ██╔═══╝ ██║   ██║██║  ██║██║     ██╔══██║╚════██║   ██║   [/]
-[magenta]    ██║     ╚██████╔╝██████╔╝╚██████╗██║  ██║███████║   ██║   [/]
-[magenta]    ╚═╝      ╚═════╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝╚══════╝   ╚═╝   [/]
-[grey]           ╔╦╗┌─┐┌┬┐┌─┐┌┬┐┌─┐┌┬┐┌─┐  ╔═╗┌─┐┌┐┌[/]
-[grey]           ║║║├┤  │ ├─┤ ││├─┤ │ ├─┤  ║ ╦├┤ │││[/]
-[grey]           ╩ ╩└─┘ ┴ ┴ ┴─┴┘┴ ┴ ┴ ┴ ┴  ╚═╝└─┘┘└┘[/]
+        // The wordmark sits under three bands, like the card on outrokit.com.
+        var banner = @"
+[#f2543a]  ████████████████████████████████████████████████████████████████[/]
+[#ffd22e]  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[/]
+[#6f7ef7]  ────────────────────────────────────────────────────────────────[/]
+
+[bold]   ██████╗ ██╗   ██╗████████╗██████╗  ██████╗ ██╗  ██╗██╗████████╗[/]
+[bold]  ██╔═══██╗██║   ██║╚══██╔══╝██╔══██╗██╔═══██╗██║ ██╔╝██║╚══██╔══╝[/]
+[bold]  ██║   ██║██║   ██║   ██║   ██████╔╝██║   ██║█████╔╝ ██║   ██║   [/]
+[bold]  ██║   ██║██║   ██║   ██║   ██╔══██╗██║   ██║██╔═██╗ ██║   ██║   [/]
+[bold]  ╚██████╔╝╚██████╔╝   ██║   ██║  ██║╚██████╔╝██║  ██╗██║   ██║   [/]
+[bold]   ╚═════╝  ╚═════╝    ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚═╝   ╚═╝   [/]
 ";
-        AnsiConsole.Markup(asciiArt);
+        AnsiConsole.Markup(banner);
         AnsiConsole.WriteLine();
-        
-        var rule = new Rule("[bold blue]🎙️ Podcast Metadata Generator[/]")
-        {
-            Justification = Justify.Center,
-            Style = Style.Parse("blue")
-        };
-        AnsiConsole.Write(rule);
+        AnsiConsole.MarkupLine("  [bold]The episode is done.[/] [bold #f2543a]The label isn't.[/]");
+        AnsiConsole.MarkupLine("  [grey]Titles, descriptions, chapters, and subtitles for your episode.[/]");
+        AnsiConsole.WriteLine();
+        AnsiConsole.Write(new Rule { Style = Style.Parse("grey") });
         AnsiConsole.WriteLine();
         
         // Show Copilot status if provided

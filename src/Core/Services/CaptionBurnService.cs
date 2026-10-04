@@ -10,6 +10,12 @@ namespace PodcastMetadataGenerator.Core.Services;
 /// </summary>
 public partial class CaptionBurnService
 {
+    /// <summary>
+    /// CaptionStack, a free caption converter the app points to for formats it cannot burn
+    /// and for captions that need more work first.
+    /// </summary>
+    public const string CaptionToolsUrl = "https://captionstack.app/";
+
     private const string SubtitlesFilter = "subtitles";
 
     private static readonly HashSet<string> CaptionExtensions = new(StringComparer.OrdinalIgnoreCase)
