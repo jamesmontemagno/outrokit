@@ -18,6 +18,7 @@ public class AppWorkflow
     private readonly TranscriptParser _parser;
     private readonly SrtConverter _srtConverter;
     private readonly OutputService _outputService;
+    private readonly WhisperModelService _whisperModelService;
     private MetadataGenerator? _generator;
     
     private Transcript? _transcript;
@@ -57,6 +58,7 @@ public class AppWorkflow
         _parser = new TranscriptParser(_settings);
         _srtConverter = new SrtConverter();
         _outputService = new OutputService(_srtConverter);
+        _whisperModelService = new WhisperModelService();
     }
     
     /// <summary>
@@ -78,10 +80,18 @@ public class AppWorkflow
             return;
         }
         
-        // If transcript path provided as argument, load it directly
+        // If an input path is provided as an argument, route it through the matching flow.
+        // Anything that is not a known video or audio type is loaded as a transcript, as before.
         if (args.Length > 0 && File.Exists(args[0]))
         {
-            await LoadTranscriptAsync(args[0]);
+            if (MediaTranscriptService.HasMediaExtension(args[0]))
+            {
+                await ProcessMediaAsync(args[0]);
+            }
+            else
+            {
+                await LoadTranscriptAsync(args[0]);
+            }
         }
         
         await MainMenuLoopAsync();
@@ -119,11 +129,11 @@ public class AppWorkflow
             
             if (_transcript == null)
             {
-                choices.Add("📂 Load Transcript");
+                choices.Add("📂 Load Transcript, Video, or Audio");
             }
             else
             {
-                choices.Add("📂 Load Different Transcript");
+                choices.Add("📂 Load Different Transcript, Video, or Audio");
                 choices.Add("🚀 Generate All Metadata");
                 choices.Add("📝 Generate Titles");
                 choices.Add("📄 Generate Descriptions");
@@ -146,9 +156,9 @@ public class AppWorkflow
             
             switch (action)
             {
-                case "📂 Load Transcript":
-                case "📂 Load Different Transcript":
-                    await PromptAndLoadTranscriptAsync();
+                case "📂 Load Transcript, Video, or Audio":
+                case "📂 Load Different Transcript, Video, or Audio":
+                    await PromptAndLoadInputAsync();
                     break;
                     
                 case "🚀 Generate All Metadata":
@@ -198,13 +208,113 @@ public class AppWorkflow
         }
     }
     
-    private async Task PromptAndLoadTranscriptAsync()
+    private async Task PromptAndLoadInputAsync()
     {
-        var path = ConsoleUI.AskFilePath(
-            "Enter transcript file path:",
-            mustExist: true);
-        
-        await LoadTranscriptAsync(path);
+        var inputType = ConsoleUI.SelectFromList(
+            "What would you like to provide?",
+            new[] { "📄 Transcript file", "🎬 Video or audio file" });
+
+        if (inputType == "📄 Transcript file")
+        {
+            var transcriptPath = ConsoleUI.AskFilePath(
+                "Select a transcript file:",
+                mustExist: true,
+                discoveryType: ConsoleUI.FileDiscoveryType.Transcript);
+            await LoadTranscriptAsync(transcriptPath);
+            return;
+        }
+
+        var mediaPath = ConsoleUI.AskFilePath(
+            "Select a video or audio file:",
+            mustExist: true,
+            discoveryType: ConsoleUI.FileDiscoveryType.Media);
+        await ProcessMediaAsync(mediaPath);
+    }
+
+    private async Task ProcessMediaAsync(string mediaPath)
+    {
+        try
+        {
+            if (_whisperModelService.GetInstalledModelPath(_settings) is null)
+            {
+                ConsoleUI.ShowWarning("A Whisper model must be installed before a video or audio file can be transcribed.");
+                if (!AnsiConsole.Confirm("Open transcription settings now?", defaultValue: true))
+                {
+                    return;
+                }
+
+                await EditTranscriptionSettingsAsync();
+                if (_whisperModelService.GetInstalledModelPath(_settings) is null)
+                {
+                    ConsoleUI.ShowWarning("Transcription was cancelled because no Whisper model is installed.");
+                    return;
+                }
+            }
+
+            var transcriptService = new MediaTranscriptService(_settings, _whisperModelService);
+            var hasAudio = await AnsiConsole.Status()
+                .Spinner(Spinner.Known.Dots)
+                .SpinnerStyle(Style.Parse("blue"))
+                .StartAsync("Checking the file for an audio track...", _ =>
+                    transcriptService.HasAudioStreamAsync(mediaPath));
+
+            if (!hasAudio)
+            {
+                ConsoleUI.ShowError("The selected file does not contain a readable audio track.");
+                return;
+            }
+
+            ConsoleUI.ShowSuccess($"Found audio to transcribe: {Path.GetFileName(mediaPath)}");
+
+            // Ask up front so the transcript is written the moment a long transcription finishes,
+            // rather than being held in memory behind a prompt.
+            var defaultDirectory = Path.GetDirectoryName(Path.GetFullPath(mediaPath)) ?? Environment.CurrentDirectory;
+            var defaultPath = Path.Combine(defaultDirectory, $"{Path.GetFileNameWithoutExtension(mediaPath)}.srt");
+            var transcriptPath = ConsoleUI.AskSaveFilePath(
+                "Where should the transcript be saved?",
+                defaultPath);
+
+            ConsoleUI.ShowInfo("Transcribing locally with Whisper. Press Ctrl+C to cancel.");
+
+            var srt = await ConsoleCancellation.RunAsync(cancellationToken => AnsiConsole.Progress()
+                .AutoClear(false)
+                .HideCompleted(false)
+                .Columns(
+                    new TaskDescriptionColumn(),
+                    new ProgressBarColumn(),
+                    new PercentageColumn(),
+                    new RemainingTimeColumn(),
+                    new SpinnerColumn())
+                .StartAsync(async context =>
+                {
+                    var task = context.AddTask(
+                        "[blue]Preparing audio for Whisper...[/]",
+                        maxValue: 100);
+                    task.IsIndeterminate = true;
+
+                    var progress = new InlineProgress<MediaTranscriptionProgress>(update =>
+                    {
+                        task.IsIndeterminate = false;
+                        task.Value = update.Percentage;
+                        task.Description =
+                            $"[blue]Transcribing {FormatDuration(update.Position)} / {FormatDuration(update.Duration)}[/]";
+                    });
+
+                    return await transcriptService.TranscribeToSrtAsync(mediaPath, progress, cancellationToken);
+                }));
+
+            await File.WriteAllTextAsync(transcriptPath, srt, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+            ConsoleUI.ShowSuccess($"Saved transcript: {transcriptPath}");
+            await LoadTranscriptAsync(transcriptPath);
+        }
+        catch (OperationCanceledException)
+        {
+            ConsoleUI.ShowWarning("Transcription cancelled.");
+        }
+        catch (Exception ex)
+        {
+            ConsoleUI.ShowError($"Transcription failed: {ex.Message}");
+        }
     }
     
     private async Task LoadTranscriptAsync(string path)
@@ -689,6 +799,14 @@ public class AppWorkflow
             
             generalTable.AddRow("[blue]Model[/]", Markup.Escape(_settings.Model));
             generalTable.AddRow("[blue]Output Directory[/]", Markup.Escape(_settings.OutputDirectory));
+            generalTable.AddRow("[blue]ffmpeg[/]", Markup.Escape(_settings.FfmpegPath));
+            var whisperModel = WhisperModelCatalog.Get(_settings.WhisperModel);
+            var installedModelPath = _whisperModelService.GetInstalledModelPath(_settings);
+            generalTable.AddRow(
+                "[blue]Whisper Model[/]",
+                installedModelPath is null
+                    ? $"{Markup.Escape(whisperModel.DisplayName)} [yellow](not installed)[/]"
+                    : $"{Markup.Escape(whisperModel.DisplayName)} [green](initialized)[/]");
             generalTable.AddRow("[blue]Podcast Name[/]", 
                 string.IsNullOrEmpty(_settings.PodcastName) 
                     ? "[grey](not set)[/]" 
@@ -732,6 +850,7 @@ public class AppWorkflow
                 new[] 
                 { 
                     "🤖 Change Model", 
+                    "🎧 Transcription Settings",
                     "📁 Change Output Directory", 
                     "🎙️ Podcast Info (Name & Hosts)",
                     "📝 Episode Context",
@@ -777,6 +896,10 @@ public class AppWorkflow
                         defaultValue: _settings.OutputDirectory);
                     ConsoleUI.ShowSuccess($"Output directory set to: {_settings.OutputDirectory}");
                     break;
+
+                case "🎧 Transcription Settings":
+                    await EditTranscriptionSettingsAsync();
+                    break;
                     
                 case "🎙️ Podcast Info (Name & Hosts)":
                     EditPodcastInfo();
@@ -820,6 +943,104 @@ public class AppWorkflow
                     return;
             }
         }
+    }
+
+    private async Task EditTranscriptionSettingsAsync()
+    {
+        while (true)
+        {
+            var model = WhisperModelCatalog.Get(_settings.WhisperModel);
+            var installedPath = _whisperModelService.GetInstalledModelPath(_settings);
+            var action = ConsoleUI.SelectFromList(
+                $"[bold]Video and Audio Transcription[/]\nffmpeg: [blue]{Markup.Escape(_settings.FfmpegPath)}[/]\n" +
+                $"Model: [blue]{Markup.Escape(model.DisplayName)}[/] ({model.ApproximateSize}) " +
+                (installedPath is null ? "[yellow]not installed[/]" : "[green]initialized[/]"),
+                new[]
+                {
+                    "🛠️ Configure ffmpeg",
+                    "🧠 Choose Whisper GGML Model",
+                    "⬇️ Download and Initialize Selected Model",
+                    "⬅️ Back"
+                });
+
+            switch (action)
+            {
+                case "🛠️ Configure ffmpeg":
+                    _settings.FfmpegPath = ConsoleUI.AskText(
+                        "Enter the ffmpeg executable path or command:",
+                        defaultValue: _settings.FfmpegPath);
+                    break;
+
+                case "🧠 Choose Whisper GGML Model":
+                    var selected = ConsoleUI.SelectFromList(
+                        "Choose a GGML model (English variants only transcribe English):",
+                        WhisperModelCatalog.All,
+                        option => $"{option.DisplayName} - {option.ApproximateSize} - {option.Guidance}");
+                    if (!string.Equals(_settings.WhisperModel, selected.Id, StringComparison.Ordinal))
+                    {
+                        _settings.WhisperModel = selected.Id;
+                        _settings.WhisperModelPath = null;
+                    }
+                    break;
+
+                case "⬇️ Download and Initialize Selected Model":
+                    try
+                    {
+                        var statusPrefix = $"Downloading and initializing {Markup.Escape(model.DisplayName)}";
+                        var modelPath = await ConsoleCancellation.RunAsync(cancellationToken => AnsiConsole.Status()
+                            .Spinner(Spinner.Known.Dots)
+                            .SpinnerStyle(Style.Parse("blue"))
+                            .StartAsync(
+                                $"{statusPrefix} ({model.ApproximateSize})... Ctrl+C to cancel",
+                                context =>
+                                {
+                                    var downloadProgress = new InlineProgress<long>(bytes =>
+                                        context.Status =
+                                            $"{statusPrefix}: {FormatByteSize(bytes)} of ~{model.ApproximateSize}. Ctrl+C to cancel");
+                                    return _whisperModelService.DownloadAndInitializeAsync(
+                                        _settings,
+                                        downloadProgress,
+                                        cancellationToken);
+                                }));
+                        await SaveSettingsAsync();
+                        ConsoleUI.ShowSuccess($"Whisper model initialized: {modelPath}");
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        ConsoleUI.ShowWarning("Model download cancelled.");
+                    }
+                    catch (Exception ex)
+                    {
+                        ConsoleUI.ShowError($"Could not install the Whisper model: {ex.Message}");
+                    }
+                    break;
+
+                case "⬅️ Back":
+                    await SaveSettingsAsync();
+                    return;
+            }
+        }
+    }
+
+    private static string FormatDuration(TimeSpan duration)
+    {
+        return duration.TotalHours >= 1
+            ? duration.ToString(@"h\:mm\:ss")
+            : duration.ToString(@"m\:ss");
+    }
+
+    private static string FormatByteSize(long bytes)
+    {
+        const double mebibyte = 1024 * 1024;
+        const double gibibyte = mebibyte * 1024;
+        return bytes >= gibibyte
+            ? $"{bytes / gibibyte:0.0} GiB"
+            : $"{bytes / mebibyte:0} MiB";
+    }
+
+    private sealed class InlineProgress<T>(Action<T> handler) : IProgress<T>
+    {
+        public void Report(T value) => handler(value);
     }
     
     private void EditPodcastInfo()

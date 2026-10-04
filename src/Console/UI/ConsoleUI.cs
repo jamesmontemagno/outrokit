@@ -291,7 +291,11 @@ public static class ConsoleUI
     /// Prompts for file path with existence validation and file browser option.
     /// Handles drag-and-drop paths that may have quotes or escape characters.
     /// </summary>
-    public static string AskFilePath(string prompt, bool mustExist = true, string? startDirectory = null)
+    public static string AskFilePath(
+        string prompt,
+        bool mustExist = true,
+        string? startDirectory = null,
+        FileDiscoveryType discoveryType = FileDiscoveryType.Transcript)
     {
         while (true)
         {
@@ -305,7 +309,7 @@ public static class ConsoleUI
             
             if (choice.StartsWith("📂"))
             {
-                var browsedPath = BrowseForFile(startDirectory);
+                var browsedPath = BrowseForFile(startDirectory, discoveryType);
                 if (browsedPath == null)
                     continue; // User cancelled, show menu again
                 path = browsedPath;
@@ -332,6 +336,42 @@ public static class ConsoleUI
             if (!mustExist || File.Exists(path))
             {
                 return path;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Prompts for where to save an SRT file, confirming before overwriting an existing one.
+    /// </summary>
+    public static string AskSaveFilePath(string prompt, string defaultPath)
+    {
+        while (true)
+        {
+            // File names routinely contain [brackets], which Spectre would parse as markup,
+            // and it does not escape a prompt's default value itself.
+            var path = AnsiConsole.Prompt(
+                new TextPrompt<string>($"{prompt} [green]({Markup.Escape(defaultPath)})[/]:")
+                    .DefaultValue(defaultPath)
+                    .HideDefaultValue());
+            path = CleanFilePath(path);
+
+            if (!string.Equals(Path.GetExtension(path), ".srt", StringComparison.OrdinalIgnoreCase))
+            {
+                path += ".srt";
+            }
+
+            var fullPath = Path.GetFullPath(path);
+            var directory = Path.GetDirectoryName(fullPath);
+            if (string.IsNullOrWhiteSpace(directory) || !Directory.Exists(directory))
+            {
+                ShowError($"Directory not found: {directory}");
+                continue;
+            }
+
+            if (!File.Exists(fullPath)
+                || AnsiConsole.Confirm($"Overwrite '{Markup.Escape(Path.GetFileName(fullPath))}'?", false))
+            {
+                return fullPath;
             }
         }
     }
@@ -371,7 +411,9 @@ public static class ConsoleUI
     /// <summary>
     /// Simple file browser using selection prompts.
     /// </summary>
-    private static string? BrowseForFile(string? startDirectory = null)
+    private static string? BrowseForFile(
+        string? startDirectory = null,
+        FileDiscoveryType discoveryType = FileDiscoveryType.Transcript)
     {
         var currentDir = startDirectory ?? Environment.CurrentDirectory;
         
@@ -397,10 +439,9 @@ public static class ConsoleUI
                     .Select(d => $"📁 {d.Name}");
                 items.AddRange(dirs);
                 
-                // Add transcript files (common extensions)
                 var files = Directory.GetFiles(currentDir)
                     .Select(f => new FileInfo(f))
-                    .Where(f => !f.Name.StartsWith('.') && IsTranscriptFile(f.Name))
+                    .Where(f => !f.Name.StartsWith('.') && IsDiscoverableFile(f.Name, discoveryType))
                     .OrderBy(f => f.Name)
                     .Select(f => $"📄 {f.Name}");
                 items.AddRange(files);
@@ -414,12 +455,14 @@ public static class ConsoleUI
             
             items.Add("❌ Cancel");
             
+            // Names are escaped for display only; brackets in a file or folder name are not markup.
             var selection = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("[bold]Select a file or navigate:[/]")
                     .PageSize(15)
                     .MoreChoicesText("[grey](Move up/down to see more)[/]")
                     .HighlightStyle(Style.Parse("blue"))
+                    .UseConverter(Markup.Escape)
                     .AddChoices(items));
             
             if (selection == "❌ Cancel")
@@ -450,10 +493,15 @@ public static class ConsoleUI
     /// <summary>
     /// Checks if a file is likely a transcript file based on extension.
     /// </summary>
-    private static bool IsTranscriptFile(string fileName)
+    private static bool IsDiscoverableFile(string fileName, FileDiscoveryType discoveryType)
     {
         var ext = Path.GetExtension(fileName).ToLowerInvariant();
-        return ext is ".txt" or ".srt" or ".vtt" or ".json" or ".md" or ".csv";
+        return discoveryType switch
+        {
+            FileDiscoveryType.Transcript => ext is ".txt" or ".srt" or ".vtt" or ".json" or ".md" or ".csv",
+            FileDiscoveryType.Media => MediaTranscriptService.HasMediaExtension(fileName),
+            _ => false
+        };
     }
     
     /// <summary>
@@ -474,7 +522,7 @@ public static class ConsoleUI
         {
             table.AddRow($"[blue]{i + 1}[/]", Markup.Escape(titles[i]));
         }
-        
+
         AnsiConsole.Write(table);
         AnsiConsole.WriteLine();
         
@@ -522,6 +570,12 @@ public static class ConsoleUI
             
             ShowPanel($"{length} Description", description, color);
         }
+    }
+
+    public enum FileDiscoveryType
+    {
+        Transcript,
+        Media
     }
     
     /// <summary>

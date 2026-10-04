@@ -25,12 +25,12 @@ public class SettingsService
     /// </summary>
     public static string GetDefaultSettingsPath()
     {
-        var configDir = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-            ".podcast-metadata-generator");
-        
-        return Path.Combine(configDir, "settings.json");
+        return Path.Combine(GetDefaultConfigDirectory(), "settings.json");
     }
+
+    public static string GetDefaultConfigDirectory() => Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+        ".podcast-metadata-generator");
     
     /// <summary>
     /// Loads settings from disk, returning defaults if not found.
@@ -106,6 +106,9 @@ public class SettingsService
     private static AppSettings CreatePersistedCopy(AppSettings settings) => new()
     {
         Model = settings.Model,
+        FfmpegPath = settings.FfmpegPath,
+        WhisperModel = settings.WhisperModel,
+        WhisperModelPath = settings.WhisperModelPath,
         OutputDirectory = settings.OutputDirectory,
         TitleCount = settings.TitleCount,
         TitleMaxWords = settings.TitleMaxWords,
@@ -129,6 +132,15 @@ public class SettingsService
         settings.Model = string.IsNullOrWhiteSpace(settings.Model)
             ? AvailableModels.PreferredDefaultModelId
             : settings.Model.Trim();
+        settings.FfmpegPath = string.IsNullOrWhiteSpace(settings.FfmpegPath)
+            ? "ffmpeg"
+            : settings.FfmpegPath.Trim();
+        settings.WhisperModel = WhisperModelCatalog.TryGet(settings.WhisperModel, out var model)
+            ? model.Id
+            : WhisperModelCatalog.Default.Id;
+        settings.WhisperModelPath = string.IsNullOrWhiteSpace(settings.WhisperModelPath)
+            ? null
+            : settings.WhisperModelPath.Trim();
 
         if (!Enum.IsDefined(settings.TitleStyle))
         {
