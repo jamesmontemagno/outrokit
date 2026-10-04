@@ -108,6 +108,25 @@ public class AppSettings
     public string Model { get; set; } = string.Empty;
     
     #endregion
+
+    #region Transcription Settings
+
+    /// <summary>
+    /// Path or command name used to launch ffmpeg.
+    /// </summary>
+    public string FfmpegPath { get; set; } = "ffmpeg";
+
+    /// <summary>
+    /// Whisper.net GGML model selected for video transcription.
+    /// </summary>
+    public string WhisperModel { get; set; } = "Base";
+
+    /// <summary>
+    /// Path to the downloaded and initialized GGML model.
+    /// </summary>
+    public string? WhisperModelPath { get; set; }
+
+    #endregion
     
     #region Output Settings
     
