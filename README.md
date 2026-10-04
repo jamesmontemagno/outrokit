@@ -6,6 +6,8 @@ Generate podcast metadata (titles, descriptions, chapters, SRT subtitles) from t
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![GitHub Copilot](https://img.shields.io/badge/GitHub%20Copilot-SDK-000?logo=github)
 
+**New here?** The [step-by-step install and usage guide](https://jamesmontemagno.github.io/podcast-metadata-generator/) walks through everything, starting from opening a terminal.
+
 <img width="896" height="378" alt="Screenshot 2026-02-13 at 11 29 28 AM" src="https://github.com/user-attachments/assets/2dfef3a4-6323-4b18-b1b0-2e17ba2fddef" />
 
 
@@ -30,7 +32,7 @@ Generate podcast metadata (titles, descriptions, chapters, SRT subtitles) from t
 ## 📋 Prerequisites
 
 - [.NET 10.0 SDK](https://dotnet.microsoft.com/download) or later
-- A GitHub Copilot subscription and authentication, unless using BYOK
+- A GitHub Copilot account and authentication, unless using BYOK. The free Copilot plan works
 - [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/set-up/install-copilot-cli) installed, when running the NuGet tool on macOS, Windows, or Linux on Arm (see below)
 - [ffmpeg](https://ffmpeg.org/download.html) available on `PATH`, or its executable path configured in Settings (only needed to transcribe video or audio files)
 
@@ -173,6 +175,19 @@ Set the default under **Settings → Generation Settings → Title Settings** (c
 ### Copying Results (Console)
 
 When a generation finishes, the console offers a **Copy to clipboard** menu for the selected title, all titles, each description, chapters, or everything. The same menu is available from the main menu once you have results. On Linux, clipboard access requires `xsel`.
+
+## 🌍 Website
+
+The guide at [jamesmontemagno.github.io/podcast-metadata-generator](https://jamesmontemagno.github.io/podcast-metadata-generator/) lives in [`site/`](site/) as plain HTML, CSS, and JavaScript with no build step. Pushing changes under `site/` to `main` deploys it through the [Pages workflow](.github/workflows/pages.yml).
+
+To preview it locally:
+
+```bash
+cd site
+python3 -m http.server 4173
+```
+
+Then open http://localhost:4173.
 
 ## 🎯 Supported Transcript Formats
 
