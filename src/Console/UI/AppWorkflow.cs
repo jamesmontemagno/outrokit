@@ -148,6 +148,7 @@ public class AppWorkflow
                 choices.Add("💾 Save Results");
             }
             
+            choices.Add("✨ What's New");
             choices.Add("⚙️ Settings");
             choices.Add("❌ Exit");
             
@@ -191,6 +192,11 @@ public class AppWorkflow
                     
                 case "💾 Save Results":
                     await SaveResultsAsync();
+                    break;
+                    
+                case "✨ What's New":
+                    ConsoleUI.ShowWhatsNew();
+                    ConsoleUI.WaitForKey();
                     break;
                     
                 case "⚙️ Settings":

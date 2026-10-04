@@ -25,6 +25,7 @@ Generate podcast metadata (titles, descriptions, chapters, SRT subtitles) from t
 - **📋 Copy to Clipboard** - Copy titles, descriptions, chapters, or everything at once; finished output is printed unwrapped so it also selects cleanly in the terminal
 - **🤖 Model Selection** - Choose from multiple AI models (GPT-5, Claude, Gemini)
 - **⚙️ Configurable Settings** - Customize generation parameters and save preferences
+- **✨ What's New** - See the latest features from the main menu
 
 ## 📋 Prerequisites
 
@@ -262,7 +263,8 @@ podcast-metadata-generator/
 │   ├── Console/                     # Console application
 │   │   ├── UI/
 │   │   │   ├── AppWorkflow.cs          # Main application workflow
-│   │   │   └── ConsoleUI.cs            # Spectre.Console UI helpers
+│   │   │   ├── ConsoleUI.cs            # Spectre.Console UI helpers
+│   │   │   └── WhatsNew.cs             # Entries for the What's New screen
 │   │   └── Program.cs                  # Console entry point
 │   └── Blazor/                      # Blazor Server demo (local only)
 │       ├── Components/
