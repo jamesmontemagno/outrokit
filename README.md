@@ -10,10 +10,7 @@ OutroKit writes the titles, descriptions, chapters, and SRT subtitles for your e
 
 **New here?** The [step-by-step install and usage guide](https://outrokit.com/) at **outrokit.com** walks through everything, starting from opening a terminal.
 
-<img width="896" height="378" alt="Screenshot 2026-02-13 at 11 29 28 AM" src="https://github.com/user-attachments/assets/2dfef3a4-6323-4b18-b1b0-2e17ba2fddef" />
-
-
-<img width="1145" height="682" alt="Screenshot 2026-02-13 at 11 29 09 AM" src="https://github.com/user-attachments/assets/4fe2fe1c-b390-42c0-b730-8aa5e1f03662" />
+![OutroKit Banner](site/og.png)
 
 ## ✨ Features
 
