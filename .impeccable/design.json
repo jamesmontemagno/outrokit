@@ -1,0 +1,398 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-04T10:11:17.989-07:00",
+  "title": "Design System: Podcast Metadata Generator",
+  "extensions": {
+    "colorMeta": {
+      "tape-blue": {
+        "role": "primary",
+        "displayName": "Tape Blue",
+        "canonical": "oklch(41% 0.2 268)",
+        "tonalRamp": [
+          "oklch(15% 0.2 268)",
+          "oklch(25% 0.2 268)",
+          "oklch(33% 0.2 268)",
+          "oklch(41% 0.2 268)",
+          "oklch(52% 0.18 268)",
+          "oklch(64% 0.14 268)",
+          "oklch(78% 0.09 268)",
+          "oklch(94% 0.03 268)"
+        ]
+      },
+      "tape-blue-deep": {
+        "role": "primary",
+        "displayName": "Deep Tape Blue",
+        "canonical": "oklch(30% 0.16 268)",
+        "tonalRamp": [
+          "oklch(12% 0.16 268)",
+          "oklch(20% 0.16 268)",
+          "oklch(30% 0.16 268)",
+          "oklch(42% 0.15 268)",
+          "oklch(55% 0.12 268)",
+          "oklch(68% 0.09 268)",
+          "oklch(82% 0.06 268)",
+          "oklch(95% 0.025 268)"
+        ]
+      },
+      "card-stock": {
+        "role": "neutral",
+        "displayName": "Coated Card Stock",
+        "canonical": "oklch(98.5% 0.004 100)",
+        "tonalRamp": [
+          "oklch(18% 0.004 100)",
+          "oklch(30% 0.004 100)",
+          "oklch(45% 0.004 100)",
+          "oklch(60% 0.004 100)",
+          "oklch(75% 0.004 100)",
+          "oklch(88% 0.004 100)",
+          "oklch(94% 0.004 100)",
+          "oklch(98.5% 0.004 100)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Dark Ink",
+        "canonical": "oklch(19% 0.025 268)",
+        "tonalRamp": [
+          "oklch(10% 0.025 268)",
+          "oklch(19% 0.025 268)",
+          "oklch(30% 0.025 268)",
+          "oklch(42% 0.022 268)",
+          "oklch(55% 0.018 268)",
+          "oklch(68% 0.014 268)",
+          "oklch(82% 0.01 268)",
+          "oklch(95% 0.006 268)"
+        ]
+      },
+      "ink-soft": {
+        "role": "neutral",
+        "displayName": "Soft Ink",
+        "canonical": "oklch(40% 0.05 268)",
+        "tonalRamp": [
+          "oklch(15% 0.05 268)",
+          "oklch(25% 0.05 268)",
+          "oklch(40% 0.05 268)",
+          "oklch(52% 0.045 268)",
+          "oklch(64% 0.036 268)",
+          "oklch(76% 0.026 268)",
+          "oklch(88% 0.016 268)",
+          "oklch(96% 0.008 268)"
+        ]
+      },
+      "leader-yellow": {
+        "role": "secondary",
+        "displayName": "Leader Yellow",
+        "canonical": "oklch(88% 0.17 93)",
+        "tonalRamp": [
+          "oklch(18% 0.17 93)",
+          "oklch(30% 0.17 93)",
+          "oklch(45% 0.17 93)",
+          "oklch(60% 0.17 93)",
+          "oklch(74% 0.17 93)",
+          "oklch(88% 0.17 93)",
+          "oklch(93% 0.12 93)",
+          "oklch(97% 0.06 93)"
+        ]
+      },
+      "record-red": {
+        "role": "tertiary",
+        "displayName": "Record Red",
+        "canonical": "oklch(65% 0.22 31)",
+        "tonalRamp": [
+          "oklch(16% 0.22 31)",
+          "oklch(28% 0.22 31)",
+          "oklch(40% 0.22 31)",
+          "oklch(52% 0.22 31)",
+          "oklch(65% 0.22 31)",
+          "oklch(76% 0.16 31)",
+          "oklch(88% 0.09 31)",
+          "oklch(96% 0.04 31)"
+        ]
+      },
+      "record-red-ink": {
+        "role": "tertiary",
+        "displayName": "Record Red Ink",
+        "canonical": "oklch(50% 0.2 29)",
+        "tonalRamp": [
+          "oklch(14% 0.2 29)",
+          "oklch(26% 0.2 29)",
+          "oklch(38% 0.2 29)",
+          "oklch(50% 0.2 29)",
+          "oklch(62% 0.18 29)",
+          "oklch(74% 0.13 29)",
+          "oklch(86% 0.08 29)",
+          "oklch(96% 0.035 29)"
+        ]
+      },
+      "ruled-blue": {
+        "role": "neutral",
+        "displayName": "Ruled Blue",
+        "canonical": "oklch(41% 0.2 268 / 0.26)",
+        "tonalRamp": [
+          "oklch(15% 0.2 268 / 0.26)",
+          "oklch(25% 0.2 268 / 0.26)",
+          "oklch(33% 0.2 268 / 0.26)",
+          "oklch(41% 0.2 268 / 0.26)",
+          "oklch(52% 0.18 268 / 0.26)",
+          "oklch(64% 0.14 268 / 0.26)",
+          "oklch(78% 0.09 268 / 0.26)",
+          "oklch(94% 0.03 268 / 0.26)"
+        ]
+      },
+      "tape-brown": {
+        "role": "neutral",
+        "displayName": "Tape Brown",
+        "canonical": "oklch(31% 0.035 55)",
+        "tonalRamp": [
+          "oklch(12% 0.035 55)",
+          "oklch(22% 0.035 55)",
+          "oklch(31% 0.035 55)",
+          "oklch(44% 0.032 55)",
+          "oklch(58% 0.028 55)",
+          "oklch(72% 0.02 55)",
+          "oklch(86% 0.012 55)",
+          "oklch(96% 0.006 55)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Hero h1 only; Archivo at 125% stretch, 800 weight, tight tracking."
+      },
+      "section-heading": {
+        "displayName": "Section Heading",
+        "purpose": "Side, liner-notes, and outro headings; Archivo at 125% stretch, 800 weight, uppercase."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Track and note headings; Archivo at normal stretch with bold, compact leading."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Reading copy on card-stock or yellow surfaces."
+      },
+      "printed-label": {
+        "displayName": "Printed Label",
+        "purpose": "Manufactured labels, field labels, table headers, and copy controls; Archivo at 70% stretch and uppercase."
+      },
+      "mono": {
+        "displayName": "Typed Mono",
+        "purpose": "Commands, filenames, generated examples, SRT, and terminal output."
+      }
+    },
+    "shadows": [
+      {
+        "name": "jcard-lift",
+        "value": "0 30px 50px -22px oklch(15% 0.1 268 / 0.75), 0 8px 16px -8px oklch(15% 0.1 268 / 0.5)",
+        "purpose": "Lift the unfolded hero J-card from the tape-blue field."
+      },
+      {
+        "name": "cassette-shell",
+        "value": "0 16px 22px -12px oklch(19% 0.025 268 / 0.6), 0 3px 6px -2px oklch(19% 0.025 268 / 0.4), inset 0 1px 0 oklch(100% 0 0 / 0.2)",
+        "purpose": "Give the cassette a plastic shell over the card surface."
+      },
+      {
+        "name": "fold-crease",
+        "value": "inset 7px 0 7px -7px oklch(19% 0.025 268 / 0.45), inset -7px 0 7px -7px oklch(19% 0.025 268 / 0.45)",
+        "purpose": "Create the vertical spine fold; turns top/bottom on narrow screens."
+      },
+      {
+        "name": "flap-crease",
+        "value": "inset 0 7px 7px -7px oklch(19% 0.025 268 / 0.3)",
+        "purpose": "Mark the folded flap seam."
+      },
+      {
+        "name": "pressed-key",
+        "value": "0 2px 0 var(--ink)",
+        "purpose": "Small keycap depth for kbd elements only."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Default easing for button, copy, and OS-switch state changes."
+      },
+      {
+        "name": "reel-spin",
+        "value": "spin 1.5s linear infinite",
+        "purpose": "Cassette reels turn while the index card is typing."
+      },
+      {
+        "name": "card-typing",
+        "value": "190 chars/second initial pass; 70 chars/second title-style retype",
+        "purpose": "Authored typing moment for generated example output."
+      },
+      {
+        "name": "copy-reset",
+        "value": "2200ms",
+        "purpose": "Copy buttons return from Copied/Select it state."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "prefers-reduced-motion: reduce disables animation and transition globally",
+        "purpose": "Preserve content with no typing or reel motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "short-wide",
+        "value": "(min-width: 68.0625rem) and (max-height: 51rem)"
+      },
+      {
+        "name": "jcard-stack",
+        "value": "68rem"
+      },
+      {
+        "name": "track-stack",
+        "value": "60rem"
+      },
+      {
+        "name": "phone",
+        "value": "40rem"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Tape-blue call-to-action used on card-stock surfaces.",
+      "html": "<a class=\"ds-btn-primary\" href=\"#\">New to this? Start the install guide</a>",
+      "css": ".ds-btn-primary { display: inline-block; padding: 0.8rem 1.2rem; background: var(--blue); color: var(--card); font-family: var(--sans); font-weight: 650; font-size: 1rem; line-height: 1.25; text-decoration: none; border-radius: 4px; transition: background-color 0.2s var(--ease), translate 0.2s var(--ease); } .ds-btn-primary:hover { background: var(--blue-deep); } .ds-btn-primary:active { translate: 0 1px; } .ds-btn-primary:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }"
+    },
+    {
+      "name": "Command With Copy",
+      "kind": "custom",
+      "refersTo": "command",
+      "description": "Dark command strip with mono command and yellow copy control.",
+      "html": "<div class=\"ds-cmd\"><pre><code>dnx PodcastMetadataGenerator</code></pre><button class=\"ds-copy\" type=\"button\">Copy</button></div>",
+      "css": ".ds-cmd { display: flex; align-items: stretch; background: var(--ink); color: var(--card); border-radius: 4px; overflow: hidden; } .ds-cmd pre { flex: 1; min-width: 0; margin: 0; padding: 0.85rem 1rem; font-family: var(--mono); font-weight: 500; font-size: 0.9375rem; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; } .ds-cmd code { font: inherit; } .ds-copy { border: 0; margin: 0; padding: 0 1rem; min-width: 5.5rem; background: var(--yellow); color: var(--ink); font-family: var(--sans); font-stretch: 70%; font-weight: 650; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: background-color 0.2s var(--ease); } .ds-copy:hover { background: oklch(93% 0.14 95); } .ds-copy:focus-visible { outline: 3px solid var(--blue); outline-offset: -5px; }"
+    },
+    {
+      "name": "Unfolded J-card",
+      "kind": "card",
+      "refersTo": "coated-card",
+      "description": "Three-part hero card: front panel, yellow spine, and ruled index panel.",
+      "html": "<div class=\"ds-jcard\"><section class=\"ds-jcard-front\"><p class=\"ds-printed\">Front panel</p><h1>The episode is done.</h1></section><aside class=\"ds-jcard-spine\"><span class=\"ds-printed\">Show</span><span>Spare Room Radio</span></aside><section class=\"ds-jcard-index\"><p class=\"ds-printed\">What it writes for you</p><div class=\"ds-rule\">Title</div><div class=\"ds-rule\">Description</div></section></div>",
+      "css": ".ds-jcard { display: grid; grid-template-columns: minmax(0, 5fr) 3.5rem minmax(0, 7fr); max-width: 80rem; background: var(--card); color: var(--ink); border-radius: 4px; box-shadow: 0 30px 50px -22px oklch(15% 0.1 268 / 0.75), 0 8px 16px -8px oklch(15% 0.1 268 / 0.5); overflow: hidden; } .ds-jcard-front, .ds-jcard-index { padding: clamp(1.25rem, 2.5vw, 2.25rem); } .ds-jcard-front h1 { margin: 0.5rem 0 0; font-family: var(--sans); font-stretch: 125%; font-weight: 800; font-size: clamp(2.25rem, 1.2rem + 2.3vw, 3.25rem); line-height: 0.98; letter-spacing: -0.025em; } .ds-jcard-spine { display: flex; align-items: center; gap: 0.7rem; padding: 1.75rem 0; background: var(--yellow); writing-mode: vertical-rl; rotate: 180deg; white-space: nowrap; box-shadow: inset 7px 0 7px -7px oklch(19% 0.025 268 / 0.45), inset -7px 0 7px -7px oklch(19% 0.025 268 / 0.45); } .ds-printed { font-family: var(--sans); font-stretch: 70%; font-weight: 650; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1.3; } .ds-rule { min-height: 1.625rem; border-bottom: 1px solid var(--rule); font-family: var(--mono); }"
+    },
+    {
+      "name": "Cassette Label",
+      "kind": "custom",
+      "refersTo": "coated-card",
+      "description": "Hero cassette shell and label that carries the run command.",
+      "html": "<div class=\"ds-cassette\"><div class=\"ds-cassette-label\"><div class=\"ds-cassette-write\"><span class=\"ds-cassette-side\">A</span><span class=\"ds-printed\">Have .NET 10? Run this</span><code>dnx PodcastMetadataGenerator</code></div><div class=\"ds-cassette-band\"><span>Titles</span><span>Descriptions</span><span>Chapters</span><span>Subtitles</span></div></div></div>",
+      "css": ".ds-cassette { width: min(100%, 24rem); aspect-ratio: 100 / 64; padding: 4.5% 5% 0; border-radius: 0.6rem; background: var(--ink); box-shadow: 0 16px 22px -12px oklch(19% 0.025 268 / 0.6), 0 3px 6px -2px oklch(19% 0.025 268 / 0.4), inset 0 1px 0 oklch(100% 0 0 / 0.2); } .ds-cassette-label { display: grid; grid-template-rows: auto 1fr auto; height: 72%; background: var(--card); border-radius: 0.3rem; overflow: hidden; } .ds-cassette-write { display: grid; grid-template-columns: auto 1fr; gap: 0.3rem 0.55rem; align-items: center; padding: 0.45rem 0.6rem 0.35rem; } .ds-cassette-side { display: grid; place-items: center; width: 1.5rem; height: 1.5rem; background: var(--red); color: var(--ink); font-family: var(--sans); font-stretch: 125%; font-weight: 800; font-size: 0.9rem; line-height: 1; } .ds-cassette-write code { grid-column: 1 / -1; font-family: var(--mono); font-weight: 600; font-size: 1rem; line-height: 1.5; border-bottom: 1px solid var(--rule); white-space: nowrap; } .ds-cassette-band { display: flex; justify-content: space-between; gap: 0.4rem; padding: 0.22rem 0.6rem; background: var(--yellow); color: var(--ink); font-family: var(--sans); font-stretch: 70%; font-weight: 700; font-size: 0.6875rem; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1.2; }"
+    },
+    {
+      "name": "OS Switch",
+      "kind": "input",
+      "refersTo": "button-ink",
+      "description": "Pill selector for Windows, macOS, and Linux install instructions.",
+      "html": "<fieldset class=\"ds-os\"><legend class=\"ds-printed\">Your computer</legend><div class=\"ds-os-switch\"><label><input type=\"radio\" name=\"ds-os\" checked><span>Windows</span></label><label><input type=\"radio\" name=\"ds-os\"><span>macOS</span></label><label><input type=\"radio\" name=\"ds-os\"><span>Linux</span></label></div></fieldset>",
+      "css": ".ds-os { margin: 0; padding: 0; border: 0; min-width: 0; color: var(--ink); } .ds-os legend { padding: 0; margin-bottom: 0.45rem; color: var(--ink-soft); } .ds-os-switch { display: inline-flex; padding: 3px; border: 2px solid var(--ink); border-radius: 999px; } .ds-os-switch label { cursor: pointer; } .ds-os-switch input { position: absolute; opacity: 0; pointer-events: none; } .ds-os-switch span { display: block; padding: 0.5rem 1.05rem; border-radius: 999px; font-family: var(--sans); font-weight: 650; font-size: 0.9375rem; line-height: 1.2; transition: background-color 0.25s var(--ease), color 0.25s var(--ease); } .ds-os-switch label:hover span { background: oklch(19% 0.025 268 / 0.1); } .ds-os-switch input:checked + span { background: var(--ink); color: var(--card); } .ds-os-switch input:focus-visible + span { outline: 3px solid var(--blue); outline-offset: 3px; }"
+    },
+    {
+      "name": "Title Style Ticks",
+      "kind": "input",
+      "refersTo": "coated-card",
+      "description": "Inline title-style radio boxes with red crossed checked marks.",
+      "html": "<div class=\"ds-ticks\"><label><input type=\"radio\" name=\"ds-style\" checked><span>Balanced</span></label><label><input type=\"radio\" name=\"ds-style\"><span>Descriptive</span></label><label><input type=\"radio\" name=\"ds-style\"><span>Curiosity hook</span></label></div>",
+      "css": ".ds-ticks { display: flex; flex-wrap: wrap; column-gap: 0.9rem; } .ds-ticks label { display: inline-flex; align-items: center; gap: 0.35rem; min-height: 1.625rem; cursor: pointer; font-family: var(--sans); font-stretch: 78%; font-weight: 600; font-size: 0.8125rem; letter-spacing: 0.02em; line-height: 1; white-space: nowrap; } .ds-ticks input { appearance: none; flex: none; width: 0.9rem; height: 0.9rem; margin: 0; border: 1.5px solid var(--ink); border-radius: 1px; background: var(--card); cursor: pointer; } .ds-ticks label:hover input { background: var(--yellow); } .ds-ticks input:checked { background: linear-gradient(45deg, transparent 41%, var(--red-ink) 41% 59%, transparent 59%), linear-gradient(-45deg, transparent 41%, var(--red-ink) 41% 59%, transparent 59%), var(--card); } .ds-ticks input:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }"
+    },
+    {
+      "name": "Tape Track Row",
+      "kind": "custom",
+      "refersTo": "coated-card",
+      "description": "Two-column instruction row for Side A and Side B programs.",
+      "html": "<div class=\"ds-track\"><div class=\"ds-track-name\"><span class=\"ds-track-no\">A1</span><h3>Open a terminal</h3></div><div class=\"ds-track-body\"><p>A terminal is a window where you type a command and press Enter.</p></div></div>",
+      "css": ".ds-track { display: grid; grid-template-columns: minmax(0, 20rem) minmax(0, 40rem); gap: 1rem clamp(1.5rem, 5vw, 5rem); padding-block: clamp(1.75rem, 3.5vw, 2.75rem); border-top: 2px solid var(--ink); color: var(--ink); } .ds-track-name { display: grid; grid-template-columns: 3.75rem minmax(0, 1fr); align-items: baseline; align-self: start; } .ds-track-no { font-family: var(--sans); font-stretch: 125%; font-weight: 800; font-size: 1rem; letter-spacing: 0; text-transform: uppercase; color: var(--red-ink); } .ds-track h3 { margin: 0; font-family: var(--sans); font-weight: 700; font-size: clamp(1.3rem, 1.1rem + 0.7vw, 1.625rem); line-height: 1.15; letter-spacing: -0.01em; } .ds-track p { margin: 0; font-family: var(--sans); font-size: 1.0625rem; line-height: 1.55; }"
+    },
+    {
+      "name": "Ruled Chart",
+      "kind": "custom",
+      "refersTo": "coated-card",
+      "description": "Plain ruled data table with condensed printed headers.",
+      "html": "<table class=\"ds-chart\"><thead><tr><th scope=\"col\">Model</th><th scope=\"col\">Download</th><th scope=\"col\">Good for</th></tr></thead><tbody><tr><th scope=\"row\">Base</th><td>142 MiB</td><td>The default.</td></tr></tbody></table>",
+      "css": ".ds-chart { width: 100%; border-collapse: collapse; color: var(--ink); font-family: var(--sans); font-size: 0.9375rem; line-height: 1.4; } .ds-chart th, .ds-chart td { padding: 0.55rem 1rem 0.55rem 0; text-align: left; vertical-align: baseline; border-bottom: 1px solid var(--rule); } .ds-chart thead th { padding-bottom: 0.4rem; color: var(--ink-soft); border-bottom: 2px solid var(--ink); font-stretch: 70%; font-weight: 650; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1.3; } .ds-chart tbody th { font-weight: 650; white-space: nowrap; }"
+    },
+    {
+      "name": "Terminal Screen Sketch",
+      "kind": "custom",
+      "refersTo": "command",
+      "description": "Dark mono sketch of the terminal app menu.",
+      "html": "<figure class=\"ds-screen\"><div class=\"ds-screen-glass\"><p class=\"ds-screen-title\">Main Menu</p><ul><li>📂 Load Different Transcript, Video, or Audio</li><li class=\"ds-is-on\">🚀 Generate All Metadata</li><li>📝 Generate Titles</li></ul></div><figcaption>A sketch of the real screen, not a screenshot.</figcaption></figure>",
+      "css": ".ds-screen { margin: 0; color: var(--ink); } .ds-screen-glass { padding: 1.1rem 1.25rem 1.25rem; background: var(--ink); color: oklch(90% 0.012 268); border-radius: 6px; font-family: var(--mono); font-size: 0.875rem; line-height: 1.75; } .ds-screen-title { margin: 0; font-weight: 700; color: var(--card); } .ds-screen ul { margin: 0; padding: 0; list-style: none; } .ds-screen li { position: relative; padding-left: 1.4rem; } .ds-screen .ds-is-on { color: var(--yellow); font-weight: 600; } .ds-screen .ds-is-on::before { content: \">\"; position: absolute; left: 0; } .ds-screen figcaption { margin-top: 0.5rem; font-family: var(--sans); font-size: 0.9375rem; color: var(--ink-soft); }"
+    },
+    {
+      "name": "Example Stamp",
+      "kind": "chip",
+      "refersTo": "coated-card",
+      "description": "Rotated red-ink stamp for labeling made-up example content.",
+      "html": "<p class=\"ds-stamp\">Example episode, made up for this page</p>",
+      "css": ".ds-stamp { display: inline-block; margin: 0; padding: 0.3rem 0.6rem; border: 2px solid var(--red-ink); border-radius: 3px; color: var(--red-ink); font-family: var(--sans); font-stretch: 70%; font-weight: 700; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1.2; rotate: -1.5deg; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Blank Tape J-Card",
+    "overview": "The public site is a 1975-95 blank cassette inlay card, unfolded on a tape-blue table. It uses white coated-card panels, ruled index lines, a leader-yellow spine, record-red side blocks, packaging stripes, and a cassette shell to make generated metadata feel like labels being written onto physical media.\n\nThe system is graphic and tactile, not app-chrome or generic SaaS. Reading regions stay on white card stock for legibility, while tape blue owns the page ground and outro, leader yellow owns the spine and liner-notes region, and record red marks action, side identity, and typed-cursor emphasis. The one authored motion is the index card typing itself while cassette reels turn; the same content is present in the HTML before motion starts and motion is skipped under `prefers-reduced-motion`.",
+    "keyCharacteristics": [
+      "Unfolded J-card structure: `.jcard`, `.jcard__front`, `.jcard__spine`, `.jcard__index`, and `.jcard__flap` are the core layout vocabulary.",
+      "Tape-package color ownership: blue field, white card stock, yellow reference/spine, red side and stamp marks.",
+      "Archivo carries printed labels and display type; Sometype Mono is reserved for commands, filenames, generated examples, and terminal output.",
+      "Surfaces are mostly flat coated paper, with selective cassette and card shadows to lift the physical object from the blue field.",
+      "Example episode content stays made up and labeled as an example."
+    ],
+    "rules": [
+      {
+        "name": "The Field and Card Rule",
+        "body": "Blue owns the outside world; card stock owns reading and instruction. Do not turn the main reading sections blue or move the hero to a dark terminal field.",
+        "section": "colors"
+      },
+      {
+        "name": "The Four Package Colors Rule",
+        "body": "New visual elements should come from tape blue, card stock, leader yellow, record red, and ink before introducing any new hue.",
+        "section": "colors"
+      },
+      {
+        "name": "The Typed Output Rule",
+        "body": "Use Sometype Mono only for what the visitor types or what the tool writes; do not use it for marketing headings, navigation, or general body copy.",
+        "section": "typography"
+      },
+      {
+        "name": "The Printed Label Rule",
+        "body": "Small functional labels should be uppercase Archivo at condensed widths, usually 70% stretch with 0.08em tracking.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tape Program Rule",
+        "body": "Extensions should keep the Side A / Side B program model: side letters identify major flows, `.tracks` hold sequential steps, and liner notes hold reference material.",
+        "section": "layout"
+      },
+      {
+        "name": "The Layered Paper Rule",
+        "body": "Add shadows only when an object is physically lifted, folded, inset, or pressed; ordinary content containers stay flat with rules and color blocks.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep blue as the page field and white card stock as the primary reading surface.",
+      "Do reserve Sometype Mono for commands, filenames, generated example output, SRT, terminal sketches, and other typed material.",
+      "Do label any made-up episode or generated example as an example.",
+      "Do extend instruction flows with `.tracks` and Side A / Side B language when the new content is procedural.",
+      "Do honor `prefers-reduced-motion` by keeping content present without animation and disabling reel/typing transitions.",
+      "Do use ruled lines, fold creases, side blocks, stamps, and package stripes before inventing new decorative motifs."
+    ],
+    "donts": [
+      "Don't replace the hero with a dark terminal panel, dashboard shell, or feature-card grid.",
+      "Don't use the older `src/Blazor/wwwroot/css/app.css` look as part of this public-site design system; it is out of scope.",
+      "Don't introduce new accent hues unless the four package colors cannot solve the communication problem.",
+      "Don't use Sometype Mono for broad body copy, display headlines, or navigation.",
+      "Don't present invented output as real user data, real testimonials, benchmarks, or a real episode.",
+      "Don't add generic shadows to every card; depth must map to a physical fold, lift, inset, or press."
+    ]
+  }
+}

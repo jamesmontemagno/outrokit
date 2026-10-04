@@ -1,0 +1,476 @@
+<!doctype html>
+<!--
+THESIS: The episode is on the tape; the tool fills in the J-card. Refuses the dark terminal hero with a feature-card grid.
+OWN-WORLD: Tape-blue field, white coated-card panels with fold creases and ruled index lines, leader-yellow spine, record-red side blocks, packaging stripes. Archivo runs from condensed printed labels to expanded display; everything the tool writes is typed in Sometype Mono.
+STORY: The visitor watches a blank inlay card get filled in for a made-up episode, believes it will do the same for theirs, then follows Side A (install) and Side B (use).
+FIRST VIEWPORT: One unfolded J-card across the blue field. Front panel left: headline, pitch, a cassette whose label carries the run command, install button. Yellow spine. Index panel right typing in title, description, chapters, subtitles.
+FORM: Blank Tape J-Card, 6th of 7 grounded directions; staged as the unfolded card with a Side A / Side B program; seed 9502f324.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Podcast Metadata Generator: titles, descriptions, chapters, and subtitles from your episode</title>
+  <meta name="description" content="A free terminal app that reads your podcast transcript, video, or audio file and writes the titles, descriptions, YouTube chapters, and SRT subtitles. Works with the free GitHub Copilot plan. Step-by-step install and usage guide.">
+  <meta name="theme-color" content="#2438c9">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Podcast Metadata Generator">
+  <meta property="og:description" content="Hand it your episode. Get back titles, descriptions, YouTube chapters, and subtitles. Install and usage guide.">
+  <meta property="og:url" content="https://jamesmontemagno.github.io/podcast-metadata-generator/">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="fonts/archivo-variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/sometype-mono-variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    (function () {
+      var root = document.documentElement;
+      root.classList.add('js');
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        root.classList.add('will-type');
+        window.__typeGuard = setTimeout(function () { root.classList.remove('will-type'); }, 2500);
+      }
+    })();
+  </script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="Podcast Metadata Generator, back to top">Podcast Metadata Generator</a>
+    <nav aria-label="Sections">
+      <ul>
+        <li><a href="#side-a"><span class="chip chip--a" aria-hidden="true">A</span>Install</a></li>
+        <li><a href="#side-b"><span class="chip chip--b" aria-hidden="true">B</span>Use</a></li>
+        <li><a href="#liner-notes">Liner notes</a></li>
+        <li><a href="https://github.com/jamesmontemagno/podcast-metadata-generator">GitHub</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top" aria-labelledby="hero-title">
+      <div class="jcard">
+
+        <div class="jcard__front">
+          <div class="bands" aria-hidden="true"><i></i><i></i><i></i></div>
+          <h1 id="hero-title"><span>The episode is done.</span> <span class="turn">The label isn&rsquo;t.</span></h1>
+          <p class="pitch">Podcast Metadata Generator reads your transcript, video, or audio file and writes the titles, descriptions, YouTube chapters, and subtitles for it.</p>
+
+          <div class="cassette" id="cassette">
+            <div class="cassette__label">
+              <div class="cassette__write">
+                <span class="cassette__side" aria-hidden="true">A</span>
+                <p class="printed" id="hero-cmd-label">Have .NET 10? Run this</p>
+                <button class="copy copy--label" type="button" data-copy="dnx PodcastMetadataGenerator" hidden>Copy</button>
+                <code class="cassette__cmd">dnx PodcastMetadataGenerator</code>
+              </div>
+              <div class="cassette__window" aria-hidden="true">
+                <svg class="reel reel--full" viewBox="0 0 100 100"><circle class="reel__tape" cx="50" cy="50" r="49"/><g class="reel__hub"><circle cx="50" cy="50" r="19"/><path d="M50 31v9M50 60v9M33.5 40.5l7.8 4.5M58.7 55l7.8 4.5M33.5 59.5l7.8-4.5M58.7 45l7.8-4.5"/></g></svg>
+                <svg class="reel reel--empty" viewBox="0 0 100 100"><circle class="reel__tape" cx="50" cy="50" r="30"/><g class="reel__hub"><circle cx="50" cy="50" r="19"/><path d="M50 31v9M50 60v9M33.5 40.5l7.8 4.5M58.7 55l7.8 4.5M33.5 59.5l7.8-4.5M58.7 45l7.8-4.5"/></g></svg>
+              </div>
+              <p class="cassette__band" aria-hidden="true"><span>Titles</span><span>Descriptions</span><span>Chapters</span><span>Subtitles</span></p>
+            </div>
+            <div class="cassette__foot" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+          </div>
+
+          <a class="btn" href="#side-a">New to this? Start the install guide</a>
+        </div>
+
+        <div class="jcard__spine" aria-hidden="true">
+          <span class="printed">Show</span>
+          <span class="typed-ink">Spare Room Radio</span>
+          <span class="printed">Ep.</span>
+          <span class="typed-ink">031</span>
+        </div>
+
+        <div class="jcard__index">
+          <div class="index__head">
+            <h2 class="printed printed--lg">What it writes for you</h2>
+            <p class="stamp">Example episode, made up for this page</p>
+          </div>
+
+          <dl class="fields">
+            <div class="field field--split">
+              <dt>File in</dt>
+              <dd><span class="mono">spare-room-radio-031.mp3</span></dd>
+              <dt>Length</dt>
+              <dd><span class="mono">42:18</span></dd>
+            </div>
+
+            <div class="field">
+              <dt id="title-label">Title</dt>
+              <dd class="ruled ruled--2"><span class="mono" id="demo-title" data-type>Four Episodes in One Day: Does Batch Recording Work?</span></dd>
+            </div>
+
+            <div class="field">
+              <dt id="style-label">Style</dt>
+              <dd>
+                <div class="ticks" role="radiogroup" aria-labelledby="style-label">
+                  <label><input type="radio" name="style" value="balanced" checked><span>Balanced</span></label>
+                  <label><input type="radio" name="style" value="descriptive"><span>Descriptive</span></label>
+                  <label><input type="radio" name="style" value="curiosity"><span>Curiosity hook</span></label>
+                  <label><input type="radio" name="style" value="question"><span>Question</span></label>
+                  <label><input type="radio" name="style" value="howto"><span>How-to</span></label>
+                  <label><input type="radio" name="style" value="playful"><span>Playful</span></label>
+                  <label><input type="radio" name="style" value="professional"><span>Professional</span></label>
+                  <label><input type="radio" name="style" value="seo"><span>SEO keywords</span></label>
+                  <label><input type="radio" name="style" value="mixed"><span>Mixed</span></label>
+                </div>
+                <p class="hint">Tick a style and the title is retyped.</p>
+                <p class="sr-only" aria-live="polite" id="title-live"></p>
+              </dd>
+            </div>
+
+            <div class="field">
+              <dt>Description <small>short</small></dt>
+              <dd class="ruled"><span class="mono" data-type>We tried recording a full month of episodes in a single day to see whether batch recording saves time or just wears you out. Here is how we planned the day, where our energy dipped, the episode we nearly scrapped, and the schedule we are keeping from now on.</span></dd>
+            </div>
+
+            <div class="field">
+              <dt>Chapters</dt>
+              <dd class="ruled">
+                <ol class="chapters mono">
+                  <li><span data-type>00:00</span> <span data-type>Welcome and the plan</span></li>
+                  <li><span data-type>02:45</span> <span data-type>Why we wanted to batch</span></li>
+                  <li><span data-type>09:30</span> <span data-type>Prepping four outlines</span></li>
+                  <li><span data-type>17:05</span> <span data-type>Hour six: the energy dip</span></li>
+                  <li><span data-type>26:40</span> <span data-type>The episode we nearly scrapped</span></li>
+                  <li><span data-type>34:15</span> <span data-type>What we would change</span></li>
+                  <li><span data-type>40:02</span> <span data-type>Our new schedule</span></li>
+                </ol>
+              </dd>
+            </div>
+
+            <div class="field">
+              <dt>Subtitles <small>.srt</small></dt>
+              <dd class="ruled">
+                <p class="mono srt"><span data-type>1</span><br><span data-type>00:00:00,000 --&gt; 00:00:04,200</span><br><span data-type>Welcome back to Spare Room Radio.</span></p>
+              </dd>
+            </div>
+          </dl>
+        </div>
+
+        <ul class="jcard__flap">
+          <li><span class="printed">Runs on</span> Windows, macOS, Linux</li>
+          <li><span class="printed">Needs</span> .NET 10 and GitHub Copilot</li>
+          <li><span class="printed">Copilot plan</span> Free is enough</li>
+          <li><span class="printed">Transcribes</span> on your own computer</li>
+        </ul>
+      </div>
+    </section>
+
+    <div class="stripes" aria-hidden="true"><i></i><i></i><i></i></div>
+
+    <section class="side" id="side-a" aria-labelledby="side-a-title">
+      <div class="wrap">
+        <header class="side__head">
+          <span class="side__letter side__letter--a" aria-hidden="true">A</span>
+          <div class="side__intro">
+            <h2 id="side-a-title">Side A: Install it</h2>
+            <p>Four steps, and you only do them once. You do not need to have used a terminal before: every command is written out in full, ready to copy.</p>
+          </div>
+          <fieldset class="os">
+            <legend class="printed">Your computer</legend>
+            <div class="os__switch">
+              <label><input type="radio" name="os" value="windows" checked><span>Windows</span></label>
+              <label><input type="radio" name="os" value="macos"><span>macOS</span></label>
+              <label><input type="radio" name="os" value="linux"><span>Linux</span></label>
+            </div>
+          </fieldset>
+        </header>
+
+        <ol class="tracks">
+          <li class="track" id="a1">
+            <div class="track__name"><span class="track__no">A1</span><h3>Open a terminal</h3></div>
+            <div class="track__body">
+              <p>A terminal is a window where you type a command and press Enter. You only need it to start the app. After that you move around with the arrow keys.</p>
+              <p data-os="windows"><b class="os-name">Windows:</b> press the <kbd>Windows</kbd> key, type <strong>Terminal</strong>, and press <kbd>Enter</kbd>. On older Windows 10, type <strong>PowerShell</strong> instead.</p>
+              <p data-os="macos"><b class="os-name">macOS:</b> press <kbd>Command</kbd> + <kbd>Space</kbd>, type <strong>Terminal</strong>, and press <kbd>Return</kbd>.</p>
+              <p data-os="linux"><b class="os-name">Linux:</b> press <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>T</kbd>, or search your apps for <strong>Terminal</strong>.</p>
+            </div>
+          </li>
+
+          <li class="track" id="a2">
+            <div class="track__name"><span class="track__no">A2</span><h3>Install .NET 10</h3></div>
+            <div class="track__body">
+              <p>The app runs on .NET, a free toolkit from Microsoft. You need version 10 or later.</p>
+              <p><a class="btn btn--ink" href="https://dotnet.microsoft.com/download/dotnet/10.0">Download the .NET 10 SDK</a></p>
+              <p>Choose the <strong>SDK</strong> installer for your computer and run it. Then close the terminal, open it again, and check that it worked:</p>
+              <div class="cmd"><pre><code>dotnet --version</code></pre></div>
+              <p class="expect">You should see a number that starts with <span class="mono">10</span>. If you see &ldquo;command not found&rdquo;, close and reopen the terminal and try once more.</p>
+            </div>
+          </li>
+
+          <li class="track" id="a3">
+            <div class="track__name"><span class="track__no">A3</span><h3>Sign in to GitHub Copilot</h3></div>
+            <div class="track__body">
+              <p>GitHub Copilot does the writing, so you need a GitHub account with Copilot. <strong>The free Copilot plan works.</strong> You do not need a paid subscription. <a href="https://github.com/features/copilot/plans">See the Copilot plans</a>.</p>
+              <p>Install the Copilot command-line app. The app uses it to reach Copilot, and it is how you sign in:</p>
+              <div data-os="windows">
+                <p class="os-name"><b>Windows</b></p>
+                <div class="cmd"><pre><code>winget install GitHub.Copilot</code></pre></div>
+              </div>
+              <div data-os="macos">
+                <p class="os-name"><b>macOS</b></p>
+                <div class="cmd"><pre><code>curl -fsSL https://gh.io/copilot-install | bash</code></pre></div>
+                <p class="aside">Use Homebrew? <span class="mono">brew install copilot-cli</span> does the same job.</p>
+              </div>
+              <div data-os="linux">
+                <p class="os-name"><b>Linux</b></p>
+                <div class="cmd"><pre><code>curl -fsSL https://gh.io/copilot-install | bash</code></pre></div>
+              </div>
+              <p>Then sign in and follow the prompts to approve it in your browser:</p>
+              <div class="cmd"><pre><code>copilot login</code></pre></div>
+              <p class="aside">You can also start <span class="mono">copilot</span> and type <span class="mono">/login</span>. Have Node.js 22 or later? <span class="mono">npm install -g @github/copilot</span> installs it on any computer.</p>
+            </div>
+          </li>
+
+          <li class="track" id="a4">
+            <div class="track__name"><span class="track__no">A4</span><h3>Run it</h3></div>
+            <div class="track__body">
+              <div class="cmd cmd--lead"><pre><code>dnx PodcastMetadataGenerator</code></pre></div>
+              <p><span class="mono">dnx</span> comes with .NET 10. It fetches the latest version and starts it, with nothing left to maintain. If it asks whether to download the package, answer yes.</p>
+              <p class="expect">You should see the app&rsquo;s banner, then a Copilot status table ending in <span class="mono">Copilot runtime is ready to use!</span></p>
+              <h4>Prefer to keep it installed?</h4>
+              <div class="cmd"><pre><code>dotnet tool install -g PodcastMetadataGenerator</code></pre></div>
+              <p>From then on, start it with:</p>
+              <div class="cmd"><pre><code>podcast-metadata-generator</code></pre></div>
+              <p class="aside">Update later with <span class="mono">dotnet tool update -g PodcastMetadataGenerator</span>.</p>
+            </div>
+          </li>
+
+          <li class="track track--bonus" id="a5">
+            <div class="track__name"><span class="track__no">Bonus</span><h3>ffmpeg, for video and audio</h3></div>
+            <div class="track__body">
+              <p>Skip this if you already have a transcript. ffmpeg is a free tool that pulls the sound out of a video or audio file so the app can transcribe it.</p>
+              <div data-os="windows">
+                <p class="os-name"><b>Windows</b></p>
+                <div class="cmd"><pre><code>winget install ffmpeg</code></pre></div>
+              </div>
+              <div data-os="macos">
+                <p class="os-name"><b>macOS</b>, with <a href="https://brew.sh">Homebrew</a></p>
+                <div class="cmd"><pre><code>brew install ffmpeg</code></pre></div>
+              </div>
+              <div data-os="linux">
+                <p class="os-name"><b>Linux</b>, Debian or Ubuntu</p>
+                <div class="cmd"><pre><code>sudo apt install ffmpeg</code></pre></div>
+              </div>
+              <p class="aside">Other ways to get it are on the <a href="https://ffmpeg.org/download.html">ffmpeg download page</a>. If ffmpeg ends up somewhere unusual, point the app at it under <strong>Settings</strong>.</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="side side--b" id="side-b" aria-labelledby="side-b-title">
+      <div class="wrap">
+        <header class="side__head">
+          <span class="side__letter side__letter--b" aria-hidden="true">B</span>
+          <div class="side__intro">
+            <h2 id="side-b-title">Side B: Use it</h2>
+            <p>The app is a set of menus. Move with the arrow keys and press Enter to choose. There are no commands to memorize.</p>
+          </div>
+        </header>
+
+        <ol class="tracks">
+          <li class="track" id="b1">
+            <div class="track__name"><span class="track__no">B1</span><h3>Load your episode</h3></div>
+            <div class="track__body">
+              <p>Start the app, choose <strong>Load Transcript, Video, or Audio</strong>, then say which kind of file you have. <strong>Browse for file</strong> lets you walk your folders with the arrow keys. <strong>Type or paste path</strong> also accepts a file dragged onto the terminal window.</p>
+              <p>Or hand it the file as you start:</p>
+              <div class="cmd"><pre><code>dnx PodcastMetadataGenerator "my episode.mp3"</code></pre></div>
+              <dl class="accepts">
+                <div><dt>Transcripts</dt><dd>Zencastr, time-range, SRT, or plain text. <a href="#formats">See the formats</a>.</dd></div>
+                <div><dt>Video</dt><dd><span class="mono">.mp4 .mov .mkv .avi .webm .m4v .wmv .mpeg .mpg</span></dd></div>
+                <div><dt>Audio</dt><dd><span class="mono">.mp3 .wav</span></dd></div>
+              </dl>
+            </div>
+          </li>
+
+          <li class="track" id="b2">
+            <div class="track__name"><span class="track__no">B2</span><h3>Video or audio? Pick a speech model once</h3></div>
+            <div class="track__body">
+              <p>Your recording is transcribed on your own computer with Whisper, so the app needs a speech model first. It offers to open the right screen the first time you load a video or audio file. You can also go to <strong>Settings</strong>, then <strong>Transcription Settings</strong>, choose a model, and download it.</p>
+              <table class="chart">
+                <thead><tr><th scope="col">Model</th><th scope="col">Download</th><th scope="col">Good for</th></tr></thead>
+                <tbody>
+                  <tr><th scope="row">Tiny</th><td>75 MiB</td><td>Fastest, lowest accuracy</td></tr>
+                  <tr><th scope="row">Base</th><td>142 MiB</td><td>The default. Balanced for most machines</td></tr>
+                  <tr><th scope="row">Small</th><td>466 MiB</td><td>Better accuracy, slower</td></tr>
+                  <tr><th scope="row">Large v3 Turbo</th><td>1.5 GiB</td><td>Fast and highly accurate</td></tr>
+                  <tr><th scope="row">Large v3</th><td>2.9 GiB</td><td>Highest accuracy, heaviest</td></tr>
+                </tbody>
+              </table>
+              <p class="aside">Twelve models are offered in all. The ones marked English only understand English; the rest are multilingual.</p>
+              <p>The app asks where to save the transcript as an <span class="mono">.srt</span> file, shows progress while it listens, then carries on as if you had loaded that transcript. <kbd>Ctrl</kbd> + <kbd>C</kbd> cancels.</p>
+            </div>
+          </li>
+
+          <li class="track" id="b3">
+            <div class="track__name"><span class="track__no">B3</span><h3>Generate</h3></div>
+            <div class="track__body">
+              <figure class="screen">
+                <div class="screen__glass" role="img" aria-label="The app's main menu: Load Different Transcript, Video, or Audio; Generate All Metadata, which is selected; Generate Titles; Generate Descriptions; Generate Chapters; Convert to SRT; What's New; Settings; Exit.">
+                  <p class="screen__title">Main Menu</p>
+                  <ul>
+                    <li>📂 Load Different Transcript, Video, or Audio</li>
+                    <li class="is-on">🚀 Generate All Metadata</li>
+                    <li>📝 Generate Titles</li>
+                    <li>📄 Generate Descriptions</li>
+                    <li>📑 Generate Chapters</li>
+                    <li>🎬 Convert to SRT</li>
+                    <li>✨ What's New</li>
+                    <li>⚙️ Settings</li>
+                    <li>❌ Exit</li>
+                  </ul>
+                </div>
+                <figcaption>The main menu once a file is loaded. A sketch of the real screen, not a screenshot.</figcaption>
+              </figure>
+              <p><strong>Generate All Metadata</strong> writes titles, descriptions, chapters, and subtitles in one pass. It asks which title style you want, lets you pick your favorite title, and shows the text as it is written. Or run any one of them on its own.</p>
+              <h4>The nine title styles</h4>
+              <dl class="styles">
+                <div><dt>Balanced</dt><dd>Engaging, descriptive, and SEO-friendly</dd></div>
+                <div><dt>Descriptive</dt><dd>Clear and straightforward, no hype</dd></div>
+                <div><dt>Curiosity Hook</dt><dd>Teases a hook that makes people want to listen</dd></div>
+                <div><dt>Question</dt><dd>Phrased as a question the episode answers</dd></div>
+                <div><dt>How-To / Educational</dt><dd>Outcome-focused: how-to, guide, lessons learned</dd></div>
+                <div><dt>Playful</dt><dd>Witty, with wordplay or humor</dd></div>
+                <div><dt>Professional</dt><dd>Polished and authoritative</dd></div>
+                <div><dt>SEO Keywords</dt><dd>Leads with the terms people search for</dd></div>
+                <div><dt>Mixed Variety</dt><dd>A different style for each title</dd></div>
+              </dl>
+              <p class="aside">Chapters and subtitles need a transcript with timestamps. Plain text still gets titles and descriptions.</p>
+            </div>
+          </li>
+
+          <li class="track" id="b4">
+            <div class="track__name"><span class="track__no">B4</span><h3>Copy or save</h3></div>
+            <div class="track__body">
+              <p>When a generation finishes, <strong>Copy to Clipboard</strong> offers the selected title, all titles, each description, the chapters, or everything at once. Paste straight into YouTube or your podcast host.</p>
+              <p><strong>Save Results</strong> asks for a folder and writes these files, named after your episode file:</p>
+              <table class="chart chart--files">
+                <thead><tr><th scope="col">File</th><th scope="col">What is in it</th></tr></thead>
+                <tbody>
+                  <tr><th scope="row">my-episode_titles.txt</th><td>Your title suggestions</td></tr>
+                  <tr><th scope="row">my-episode_description_short.txt</th><td>About 50 words</td></tr>
+                  <tr><th scope="row">my-episode_description_medium.txt</th><td>About 150 words</td></tr>
+                  <tr><th scope="row">my-episode_description_long.txt</th><td>About 300 words</td></tr>
+                  <tr><th scope="row">my-episode_chapters.txt</th><td>Chapter markers, ready for YouTube</td></tr>
+                  <tr><th scope="row">my-episode.srt</th><td>Subtitles</td></tr>
+                  <tr><th scope="row">my-episode_manifest.json</th><td>Everything in one file, for other tools</td></tr>
+                </tbody>
+              </table>
+              <p class="aside" data-os="linux"><b class="os-name">Linux:</b> copying to the clipboard needs <span class="mono">xsel</span> installed.</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="notes" id="liner-notes" aria-labelledby="notes-title">
+      <div class="wrap">
+        <h2 id="notes-title">Liner notes</h2>
+
+        <div class="notes__block" id="formats">
+          <h3>Transcript formats it reads</h3>
+          <p class="notes__lede">The app works out which format you have. These are the four it knows.</p>
+          <div class="formats">
+            <article>
+              <h4>Zencastr</h4>
+<pre><code>00:00.00 Speaker 1: Hello and welcome to the show.
+00:15.50 Speaker 2: Thanks for having me!</code></pre>
+            </article>
+            <article>
+              <h4>Time range</h4>
+<pre><code>00:00:00 - 00:00:15
+Hello and welcome to the show.
+
+00:00:15 - 00:00:30
+Thanks for having me!</code></pre>
+            </article>
+            <article>
+              <h4>SRT</h4>
+<pre><code>1
+00:00:00,000 --&gt; 00:00:15,000
+Hello and welcome to the show.
+
+2
+00:00:15,000 --&gt; 00:00:30,000
+Thanks for having me!</code></pre>
+            </article>
+            <article>
+              <h4>Plain text</h4>
+<pre><code>Hello and welcome to the show.
+Thanks for having me!</code></pre>
+              <p>No timestamps, so no chapters or subtitles. Titles and descriptions still work.</p>
+            </article>
+          </div>
+        </div>
+
+        <div class="notes__pair">
+          <div class="notes__block" id="settings">
+            <h3>Settings worth a look</h3>
+            <p class="notes__lede">Open <strong>Settings</strong> from the main menu. Your choices are remembered in <span class="mono">~/.podcast-metadata-generator/settings.json</span>.</p>
+            <table class="chart chart--onyellow">
+              <thead><tr><th scope="col">Setting</th><th scope="col">Starts at</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">Titles per run</th><td>5</td></tr>
+                <tr><th scope="row">Longest title</th><td>10 words</td></tr>
+                <tr><th scope="row">Title style</th><td>Balanced</td></tr>
+                <tr><th scope="row">Description lengths</th><td>50, 150, 300 words</td></tr>
+                <tr><th scope="row">Chapters</th><td>3 to 12</td></tr>
+                <tr><th scope="row">Chapters per 30 minutes</th><td>5</td></tr>
+                <tr><th scope="row">Longest chapter title</th><td>8 words</td></tr>
+              </tbody>
+            </table>
+            <p>Filling in <strong>Podcast Name</strong>, <strong>Host Names</strong>, and <strong>Episode Context</strong> (guests, topics) gives Copilot more to work with. You can also change the AI model and where files are saved.</p>
+          </div>
+
+          <div class="notes__block" id="trouble">
+            <h3>If something goes wrong</h3>
+            <dl class="fixes">
+              <div>
+                <dt>&ldquo;command not found&rdquo; for <span class="mono">dnx</span> or <span class="mono">dotnet</span></dt>
+                <dd>.NET 10 is missing, or the terminal was open while you installed it. Close it, open it again, and repeat <a href="#a2">step A2</a>.</dd>
+              </div>
+              <div>
+                <dt>The status table says &ldquo;Not Authenticated&rdquo;</dt>
+                <dd>You are not signed in to Copilot yet. A free Copilot account is enough. Run <span class="mono">copilot login</span> from <a href="#a3">step A3</a>, then start the app again.</dd>
+              </div>
+              <div>
+                <dt>A video or audio file will not load</dt>
+                <dd>ffmpeg is missing or cannot be found. Install it from the <a href="#a5">bonus track</a>, or set its location under Settings.</dd>
+              </div>
+              <div>
+                <dt>No chapters or subtitles came out</dt>
+                <dd>The transcript has no timestamps. Use a timestamped format, or start from the video or audio file instead.</dd>
+              </div>
+              <div>
+                <dt>Still stuck?</dt>
+                <dd><a href="https://github.com/jamesmontemagno/podcast-metadata-generator/issues">Open an issue on GitHub</a> and say what you typed and what you saw.</dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="outro">
+    <div class="wrap">
+      <p class="outro__line">That is the whole tape.</p>
+      <div class="cmd cmd--outro"><pre><code>dnx PodcastMetadataGenerator</code></pre></div>
+      <ul class="outro__links">
+        <li><a href="https://github.com/jamesmontemagno/podcast-metadata-generator">Source on GitHub</a></li>
+        <li><a href="https://www.nuget.org/packages/PodcastMetadataGenerator">Package on NuGet</a></li>
+        <li><a href="https://github.com/jamesmontemagno/podcast-metadata-generator/releases">Release notes</a></li>
+        <li><a href="https://github.com/jamesmontemagno/podcast-metadata-generator/blob/main/LICENSE">MIT License</a></li>
+      </ul>
+      <p class="outro__fine">Made by James Montemagno. Spare Room Radio, its episode, and everything typed on the card above are made up to show what the app produces. Set in Archivo and Sometype Mono, both under the SIL Open Font License.</p>
+    </div>
+  </footer>
+
+  <p class="sr-only" role="status" id="copy-status"></p>
+  <script src="app.js" defer></script>
+</body>
+</html>

@@ -390,3 +390,8 @@ samples/YouTubeChaptersDemo/YouTubeChaptersDemo.csproj.lscache
 src/Blazor/PodcastMetadataGenerator.Blazor.csproj.lscache
 src/Console/PodcastMetadataGenerator.Console.csproj.lscache
 src/Core/PodcastMetadataGenerator.Core.csproj.lscache
+
+# Impeccable design tooling: local caches only
+.impeccable/hook.cache.json
+.impeccable/questions/
+.impeccable/sketches/
