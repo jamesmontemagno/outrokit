@@ -27,7 +27,9 @@ public static class WhatsNew
         new(Version: null,
         [
             new("🔥", "Burn captions into video",
-                "Pick a video and a captions file (.srt, .vtt, .ass, or .ssa) from Burn Captions into Video on the main menu and get a new video with the captions drawn into the picture. You confirm the text size and position each time; set your defaults under Settings → Caption Settings. This needs an ffmpeg that includes libass, such as Homebrew's ffmpeg-full, and the app tells you if yours does not.")
+                "Pick a video and a captions file (.srt, .vtt, .ass, or .ssa) from Burn Captions into Video on the main menu and get a new video with the captions drawn into the picture. You confirm the text size and position each time; set your defaults under Settings → Caption Settings. This needs an ffmpeg that includes libass, such as Homebrew's ffmpeg-full, and the app tells you if yours does not."),
+            new("🤖", "Change Model no longer crashes",
+                "Settings → Change Model used to close the app when Copilot offered two models with the same name, such as Auto. The list now opens, and models that share a name show their id so you can tell them apart.")
         ]),
         new(Version: "1.4.0",
         [

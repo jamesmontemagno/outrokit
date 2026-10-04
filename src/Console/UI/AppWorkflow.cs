@@ -1062,16 +1062,12 @@ public class AppWorkflow
                         break;
                     }
                     
-                    // Create display mapping
-                    var modelChoices = modelInfos.ToDictionary(
-                        m => FormatModelName(m),
-                        m => m.Id);
-                    
-                    var selectedDisplay = ConsoleUI.SelectFromList(
+                    var selectedModel = ConsoleUI.SelectFromList(
                         "Select AI Model (multiplier shows relative cost):",
-                        modelChoices.Keys);
+                        AvailableModels.BuildChoices(modelInfos),
+                        choice => Markup.Escape(choice.Label));
                     
-                    _settings.Model = modelChoices[selectedDisplay];
+                    _settings.Model = selectedModel.Id;
                     ConsoleUI.ShowSuccess($"Model set to: {_settings.Model}");
                     break;
                     
@@ -1405,16 +1401,6 @@ public class AppWorkflow
             return false;
         }
         return true;
-    }
-    
-    private static string FormatModelName(ModelInfo model)
-    {
-        var name = model.Name;
-        if (model.Billing?.Multiplier > 0)
-        {
-            name = $"{model.Name} (×{model.Billing.Multiplier:0.##})";
-        }
-        return name;
     }
     
     private async Task EnsureGeneratorInitializedAsync()
