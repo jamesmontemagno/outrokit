@@ -262,14 +262,7 @@ public partial class TranscriptParser
         
         while (i < lines.Length)
         {
-            // Skip sequence number
-            if (int.TryParse(lines[i].Trim(), out _))
-            {
-                i++;
-                if (i >= lines.Length) break;
-            }
-            
-            // Look for timestamp line
+            // Look for timestamp line; sequence numbers and stray lines are skipped
             var match = SrtTimestampRegex().Match(lines[i]);
             if (!match.Success)
             {
@@ -291,11 +284,14 @@ public partial class TranscriptParser
             
             i++;
             
-            // Collect text lines until blank line
+            // Collect text lines until the next cue starts
             var textLines = new List<string>();
-            while (i < lines.Length && !string.IsNullOrWhiteSpace(lines[i]))
+            while (i < lines.Length && !IsSrtCueStart(lines, i))
             {
-                textLines.Add(lines[i]);
+                if (!string.IsNullOrWhiteSpace(lines[i]))
+                {
+                    textLines.Add(lines[i].Trim());
+                }
                 i++;
             }
             
@@ -324,11 +320,25 @@ public partial class TranscriptParser
                     Text = text
                 });
             }
-            
-            i++; // Skip blank line
         }
         
         return segments;
+    }
+
+    /// <summary>
+    /// Whether the line begins a new SRT cue: a timestamp line, or the sequence number before one.
+    /// Blank lines are removed before parsing, so they cannot be used as the cue separator.
+    /// </summary>
+    private static bool IsSrtCueStart(string[] lines, int index)
+    {
+        if (SrtTimestampRegex().IsMatch(lines[index]))
+        {
+            return true;
+        }
+
+        return index + 1 < lines.Length
+            && int.TryParse(lines[index].Trim(), out _)
+            && SrtTimestampRegex().IsMatch(lines[index + 1]);
     }
     
     private static long ParseZencastrTimestamp(Match match)
