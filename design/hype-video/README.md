@@ -4,6 +4,8 @@ The source for the short video that announces a release: a web page that plays t
 
 The current video is 41.5 seconds, 1920×1080, 30 frames per second, with no sound. It covers the rename to OutroKit, what the app writes, transcription, title styles, burning captions, and the smaller download.
 
+If you work with GitHub Copilot, the [`hype-video` skill](../../.github/skills/hype-video/SKILL.md) tells it how to update and render this for a release, so you can ask for "the hype video for 1.6" and have it follow this guide.
+
 ## What you need
 
 - [Node.js](https://nodejs.org/) 18 or later
