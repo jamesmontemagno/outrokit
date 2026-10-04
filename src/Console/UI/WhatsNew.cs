@@ -24,6 +24,11 @@ public static class WhatsNew
 {
     public static IReadOnlyList<WhatsNewRelease> Releases { get; } =
     [
+        new(Version: null,
+        [
+            new("🔥", "Burn captions into video",
+                "Pick a video and a captions file (.srt, .vtt, .ass, or .ssa) from Burn Captions into Video on the main menu and get a new video with the captions drawn into the picture. You confirm the text size and position each time; set your defaults under Settings → Caption Settings. This needs an ffmpeg that includes libass, such as Homebrew's ffmpeg-full, and the app tells you if yours does not.")
+        ]),
         new(Version: "1.4.0",
         [
             new("🎧", "Transcribe video and audio files",

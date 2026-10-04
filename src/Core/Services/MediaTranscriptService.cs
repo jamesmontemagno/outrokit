@@ -1,5 +1,3 @@
-using System.ComponentModel;
-using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 using PodcastMetadataGenerator.Core.Models;
@@ -15,11 +13,13 @@ public class MediaTranscriptService
     // whisper.cpp emits this marker instead of text for silent audio.
     private const string BlankAudioMarker = "[BLANK_AUDIO]";
 
-    private static readonly HashSet<string> MediaExtensions = new(StringComparer.OrdinalIgnoreCase)
+    private static readonly HashSet<string> VideoExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
-        // Video
-        ".mp4", ".mov", ".mkv", ".avi", ".webm", ".m4v", ".wmv", ".mpeg", ".mpg",
-        // Audio
+        ".mp4", ".mov", ".mkv", ".avi", ".webm", ".m4v", ".wmv", ".mpeg", ".mpg"
+    };
+
+    private static readonly HashSet<string> AudioExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
         ".mp3", ".wav", ".wave"
     };
 
@@ -36,7 +36,13 @@ public class MediaTranscriptService
     /// Whether the path has a recognized video or audio extension.
     /// Use <see cref="HasAudioStreamAsync"/> to confirm the content.
     /// </summary>
-    public static bool HasMediaExtension(string path) => MediaExtensions.Contains(Path.GetExtension(path));
+    public static bool HasMediaExtension(string path) =>
+        HasVideoExtension(path) || AudioExtensions.Contains(Path.GetExtension(path));
+
+    /// <summary>
+    /// Whether the path has a recognized video extension.
+    /// </summary>
+    public static bool HasVideoExtension(string path) => VideoExtensions.Contains(Path.GetExtension(path));
 
     /// <summary>
     /// Whether ffmpeg can decode an audio stream from the file, which is what transcription needs
@@ -131,62 +137,10 @@ public class MediaTranscriptService
         }
     }
 
-    private async Task<FfmpegResult> RunFfmpegAsync(
+    private Task<FfmpegResult> RunFfmpegAsync(
         IReadOnlyList<string> arguments,
-        CancellationToken cancellationToken)
-    {
-        var startInfo = new ProcessStartInfo
-        {
-            FileName = _settings.FfmpegPath,
-            UseShellExecute = false,
-            RedirectStandardError = true,
-            RedirectStandardOutput = true,
-            CreateNoWindow = true
-        };
-
-        foreach (var argument in arguments)
-        {
-            startInfo.ArgumentList.Add(argument);
-        }
-
-        using var process = new Process { StartInfo = startInfo };
-        try
-        {
-            if (!process.Start())
-            {
-                throw new InvalidOperationException($"Could not start ffmpeg at '{_settings.FfmpegPath}'.");
-            }
-        }
-        catch (Win32Exception ex)
-        {
-            throw new InvalidOperationException(
-                $"ffmpeg was not found at '{_settings.FfmpegPath}'. Configure it in Settings.",
-                ex);
-        }
-
-        var errorTask = process.StandardError.ReadToEndAsync(cancellationToken);
-        var outputTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
-        try
-        {
-            await process.WaitForExitAsync(cancellationToken);
-            await outputTask;
-            var error = (await errorTask).Trim();
-            // Ctrl+C in a terminal also reaches ffmpeg, so it can exit with an error before the
-            // token is observed. Report that as the cancellation it is, not as an ffmpeg failure.
-            cancellationToken.ThrowIfCancellationRequested();
-            return new FfmpegResult(process.ExitCode, error);
-        }
-        catch (OperationCanceledException)
-        {
-            if (!process.HasExited)
-            {
-                process.Kill(entireProcessTree: true);
-                await process.WaitForExitAsync(CancellationToken.None);
-            }
-
-            throw;
-        }
-    }
+        CancellationToken cancellationToken) =>
+        FfmpegRunner.RunAsync(_settings.FfmpegPath, arguments, cancellationToken);
 
     private static string FormatSrtTimestamp(TimeSpan timestamp)
     {
@@ -253,8 +207,6 @@ public class MediaTranscriptService
             throw new FileNotFoundException("The selected input file was not found.", path);
         }
     }
-
-    private sealed record FfmpegResult(int ExitCode, string Error);
 }
 
 public sealed record MediaTranscriptionProgress(TimeSpan Position, TimeSpan Duration)

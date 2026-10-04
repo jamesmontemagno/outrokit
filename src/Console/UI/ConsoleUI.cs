@@ -341,9 +341,17 @@ public static class ConsoleUI
     }
 
     /// <summary>
-    /// Prompts for where to save an SRT file, confirming before overwriting an existing one.
+    /// Prompts for where to save a file, confirming before overwriting an existing one.
     /// </summary>
-    public static string AskSaveFilePath(string prompt, string defaultPath)
+    /// <param name="extensions">
+    /// The extensions the file may have, such as ".srt". The first is added when the path has none of them.
+    /// </param>
+    /// <param name="validate">Returns why a path cannot be used, or null when it can.</param>
+    public static string AskSaveFilePath(
+        string prompt,
+        string defaultPath,
+        IReadOnlyList<string> extensions,
+        Func<string, string?>? validate = null)
     {
         while (true)
         {
@@ -355,9 +363,10 @@ public static class ConsoleUI
                     .HideDefaultValue());
             path = CleanFilePath(path);
 
-            if (!string.Equals(Path.GetExtension(path), ".srt", StringComparison.OrdinalIgnoreCase))
+            if (extensions.Count > 0
+                && !extensions.Contains(Path.GetExtension(path), StringComparer.OrdinalIgnoreCase))
             {
-                path += ".srt";
+                path += extensions[0];
             }
 
             var fullPath = Path.GetFullPath(path);
@@ -365,6 +374,12 @@ public static class ConsoleUI
             if (string.IsNullOrWhiteSpace(directory) || !Directory.Exists(directory))
             {
                 ShowError($"Directory not found: {directory}");
+                continue;
+            }
+
+            if (validate?.Invoke(fullPath) is { } problem)
+            {
+                ShowError(problem);
                 continue;
             }
 
@@ -491,7 +506,7 @@ public static class ConsoleUI
     }
     
     /// <summary>
-    /// Checks if a file is likely a transcript file based on extension.
+    /// Checks whether the file browser should list a file for the kind of input being picked.
     /// </summary>
     private static bool IsDiscoverableFile(string fileName, FileDiscoveryType discoveryType)
     {
@@ -500,6 +515,8 @@ public static class ConsoleUI
         {
             FileDiscoveryType.Transcript => ext is ".txt" or ".srt" or ".vtt" or ".json" or ".md" or ".csv",
             FileDiscoveryType.Media => MediaTranscriptService.HasMediaExtension(fileName),
+            FileDiscoveryType.Video => MediaTranscriptService.HasVideoExtension(fileName),
+            FileDiscoveryType.Captions => CaptionBurnService.HasCaptionExtension(fileName),
             _ => false
         };
     }
@@ -554,6 +571,38 @@ public static class ConsoleUI
     }
     
     /// <summary>
+    /// Prompts for a caption text size, listing the default first so Enter accepts it.
+    /// </summary>
+    public static CaptionSize SelectCaptionSize(CaptionSize defaultSize, string title = "Caption text size:")
+    {
+        return SelectFromList(
+            title,
+            CaptionStyles.AllSizes.OrderByDescending(size => size == defaultSize).ToList(),
+            size =>
+            {
+                var suffix = size == defaultSize ? " [green](default)[/]" : "";
+                return $"{Markup.Escape(size.GetDisplayName())}{suffix} [grey]- {Markup.Escape(size.GetDescription())}[/]";
+            });
+    }
+
+    /// <summary>
+    /// Prompts for where captions sit in the picture, listing the default first so Enter accepts it.
+    /// </summary>
+    public static CaptionPosition SelectCaptionPosition(
+        CaptionPosition defaultPosition,
+        string title = "Caption position:")
+    {
+        return SelectFromList(
+            title,
+            CaptionStyles.AllPositions.OrderByDescending(position => position == defaultPosition).ToList(),
+            position =>
+            {
+                var suffix = position == defaultPosition ? " [green](default)[/]" : "";
+                return $"{Markup.Escape(position.GetDisplayName())}{suffix} [grey]- {Markup.Escape(position.GetDescription())}[/]";
+            });
+    }
+    
+    /// <summary>
     /// Shows descriptions in a formatted way.
     /// </summary>
     public static void ShowDescriptions(Dictionary<DescriptionLength, string> descriptions)
@@ -575,7 +624,9 @@ public static class ConsoleUI
     public enum FileDiscoveryType
     {
         Transcript,
-        Media
+        Media,
+        Video,
+        Captions
     }
     
     /// <summary>

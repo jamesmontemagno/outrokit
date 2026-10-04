@@ -13,4 +13,19 @@ internal static class TemporaryFileCleanup
             // Cleanup must not replace the operation failure that triggered it.
         }
     }
+
+    public static void DeleteDirectory(string path, Exception? primaryException)
+    {
+        try
+        {
+            if (Directory.Exists(path))
+            {
+                Directory.Delete(path, recursive: true);
+            }
+        }
+        catch when (primaryException is not null)
+        {
+            // Cleanup must not replace the operation failure that triggered it.
+        }
+    }
 }
