@@ -24,6 +24,11 @@ public static class WhatsNew
 {
     public static IReadOnlyList<WhatsNewRelease> Releases { get; } =
     [
+        new(Version: null,
+        [
+            new("🤖", "Change Model no longer crashes",
+                "Settings → Change Model used to close the app when Copilot offered two models with the same name, such as Auto. The list now opens, and models that share a name show their id so you can tell them apart.")
+        ]),
         new(Version: "1.4.0",
         [
             new("🎧", "Transcribe video and audio files",

@@ -49,14 +49,9 @@
                     else
                     {
                         <select class="form-select" @bind="AppSettings.Model">
-                            @foreach (var model in _models)
+                            @foreach (var choice in _modelChoices)
                             {
-                                var displayText = model.Name;
-                                if (model.Billing?.Multiplier > 0)
-                                {
-                                    displayText = $"{model.Name} (×{model.Billing.Multiplier:0.##})";
-                                }
-                                <option value="@model.Id">@displayText</option>
+                                <option value="@choice.Id">@choice.Label</option>
                             }
                         </select>
                     }
@@ -176,6 +171,7 @@
 
 @code {
     private List<ModelInfo> _models = [];
+    private IReadOnlyList<ModelChoice> _modelChoices = [];
     private bool _showSaved;
     private bool _isLoadingModels = true;
     private string? _modelLoadError;
@@ -196,6 +192,7 @@
             using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
             _models = await AvailableModels.GetModelsWithMetadataAsync(cancellationTokenSource.Token);
+            _modelChoices = AvailableModels.BuildChoices(_models);
 
             if (_models.Count > 0)
             {

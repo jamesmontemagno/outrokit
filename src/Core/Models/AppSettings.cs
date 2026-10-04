@@ -27,13 +27,40 @@ public static class AvailableModels
             await client.StartAsync();
 
             var models = await client.ListModelsAsync(cancellationToken);
-            return models.ToList();
+            return models.DistinctBy(m => m.Id, StringComparer.OrdinalIgnoreCase).ToList();
         }
         catch
         {
             return [];
         }
     }
+
+    /// <summary>
+    /// Builds the entries for a model picker, one per model id. Models that would show the
+    /// same label get their id appended so they can be told apart.
+    /// </summary>
+    public static IReadOnlyList<ModelChoice> BuildChoices(IEnumerable<ModelInfo> models)
+    {
+        var choices = models
+            .DistinctBy(m => m.Id, StringComparer.OrdinalIgnoreCase)
+            .Select(m => new ModelChoice(m.Id, FormatLabel(m)))
+            .ToList();
+
+        var sharedLabels = choices
+            .GroupBy(c => c.Label, StringComparer.OrdinalIgnoreCase)
+            .Where(g => g.Count() > 1)
+            .Select(g => g.Key)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        return choices
+            .Select(c => sharedLabels.Contains(c.Label) ? c with { Label = $"{c.Label} — {c.Id}" } : c)
+            .ToList();
+    }
+
+    private static string FormatLabel(ModelInfo model)
+        => model.Billing?.Multiplier > 0
+            ? $"{model.Name} (×{model.Billing.Multiplier:0.##})"
+            : model.Name;
 
     /// <summary>
     /// Resolves a valid model id from the Copilot SDK, preferring the provided selection.
@@ -93,6 +120,11 @@ public static class AvailableModels
         }
     }
 }
+
+/// <summary>
+/// A model as offered in a picker: the id to store and the label to show.
+/// </summary>
+public sealed record ModelChoice(string Id, string Label);
 
 /// <summary>
 /// Application settings and user preferences.
