@@ -9,6 +9,14 @@ namespace PodcastMetadataGenerator.Core.Services;
 
 public class VideoTranscriptService
 {
+    // whisper.cpp emits this marker instead of text for silent audio.
+    private const string BlankAudioMarker = "[BLANK_AUDIO]";
+
+    private static readonly HashSet<string> VideoExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".mp4", ".mov", ".mkv", ".avi", ".webm", ".m4v", ".wmv", ".mpeg", ".mpg"
+    };
+
     private readonly AppSettings _settings;
     private readonly WhisperModelService _modelService;
 
@@ -18,12 +26,17 @@ public class VideoTranscriptService
         _modelService = modelService ?? new WhisperModelService();
     }
 
+    /// <summary>
+    /// Whether the path has a recognized video extension. Use <see cref="IsVideoFileAsync"/> to confirm the content.
+    /// </summary>
+    public static bool HasVideoExtension(string path) => VideoExtensions.Contains(Path.GetExtension(path));
+
     public async Task<bool> IsVideoFileAsync(string path, CancellationToken cancellationToken = default)
     {
         EnsureInputExists(path);
 
         var result = await RunFfmpegAsync(
-            ["-hide_banner", "-loglevel", "error", "-i", path, "-map", "0:v:0", "-frames:v", "1", "-f", "null", "-"],
+            ["-nostdin", "-hide_banner", "-loglevel", "error", "-i", path, "-map", "0:v:0", "-frames:v", "1", "-f", "null", "-"],
             cancellationToken);
         return result.ExitCode == 0;
     }
@@ -44,31 +57,37 @@ public class VideoTranscriptService
         {
             var extraction = await RunFfmpegAsync(
                 [
-                    "-hide_banner", "-loglevel", "error", "-y", "-i", videoPath,
+                    "-nostdin", "-hide_banner", "-loglevel", "error", "-y", "-i", videoPath,
                     "-vn", "-acodec", "pcm_s16le", "-ar", "16000", "-ac", "1", temporaryWavPath
                 ],
                 cancellationToken);
 
             if (extraction.ExitCode != 0)
             {
-                throw new InvalidOperationException($"ffmpeg could not extract audio from the video: {extraction.Error}");
+                throw new InvalidOperationException(
+                    extraction.Error.Contains("does not contain any stream", StringComparison.OrdinalIgnoreCase)
+                        ? "The video does not contain an audio track to transcribe."
+                        : $"ffmpeg could not extract audio from the video: {extraction.Error}");
             }
 
             using var factory = WhisperFactory.FromPath(modelPath);
-            using var processor = factory.CreateBuilder()
-                .WithLanguage("auto")
-                .Build();
             await using var audioStream = File.OpenRead(temporaryWavPath);
             var audioDuration = GetWaveDuration(audioStream);
+            // Disposed asynchronously and first: sync Dispose throws while whisper is still processing,
+            // which is exactly the state a cancellation leaves it in.
+            await using var processor = factory.CreateBuilder()
+                .WithLanguage("auto")
+                .Build();
             progress?.Report(new VideoTranscriptionProgress(TimeSpan.Zero, audioDuration));
             
             var srt = new StringBuilder();
             var segmentNumber = 1;
             await foreach (var segment in processor.ProcessAsync(audioStream, cancellationToken))
             {
-                progress?.Report(new VideoTranscriptionProgress(segment.End, audioDuration));
+                var position = segment.End < audioDuration ? segment.End : audioDuration;
+                progress?.Report(new VideoTranscriptionProgress(position, audioDuration));
                 var text = segment.Text.Trim();
-                if (text.Length == 0)
+                if (text.Length == 0 || text == BlankAudioMarker)
                 {
                     continue;
                 }
@@ -140,7 +159,11 @@ public class VideoTranscriptService
         {
             await process.WaitForExitAsync(cancellationToken);
             await outputTask;
-            return new FfmpegResult(process.ExitCode, (await errorTask).Trim());
+            var error = (await errorTask).Trim();
+            // Ctrl+C in a terminal also reaches ffmpeg, so it can exit with an error before the
+            // token is observed. Report that as the cancellation it is, not as an ffmpeg failure.
+            cancellationToken.ThrowIfCancellationRequested();
+            return new FfmpegResult(process.ExitCode, error);
         }
         catch (OperationCanceledException)
         {
@@ -219,6 +242,7 @@ public class VideoTranscriptService
             throw new FileNotFoundException("The selected input file was not found.", path);
         }
     }
+
     private sealed record FfmpegResult(int ExitCode, string Error);
 }
 

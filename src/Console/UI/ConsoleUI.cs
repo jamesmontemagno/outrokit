@@ -314,7 +314,6 @@ public static class ConsoleUI
                     continue; // User cancelled, show menu again
                 path = browsedPath;
             }
-
             else
             {
                 path = AnsiConsole.Prompt(
@@ -341,13 +340,19 @@ public static class ConsoleUI
         }
     }
 
+    /// <summary>
+    /// Prompts for where to save an SRT file, confirming before overwriting an existing one.
+    /// </summary>
     public static string AskSaveFilePath(string prompt, string defaultPath)
     {
         while (true)
         {
+            // File names routinely contain [brackets], which Spectre would parse as markup,
+            // and it does not escape a prompt's default value itself.
             var path = AnsiConsole.Prompt(
-                new TextPrompt<string>(prompt)
-                    .DefaultValue(defaultPath));
+                new TextPrompt<string>($"{prompt} [green]({Markup.Escape(defaultPath)})[/]:")
+                    .DefaultValue(defaultPath)
+                    .HideDefaultValue());
             path = CleanFilePath(path);
 
             if (!string.Equals(Path.GetExtension(path), ".srt", StringComparison.OrdinalIgnoreCase))
@@ -363,7 +368,8 @@ public static class ConsoleUI
                 continue;
             }
 
-            if (!File.Exists(fullPath) || AnsiConsole.Confirm($"Overwrite '{Path.GetFileName(fullPath)}'?", false))
+            if (!File.Exists(fullPath)
+                || AnsiConsole.Confirm($"Overwrite '{Markup.Escape(Path.GetFileName(fullPath))}'?", false))
             {
                 return fullPath;
             }
@@ -491,8 +497,7 @@ public static class ConsoleUI
         return discoveryType switch
         {
             FileDiscoveryType.Transcript => ext is ".txt" or ".srt" or ".vtt" or ".json" or ".md" or ".csv",
-            FileDiscoveryType.Video => ext is ".mp4" or ".mov" or ".mkv" or ".avi" or ".webm"
-                or ".m4v" or ".wmv" or ".mpeg" or ".mpg",
+            FileDiscoveryType.Video => VideoTranscriptService.HasVideoExtension(fileName),
             _ => false
         };
     }

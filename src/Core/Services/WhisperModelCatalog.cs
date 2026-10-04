@@ -27,7 +27,7 @@ public static class WhisperModelCatalog
         new("LargeV3Turbo", "Large v3 Turbo", "1.5 GiB", "Fast high-accuracy multilingual model", GgmlType.LargeV3Turbo)
     ];
 
-    public static WhisperModelOption Default => All[2];
+    public static WhisperModelOption Default { get; } = All.First(option => option.GgmlType == GgmlType.Base);
 
     public static bool TryGet(string? id, out WhisperModelOption model)
     {

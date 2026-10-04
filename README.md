@@ -30,7 +30,7 @@ Generate podcast metadata (titles, descriptions, chapters, SRT subtitles) from t
 
 - [.NET 10.0 SDK](https://dotnet.microsoft.com/download) or later
 - A GitHub Copilot subscription and authentication, unless using BYOK
-- [ffmpeg](https://ffmpeg.org/download.html) available on `PATH`, or configure its executable path in Settings
+- [ffmpeg](https://ffmpeg.org/download.html) available on `PATH`, or its executable path configured in Settings (only needed for video transcription)
 
 The `GitHub.Copilot.SDK` package bundles a compatible Copilot runtime. Installing the Copilot CLI separately is optional, but useful when you want to sign in interactively or use a local CLI override.
 
@@ -112,7 +112,13 @@ dotnet run -- /path/to/transcript.txt
 
 ### Console App - With a Video File
 
-Open **Settings → Video Transcription Settings**, choose a Whisper GGML model, then download and initialize it. After setup, select **Load Transcript or Video → Video file**. The app validates the video with ffmpeg, transcribes its audio, prompts for an `.srt` save location, and loads that SRT into the existing metadata flow.
+Open **Settings → Video Transcription Settings**, choose a Whisper GGML model, then download and initialize it. After setup, select **Load Transcript or Video → Video file**, or pass the video on the command line:
+
+```bash
+podcast-metadata-generator /path/to/episode.mp4
+```
+
+The app validates the video with ffmpeg, asks where to save the `.srt`, transcribes the audio locally, and loads that SRT into the existing metadata flow. Model downloads and transcription can take a while; press **Ctrl+C** to cancel either one and return to the menu.
 
 Models are downloaded from the Whisper.net Hugging Face repository into `~/.podcast-metadata-generator/models`. Smaller models are faster and use less memory; larger models generally improve accuracy. English (`.en`) variants only transcribe English, while the other models are multilingual.
 

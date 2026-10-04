@@ -81,19 +81,16 @@ public class AppWorkflow
         }
         
         // If an input path is provided as an argument, route it through the matching flow.
+        // Anything that is not a known video type is loaded as a transcript, as before.
         if (args.Length > 0 && File.Exists(args[0]))
         {
-            if (IsTranscriptPath(args[0]))
-            {
-                await LoadTranscriptAsync(args[0]);
-            }
-            else if (IsVideoPath(args[0]))
+            if (VideoTranscriptService.HasVideoExtension(args[0]))
             {
                 await ProcessVideoAsync(args[0]);
             }
             else
             {
-                ConsoleUI.ShowWarning($"Unsupported input file type: {Path.GetExtension(args[0])}");
+                await LoadTranscriptAsync(args[0]);
             }
         }
         
@@ -269,7 +266,17 @@ public class AppWorkflow
 
             ConsoleUI.ShowSuccess($"Confirmed video file: {Path.GetFileName(videoPath)}");
 
-            var srt = await AnsiConsole.Progress()
+            // Ask up front so the transcript is written the moment a long transcription finishes,
+            // rather than being held in memory behind a prompt.
+            var defaultDirectory = Path.GetDirectoryName(Path.GetFullPath(videoPath)) ?? Environment.CurrentDirectory;
+            var defaultPath = Path.Combine(defaultDirectory, $"{Path.GetFileNameWithoutExtension(videoPath)}.srt");
+            var transcriptPath = ConsoleUI.AskSaveFilePath(
+                "Where should the transcript be saved?",
+                defaultPath);
+
+            ConsoleUI.ShowInfo("Transcribing locally with Whisper. Press Ctrl+C to cancel.");
+
+            var srt = await ConsoleCancellation.RunAsync(cancellationToken => AnsiConsole.Progress()
                 .AutoClear(false)
                 .HideCompleted(false)
                 .Columns(
@@ -293,18 +300,16 @@ public class AppWorkflow
                             $"[blue]Transcribing {FormatDuration(update.Position)} / {FormatDuration(update.Duration)}[/]";
                     });
 
-                    return await videoTranscriptService.TranscribeToSrtAsync(videoPath, progress);
-                });
-
-            var defaultDirectory = Path.GetDirectoryName(videoPath) ?? Environment.CurrentDirectory;
-            var defaultPath = Path.Combine(defaultDirectory, $"{Path.GetFileNameWithoutExtension(videoPath)}.srt");
-            var transcriptPath = ConsoleUI.AskSaveFilePath(
-                "Where should the transcript be saved?",
-                defaultPath);
+                    return await videoTranscriptService.TranscribeToSrtAsync(videoPath, progress, cancellationToken);
+                }));
 
             await File.WriteAllTextAsync(transcriptPath, srt, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
             ConsoleUI.ShowSuccess($"Saved transcript: {transcriptPath}");
             await LoadTranscriptAsync(transcriptPath);
+        }
+        catch (OperationCanceledException)
+        {
+            ConsoleUI.ShowWarning("Video transcription cancelled.");
         }
         catch (Exception ex)
         {
@@ -981,14 +986,28 @@ public class AppWorkflow
                 case "⬇️ Download and Initialize Selected Model":
                     try
                     {
-                        var modelPath = await AnsiConsole.Status()
+                        var statusPrefix = $"Downloading and initializing {Markup.Escape(model.DisplayName)}";
+                        var modelPath = await ConsoleCancellation.RunAsync(cancellationToken => AnsiConsole.Status()
                             .Spinner(Spinner.Known.Dots)
                             .SpinnerStyle(Style.Parse("blue"))
                             .StartAsync(
-                                $"Downloading and initializing {model.DisplayName} ({model.ApproximateSize})...",
-                                _ => _whisperModelService.DownloadAndInitializeAsync(_settings));
+                                $"{statusPrefix} ({model.ApproximateSize})... Ctrl+C to cancel",
+                                context =>
+                                {
+                                    var downloadProgress = new InlineProgress<long>(bytes =>
+                                        context.Status =
+                                            $"{statusPrefix}: {FormatByteSize(bytes)} of ~{model.ApproximateSize}. Ctrl+C to cancel");
+                                    return _whisperModelService.DownloadAndInitializeAsync(
+                                        _settings,
+                                        downloadProgress,
+                                        cancellationToken);
+                                }));
                         await SaveSettingsAsync();
                         ConsoleUI.ShowSuccess($"Whisper model initialized: {modelPath}");
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        ConsoleUI.ShowWarning("Model download cancelled.");
                     }
                     catch (Exception ex)
                     {
@@ -1003,36 +1022,20 @@ public class AppWorkflow
         }
     }
 
-    private static bool IsTranscriptPath(string path)
-    {
-        var extension = Path.GetExtension(path);
-        return extension.Equals(".txt", StringComparison.OrdinalIgnoreCase)
-            || extension.Equals(".srt", StringComparison.OrdinalIgnoreCase)
-            || extension.Equals(".vtt", StringComparison.OrdinalIgnoreCase)
-            || extension.Equals(".json", StringComparison.OrdinalIgnoreCase)
-            || extension.Equals(".md", StringComparison.OrdinalIgnoreCase)
-            || extension.Equals(".csv", StringComparison.OrdinalIgnoreCase);
-    }
-
-    private static bool IsVideoPath(string path)
-    {
-        var extension = Path.GetExtension(path);
-        return extension.Equals(".mp4", StringComparison.OrdinalIgnoreCase)
-            || extension.Equals(".mov", StringComparison.OrdinalIgnoreCase)
-            || extension.Equals(".mkv", StringComparison.OrdinalIgnoreCase)
-            || extension.Equals(".avi", StringComparison.OrdinalIgnoreCase)
-            || extension.Equals(".webm", StringComparison.OrdinalIgnoreCase)
-            || extension.Equals(".m4v", StringComparison.OrdinalIgnoreCase)
-            || extension.Equals(".wmv", StringComparison.OrdinalIgnoreCase)
-            || extension.Equals(".mpeg", StringComparison.OrdinalIgnoreCase)
-            || extension.Equals(".mpg", StringComparison.OrdinalIgnoreCase);
-    }
-
     private static string FormatDuration(TimeSpan duration)
     {
         return duration.TotalHours >= 1
             ? duration.ToString(@"h\:mm\:ss")
             : duration.ToString(@"m\:ss");
+    }
+
+    private static string FormatByteSize(long bytes)
+    {
+        const double mebibyte = 1024 * 1024;
+        const double gibibyte = mebibyte * 1024;
+        return bytes >= gibibyte
+            ? $"{bytes / gibibyte:0.0} GiB"
+            : $"{bytes / mebibyte:0} MiB";
     }
 
     private sealed class InlineProgress<T>(Action<T> handler) : IProgress<T>
