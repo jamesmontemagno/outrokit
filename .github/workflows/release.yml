@@ -16,6 +16,7 @@ jobs:
 
     permissions:
       contents: write
+      id-token: write # lets the job ask nuget.org for a short-lived key (Trusted Publishing)
 
     steps:
       - uses: actions/checkout@v4
@@ -48,13 +49,23 @@ jobs:
       - name: Create NuGet packages (Console tool)
         run: .github/scripts/pack-tool.sh ./artifacts "${{ steps.version.outputs.VERSION }}"
 
+      # nuget.org Trusted Publishing: no stored API key. The policy on nuget.org names this
+      # repository and this workflow file (release.yml), with no environment, and must cover both
+      # package IDs. The key lasts an hour, so it is requested right before the push.
+      - name: Get temporary NuGet API key
+        id: login
+        uses: NuGet/login@v1
+        with:
+          user: jamesmontemagno
+
       # OutroKit goes first: the old package points people at it, so it must exist.
-      # NUGET_API_KEY has to be allowed to push both package IDs.
       - name: Push to NuGet.org
+        env:
+          NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
         run: |
           for package in OutroKit PodcastMetadataGenerator; do
             dotnet nuget push ./artifacts/$package.*.nupkg \
-              --api-key ${{ secrets.NUGET_API_KEY }} \
+              --api-key "$NUGET_API_KEY" \
               --source https://api.nuget.org/v3/index.json \
               --skip-duplicate
           done
