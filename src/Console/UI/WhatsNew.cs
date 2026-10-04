@@ -24,7 +24,7 @@ public static class WhatsNew
 {
     public static IReadOnlyList<WhatsNewRelease> Releases { get; } =
     [
-        new(Version: null,
+        new(Version: "1.4.0",
         [
             new("🎧", "Transcribe video and audio files",
                 "Load a video (.mp4, .mov, .mkv, and more) or audio file (.mp3, .wav) and get an SRT transcript made locally with ffmpeg and Whisper, ready for titles, descriptions, and chapters. Choose a model under Settings → Transcription Settings. Ctrl+C cancels a transcription or model download and returns to the menu."),
@@ -34,8 +34,6 @@ public static class WhatsNew
                 "Copy the selected title, all titles, a description, chapters, or everything when a generation finishes, or any time from the main menu. Results are also printed unwrapped so they select cleanly in the terminal."),
             new("🔐", "Permission prompts",
                 "When Copilot asks for permission during a generation, you choose whether to approve or deny it instead of the request failing."),
-            new("🎬", "SRT transcripts load every cue",
-                "An SRT file could be read as one long segment, which threw off chapter generation. Every cue is now parsed with its own timestamp."),
             new("🤖", "Copilot SDK 1.0 and a new default model",
                 "Runs on the generally available GitHub Copilot SDK (1.0.16) and uses gpt-6-luna when no model has been chosen. Change it under Settings → Change Model.")
         ])
