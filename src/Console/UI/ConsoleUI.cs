@@ -690,6 +690,43 @@ public static class ConsoleUI
     }
     
     /// <summary>
+    /// Shows the most recent entries from <see cref="WhatsNew"/>.
+    /// </summary>
+    public static void ShowWhatsNew(int maxReleases = 3)
+    {
+        AnsiConsole.WriteLine();
+        AnsiConsole.Write(new Rule("[bold blue]✨ What's New[/]")
+        {
+            Justification = Justify.Left,
+            Style = Style.Parse("blue")
+        });
+
+        foreach (var release in WhatsNew.Releases.Take(maxReleases))
+        {
+            AnsiConsole.WriteLine();
+            AnsiConsole.MarkupLine($"[bold blue]{Markup.Escape(release.Heading)}[/]");
+            AnsiConsole.WriteLine();
+
+            // A grid keeps wrapped description lines aligned under their title.
+            var grid = new Grid()
+                .AddColumn(new GridColumn { NoWrap = true, Padding = new Padding(2, 0, 2, 0) })
+                .AddColumn();
+
+            foreach (var item in release.Items)
+            {
+                grid.AddRow(
+                    new Markup(Markup.Escape(item.Icon)),
+                    new Rows(
+                        new Markup($"[bold]{Markup.Escape(item.Title)}[/]"),
+                        new Markup($"[grey]{Markup.Escape(item.Description)}[/]"),
+                        Text.Empty));
+            }
+
+            AnsiConsole.Write(grid);
+        }
+    }
+
+    /// <summary>
     /// Waits for user to press any key.
     /// </summary>
     public static void WaitForKey(string message = "Press any key to continue...")

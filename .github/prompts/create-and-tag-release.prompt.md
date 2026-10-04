@@ -15,12 +15,13 @@ Requirements:
 Workflow:
 1. Validate input format is semver (`X.Y.Z` with optional prerelease/build metadata).
 2. Check git status and branch; require `main` unless explicitly told otherwise.
-3. If there are relevant uncommitted changes for the release, commit them with a clear message. If no changes, do not create an empty commit.
-4. Push `main` to `origin`.
-5. Create an annotated tag `v<version>` with message `Release v<version>`.
-6. Push the tag to `origin`.
-7. Verify the tag exists on origin and show the exact commit SHA it points to.
-8. Confirm that the release workflow should trigger from the `v*` tag.
+3. In `src/Console/UI/WhatsNew.cs`, if the first entry of `WhatsNew.Releases` has `Version: null`, set it to the release version (without `v`) so the What's New screen names the release. Check the commits since the previous tag and add any user-facing change that is missing from that entry.
+4. If there are relevant uncommitted changes for the release, commit them with a clear message. If no changes, do not create an empty commit.
+5. Push `main` to `origin`.
+6. Create an annotated tag `v<version>` with message `Release v<version>`.
+7. Push the tag to `origin`.
+8. Verify the tag exists on origin and show the exact commit SHA it points to.
+9. Confirm that the release workflow should trigger from the `v*` tag.
 
 Output format:
 - `Version:` the requested version and final tag.
