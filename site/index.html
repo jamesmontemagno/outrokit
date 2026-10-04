@@ -255,7 +255,7 @@ FORM: Blank Tape J-Card, 6th of 7 grounded directions; staged as the unfolded ca
           <li class="track track--bonus" id="a5">
             <div class="track__name"><span class="track__no">Bonus</span><h3>ffmpeg, for video and audio</h3></div>
             <div class="track__body">
-              <p>Skip this if you already have a transcript. ffmpeg is a free tool that pulls the sound out of a video or audio file so the app can transcribe it.</p>
+              <p>Skip this if you already have a transcript and are not burning captions into a video. ffmpeg is a free tool the app uses to pull the sound out of a video or audio file so it can be transcribed, and to <a href="#b5">burn captions into a video</a>.</p>
               <div data-os="windows">
                 <p class="os-name"><b>Windows</b></p>
                 <div class="cmd"><pre><code>winget install ffmpeg</code></pre></div>
@@ -263,6 +263,9 @@ FORM: Blank Tape J-Card, 6th of 7 grounded directions; staged as the unfolded ca
               <div data-os="macos">
                 <p class="os-name"><b>macOS</b>, with <a href="https://brew.sh">Homebrew</a></p>
                 <div class="cmd"><pre><code>brew install ffmpeg</code></pre></div>
+                <p>Want to burn captions into a video? Homebrew&rsquo;s standard ffmpeg leaves that part out, so install the fuller build as well:</p>
+                <div class="cmd"><pre><code>brew install ffmpeg-full</code></pre></div>
+                <p class="aside">It sits beside the standard one. The first time you choose <strong>Burn Captions into Video</strong>, the app offers to switch to it. Answer yes, then press <kbd>Return</kbd> to accept the location it suggests.</p>
               </div>
               <div data-os="linux">
                 <p class="os-name"><b>Linux</b>, Debian or Ubuntu</p>
@@ -323,7 +326,7 @@ FORM: Blank Tape J-Card, 6th of 7 grounded directions; staged as the unfolded ca
             <div class="track__name"><span class="track__no">B3</span><h3>Generate</h3></div>
             <div class="track__body">
               <figure class="screen">
-                <div class="screen__glass" role="img" aria-label="The app's main menu: Load Different Transcript, Video, or Audio; Generate All Metadata, which is selected; Generate Titles; Generate Descriptions; Generate Chapters; Convert to SRT; What's New; Settings; Exit.">
+                <div class="screen__glass" role="img" aria-label="The app's main menu: Load Different Transcript, Video, or Audio; Generate All Metadata, which is selected; Generate Titles; Generate Descriptions; Generate Chapters; Convert to SRT; Burn Captions into Video; What's New; Settings; Exit.">
                   <p class="screen__title">Main Menu</p>
                   <ul>
                     <li>📂 Load Different Transcript, Video, or Audio</li>
@@ -332,6 +335,7 @@ FORM: Blank Tape J-Card, 6th of 7 grounded directions; staged as the unfolded ca
                     <li>📄 Generate Descriptions</li>
                     <li>📑 Generate Chapters</li>
                     <li>🎬 Convert to SRT</li>
+                    <li>🔥 Burn Captions into Video</li>
                     <li>✨ What's New</li>
                     <li>⚙️ Settings</li>
                     <li>❌ Exit</li>
@@ -374,6 +378,35 @@ FORM: Blank Tape J-Card, 6th of 7 grounded directions; staged as the unfolded ca
                 </tbody>
               </table>
               <p class="aside" data-os="linux"><b class="os-name">Linux:</b> copying to the clipboard needs <span class="mono">xsel</span> installed.</p>
+            </div>
+          </li>
+
+          <li class="track track--bonus" id="b5">
+            <div class="track__name"><span class="track__no">Bonus</span><h3>Burn captions into your video</h3></div>
+            <div class="track__body">
+              <p>Burning draws the captions onto the picture itself, so they show wherever the video plays, with no subtitle file to upload. Choose <strong>Burn Captions into Video</strong> from the main menu. It is there whether or not an episode is loaded.</p>
+              <p>It uses ffmpeg, so do the <a href="#a5">bonus track on Side A</a> first.</p>
+              <p data-os="macos"><b class="os-name">macOS:</b> that includes the second, fuller install.</p>
+              <p>Pick the video, then the captions file. The <span class="mono">.srt</span> the app saved in <a href="#b2">step B2</a> works.</p>
+              <dl class="accepts">
+                <div><dt>Video</dt><dd><span class="mono">.mp4 .mov .mkv .avi .webm .m4v .wmv .mpeg .mpg</span></dd></div>
+                <div><dt>Captions</dt><dd><span class="mono">.srt .vtt .ass .ssa</span></dd></div>
+              </dl>
+              <p>The app then asks how the captions should look, starting with the text size. Your default is listed first, so pressing Enter keeps it.</p>
+              <figure class="screen">
+                <div class="screen__glass" role="img" aria-label="The caption text size question. Medium, the default, is selected: readable on most screens. Small: unobtrusive, best for wide shots and screen recordings. Large: easy to read on phones and in social clips.">
+                  <p class="screen__title">Caption text size:</p>
+                  <ul>
+                    <li class="is-on">Medium (default) - Readable on most screens</li>
+                    <li>Small - Unobtrusive, best for wide shots and screen recordings</li>
+                    <li>Large - Easy to read on phones and in social clips</li>
+                  </ul>
+                </div>
+                <figcaption>The text size question. A sketch of the real screen, not a screenshot.</figcaption>
+              </figure>
+              <p>Next it asks whether the captions sit at the <strong>Bottom</strong> or the <strong>Top</strong>, then where to save the result. It suggests <span class="mono">my-episode-captioned.mp4</span> next to the original, and it never writes over the original.</p>
+              <p>The whole video is re-encoded, so a long episode takes a while. A progress bar shows how far along it is. <kbd>Ctrl</kbd> + <kbd>C</kbd> cancels, and nothing is saved.</p>
+              <p class="aside">Captions are white with a dark outline, sized to fit the video. An <span class="mono">.ass</span> or <span class="mono">.ssa</span> file keeps its own fonts, sizes, and positions instead. Change your default size and position under <strong>Settings</strong>, then <strong>Caption Settings</strong>.</p>
             </div>
           </li>
         </ol>
@@ -434,6 +467,8 @@ Thanks for having me!</code></pre>
                 <tr><th scope="row">Chapters</th><td>3 to 12</td></tr>
                 <tr><th scope="row">Chapters per 30 minutes</th><td>5</td></tr>
                 <tr><th scope="row">Longest chapter title</th><td>8 words</td></tr>
+                <tr><th scope="row">Caption text size</th><td>Medium</td></tr>
+                <tr><th scope="row">Caption position</th><td>Bottom</td></tr>
               </tbody>
             </table>
             <p>Filling in <strong>Podcast Name</strong>, <strong>Host Names</strong>, and <strong>Episode Context</strong> (guests, topics) gives Copilot more to work with. You can also change the AI model and where files are saved.</p>
@@ -453,6 +488,10 @@ Thanks for having me!</code></pre>
               <div>
                 <dt>A video or audio file will not load</dt>
                 <dd>ffmpeg is missing or cannot be found. Install it from the <a href="#a5">bonus track</a>, or set its location under Settings.</dd>
+              </div>
+              <div>
+                <dt>The app says your ffmpeg cannot burn captions</dt>
+                <dd>Your ffmpeg was built without the part that draws captions. On macOS with Homebrew, run <span class="mono">brew install ffmpeg-full</span> from the <a href="#a5">bonus track</a>, then say yes when the app offers to switch to it. On Windows or Linux, install a fuller ffmpeg build and set its location under Settings, then Caption Settings.</dd>
               </div>
               <div>
                 <dt>No chapters or subtitles came out</dt>
