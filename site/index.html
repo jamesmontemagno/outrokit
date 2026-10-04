@@ -10,13 +10,25 @@ FORM: Blank Tape J-Card, 6th of 7 grounded directions; staged as the unfolded ca
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Podcast Metadata Generator: titles, descriptions, chapters, and subtitles from your episode</title>
-  <meta name="description" content="A free terminal app that reads your podcast transcript, video, or audio file and writes the titles, descriptions, YouTube chapters, and SRT subtitles. Works with the free GitHub Copilot plan. Step-by-step install and usage guide.">
+  <title>OutroKit: titles, descriptions, chapters, and subtitles from your podcast episode</title>
+  <meta name="description" content="OutroKit is a free terminal app that reads your podcast transcript, video, or audio file and writes the titles, descriptions, YouTube chapters, and SRT subtitles. Works with the free GitHub Copilot plan. Step-by-step install and usage guide.">
   <meta name="theme-color" content="#2438c9">
+  <link rel="canonical" href="https://outrokit.com/">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Podcast Metadata Generator">
+  <meta property="og:site_name" content="OutroKit">
+  <meta property="og:title" content="OutroKit: the episode is done, the label isn&rsquo;t">
   <meta property="og:description" content="Hand it your episode. Get back titles, descriptions, YouTube chapters, and subtitles. Install and usage guide.">
-  <meta property="og:url" content="https://jamesmontemagno.github.io/podcast-metadata-generator/">
+  <meta property="og:url" content="https://outrokit.com/">
+  <meta property="og:image" content="https://outrokit.com/og.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="An unfolded cassette inlay card. The front reads: The episode is done. The label isn&rsquo;t. The index side is filled in with a title, description, chapters, and subtitles for a made-up example episode.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="OutroKit: the episode is done, the label isn&rsquo;t">
+  <meta name="twitter:description" content="Hand it your episode. Get back titles, descriptions, YouTube chapters, and subtitles. Install and usage guide.">
+  <meta name="twitter:image" content="https://outrokit.com/og.png">
+  <meta name="twitter:image:alt" content="An unfolded cassette inlay card. The front reads: The episode is done. The label isn&rsquo;t. The index side is filled in with a title, description, chapters, and subtitles for a made-up example episode.">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="preload" href="fonts/archivo-variable.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/sometype-mono-variable.woff2" as="font" type="font/woff2" crossorigin>
@@ -36,7 +48,7 @@ FORM: Blank Tape J-Card, 6th of 7 grounded directions; staged as the unfolded ca
   <a class="skip" href="#main">Skip to content</a>
 
   <header class="topbar">
-    <a class="brand" href="#top" aria-label="Podcast Metadata Generator, back to top">Podcast Metadata Generator</a>
+    <a class="brand" href="#top" aria-label="OutroKit, back to top">OutroKit</a>
     <nav aria-label="Sections">
       <ul>
         <li><a href="#side-a"><span class="chip chip--a" aria-hidden="true">A</span>Install</a></li>
@@ -54,7 +66,7 @@ FORM: Blank Tape J-Card, 6th of 7 grounded directions; staged as the unfolded ca
         <div class="jcard__front">
           <div class="bands" aria-hidden="true"><i></i><i></i><i></i></div>
           <h1 id="hero-title"><span>The episode is done.</span> <span class="turn">The label isn&rsquo;t.</span></h1>
-          <p class="pitch">Podcast Metadata Generator reads your transcript, video, or audio file and writes the titles, descriptions, YouTube chapters, and subtitles for it.</p>
+          <p class="pitch">OutroKit reads your transcript, video, or audio file and writes the titles, descriptions, YouTube chapters, and subtitles for it.</p>
 
           <div class="cassette" id="cassette">
             <div class="cassette__label">
@@ -231,6 +243,7 @@ FORM: Blank Tape J-Card, 6th of 7 grounded directions; staged as the unfolded ca
               <div class="cmd cmd--lead"><pre><code>dnx PodcastMetadataGenerator</code></pre></div>
               <p><span class="mono">dnx</span> comes with .NET 10. It fetches the latest version and starts it, with nothing left to maintain. If it asks whether to download the package, answer yes.</p>
               <p class="expect">You should see the app&rsquo;s banner, then a Copilot status table ending in <span class="mono">Copilot runtime is ready to use!</span></p>
+              <p class="aside">The package and the banner use the app&rsquo;s original name, Podcast Metadata Generator. It is the same thing as OutroKit.</p>
               <h4>Prefer to keep it installed?</h4>
               <div class="cmd"><pre><code>dotnet tool install -g PodcastMetadataGenerator</code></pre></div>
               <p>From then on, start it with:</p>

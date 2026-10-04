@@ -43,6 +43,7 @@ It runs on the user's own machine as a single command, uses their GitHub Copilot
 ## Brand Commitments
 
 - Name: Podcast Metadata Generator. Package ID `PodcastMetadataGenerator`; command `podcast-metadata-generator`.
+- Site: https://outrokit.com, titled OutroKit (domain and title set by James Montemagno, 2026-10-04). The app's banner, NuGet package, and command keep the name Podcast Metadata Generator, and the site says they are the same thing.
 - Author: James Montemagno. MIT licensed, open source on GitHub.
 
 ## Evidence on Hand

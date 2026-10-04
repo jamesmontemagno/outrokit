@@ -6,7 +6,7 @@ Generate podcast metadata (titles, descriptions, chapters, SRT subtitles) from t
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![GitHub Copilot](https://img.shields.io/badge/GitHub%20Copilot-SDK-000?logo=github)
 
-**New here?** The [step-by-step install and usage guide](https://jamesmontemagno.github.io/podcast-metadata-generator/) walks through everything, starting from opening a terminal.
+**New here?** The [step-by-step install and usage guide](https://outrokit.com/) at **outrokit.com** walks through everything, starting from opening a terminal.
 
 <img width="896" height="378" alt="Screenshot 2026-02-13 at 11 29 28 AM" src="https://github.com/user-attachments/assets/2dfef3a4-6323-4b18-b1b0-2e17ba2fddef" />
 
@@ -196,7 +196,7 @@ When a generation finishes, the console offers a **Copy to clipboard** menu for 
 
 ## 🌍 Website
 
-The guide at [jamesmontemagno.github.io/podcast-metadata-generator](https://jamesmontemagno.github.io/podcast-metadata-generator/) lives in [`site/`](site/) as plain HTML, CSS, and JavaScript with no build step. Pushing changes under `site/` to `main` deploys it through the [Pages workflow](.github/workflows/pages.yml).
+The guide at [outrokit.com](https://outrokit.com/) lives in [`site/`](site/) as plain HTML, CSS, and JavaScript with no build step. Pushing changes under `site/` to `main` deploys it through the [Pages workflow](.github/workflows/pages.yml).
 
 To preview it locally:
 
@@ -206,6 +206,18 @@ python3 -m http.server 4173
 ```
 
 Then open http://localhost:4173.
+
+The site is served at outrokit.com through the custom domain in the repository's Pages settings.
+
+The image shown when the link is shared is `site/og.png`. It is a 1200×630 screenshot of [`design/og-image.html`](design/og-image.html), which uses the site's fonts and colors. To regenerate it after an edit, with Chrome or Edge:
+
+```bash
+"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --hide-scrollbars \
+  --force-device-scale-factor=1 --window-size=1200,630 \
+  --screenshot="$PWD/site/og.png" "file://$PWD/design/og-image.html"
+```
+
+The browser can keep running after the file is written; stop it with Ctrl+C.
 
 ## 🎯 Supported Transcript Formats
 

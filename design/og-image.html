@@ -1,0 +1,220 @@
+<!doctype html>
+<!--
+Source for site/og.png, the image shown when the site's link is shared.
+It is a 1200x630 crop of the site's J-card and uses the site's fonts and colors.
+To regenerate it after a change, see "Website" in the README.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>OutroKit share image</title>
+<style>
+  @font-face {
+    font-family: "Archivo";
+    src: url("../site/fonts/archivo-variable.woff2") format("woff2");
+    font-weight: 100 900;
+    font-stretch: 62% 125%;
+  }
+  @font-face {
+    font-family: "Sometype Mono";
+    src: url("../site/fonts/sometype-mono-variable.woff2") format("woff2");
+    font-weight: 400 700;
+  }
+  :root {
+    --blue: oklch(41% 0.2 268);
+    --card: oklch(98.5% 0.004 100);
+    --ink: oklch(19% 0.025 268);
+    --ink-soft: oklch(40% 0.05 268);
+    --yellow: oklch(88% 0.17 93);
+    --red: oklch(65% 0.22 31);
+    --red-ink: oklch(50% 0.2 29);
+    --rule: oklch(41% 0.2 268 / 0.26);
+    --line: 34px;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1200px; height: 630px; overflow: hidden; }
+  body {
+    display: grid;
+    padding: 38px 44px 46px;
+    background: var(--blue);
+    color: var(--ink);
+    font-family: "Archivo", "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .jcard {
+    display: grid;
+    grid-template-columns: 500px 50px minmax(0, 1fr);
+    background: var(--card);
+    border-radius: 6px;
+    box-shadow:
+      0 30px 50px -22px oklch(15% 0.1 268 / 0.75),
+      0 8px 16px -8px oklch(15% 0.1 268 / 0.5);
+    overflow: hidden;
+  }
+  .front {
+    display: flex;
+    flex-direction: column;
+    padding: 34px 38px 32px;
+  }
+  .bands { display: grid; gap: 7px; }
+  .bands i { display: block; height: 20px; background: var(--red); }
+  .bands i:nth-child(2) { height: 11px; background: var(--yellow); }
+  .bands i:nth-child(3) { height: 5px; background: var(--blue); }
+  h1 {
+    margin-top: 26px;
+    font-stretch: 125%;
+    font-weight: 800;
+    font-size: 53px;
+    line-height: 0.98;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+  }
+  h1 span { display: block; }
+  h1 .turn { color: var(--red-ink); }
+  .pitch {
+    margin-top: 20px;
+    font-size: 25px;
+    line-height: 1.3;
+    text-wrap: pretty;
+  }
+  .imprint {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: auto;
+  }
+  .imprint svg { width: 62px; height: 62px; flex: none; }
+  .wordmark {
+    font-stretch: 125%;
+    font-weight: 800;
+    font-size: 36px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .url {
+    margin-top: 6px;
+    font-family: "Sometype Mono", ui-monospace, monospace;
+    font-weight: 600;
+    font-size: 19px;
+    line-height: 1;
+    color: var(--ink-soft);
+  }
+  .spine {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 30px 0;
+    background: var(--yellow);
+    writing-mode: vertical-rl;
+    rotate: 180deg;
+    white-space: nowrap;
+    box-shadow:
+      inset 7px 0 7px -7px oklch(19% 0.025 268 / 0.45),
+      inset -7px 0 7px -7px oklch(19% 0.025 268 / 0.45);
+  }
+  .printed {
+    font-stretch: 70%;
+    font-weight: 650;
+    font-size: 16px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1.3;
+  }
+  .spine .printed { color: oklch(38% 0.07 93); }
+  .typed {
+    margin-block-end: 18px;
+    font-family: "Sometype Mono", ui-monospace, monospace;
+    font-weight: 600;
+    font-size: 19px;
+  }
+  .index { padding: 32px 36px 0 34px; }
+  .index__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+  .index__head .printed { font-size: 19px; }
+  .stamp {
+    padding: 6px 11px;
+    border: 2.5px solid var(--red-ink);
+    border-radius: 3px;
+    color: var(--red-ink);
+    font-stretch: 70%;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1.2;
+    rotate: -1.5deg;
+  }
+  dl { display: grid; row-gap: 17px; }
+  .field { display: grid; grid-template-columns: 112px minmax(0, 1fr); column-gap: 14px; }
+  dt { line-height: var(--line); color: var(--ink-soft); }
+  dd {
+    font-family: "Sometype Mono", ui-monospace, monospace;
+    font-weight: 500;
+    font-size: 18.5px;
+    line-height: var(--line);
+    background-image: linear-gradient(to bottom, transparent calc(var(--line) - 1px), var(--rule) 0);
+    background-size: 100% var(--line);
+  }
+  dd span { display: block; white-space: nowrap; }
+</style>
+</head>
+<body>
+  <div class="jcard">
+    <div class="front">
+      <div class="bands"><i></i><i></i><i></i></div>
+      <h1><span>The episode is done.</span> <span class="turn">The label isn&rsquo;t.</span></h1>
+      <p class="pitch">Titles, descriptions, chapters, and subtitles, written from your podcast episode.</p>
+      <div class="imprint">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" aria-hidden="true">
+          <rect width="32" height="32" rx="6" fill="#2438c9"/>
+          <rect x="4" y="8" width="24" height="16" rx="2.5" fill="#15172a"/>
+          <rect x="6" y="10" width="20" height="9" rx="1" fill="#fafaf7"/>
+          <rect x="6" y="10" width="20" height="2.5" fill="#f2543a"/>
+          <circle cx="12" cy="15.5" r="2" fill="#15172a"/>
+          <circle cx="20" cy="15.5" r="2" fill="#15172a"/>
+        </svg>
+        <div>
+          <p class="wordmark">OutroKit</p>
+          <p class="url">outrokit.com</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="spine">
+      <span class="printed">Show</span>
+      <span class="typed">Spare Room Radio</span>
+      <span class="printed">Ep.</span>
+      <span class="typed">031</span>
+    </div>
+
+    <div class="index">
+      <div class="index__head">
+        <p class="printed">What it writes for you</p>
+        <p class="stamp">Example episode</p>
+      </div>
+      <dl>
+        <div class="field">
+          <dt class="printed">Title</dt>
+          <dd><span>Four Episodes in One Day:</span><span>Does Batch Recording Work?</span></dd>
+        </div>
+        <div class="field">
+          <dt class="printed">Description</dt>
+          <dd><span>We tried recording a full month</span><span>of episodes in a single day&hellip;</span></dd>
+        </div>
+        <div class="field">
+          <dt class="printed">Chapters</dt>
+          <dd><span>00:00 Welcome and the plan</span><span>02:45 Why we wanted to batch</span><span>09:30 Prepping four outlines</span><span>17:05 Hour six: the energy dip</span></dd>
+        </div>
+        <div class="field">
+          <dt class="printed">Subtitles</dt>
+          <dd><span>1</span><span>00:00:00,000 --&gt; 00:00:04,200</span><span>Welcome back to Spare Room Radio.</span></dd>
+        </div>
+      </dl>
+    </div>
+  </div>
+</body>
+</html>
