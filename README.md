@@ -219,6 +219,8 @@ The image shown when the link is shared is `site/og.png`. It is a 1200×630 scre
   --screenshot="$PWD/site/og.png" "file://$PWD/design/og-image.html"
 ```
 
+The hype video that announces a release is made in the same style from [`design/hype-video/`](design/hype-video/). Its [README](design/hype-video/README.md) covers how to render it and how to update it for the next release.
+
 The browser can keep running after the file is written; stop it with Ctrl+C.
 
 ## 🎯 Supported Transcript Formats
