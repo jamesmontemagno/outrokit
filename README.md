@@ -31,9 +31,15 @@ Generate podcast metadata (titles, descriptions, chapters, SRT subtitles) from t
 
 - [.NET 10.0 SDK](https://dotnet.microsoft.com/download) or later
 - A GitHub Copilot subscription and authentication, unless using BYOK
+- [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/set-up/install-copilot-cli) installed, when running the NuGet tool on macOS, Windows, or Linux on Arm (see below)
 - [ffmpeg](https://ffmpeg.org/download.html) available on `PATH`, or its executable path configured in Settings (only needed to transcribe video or audio files)
 
-The `GitHub.Copilot.SDK` package bundles a compatible Copilot runtime. Installing the Copilot CLI separately is optional, but useful when you want to sign in interactively or use a local CLI override.
+The app talks to Copilot through a Copilot runtime, and whether you need to install one depends on how you run the app:
+
+- **NuGet tool (`dnx` or `dotnet tool install`)** - The package only bundles the runtime for Linux x64. On macOS, Windows, and Linux on Arm, install the Copilot CLI and make sure `copilot` is on your `PATH`, or set `COPILOT_CLI_PATH` to the executable.
+- **From source** - The `GitHub.Copilot.SDK` package bundles a runtime for the machine you build on, so the Copilot CLI is optional. It is still useful for signing in interactively.
+
+If a Copilot CLI is found on your `PATH`, the app uses it in preference to the bundled runtime.
 
 ### Installing GitHub Copilot CLI
 
