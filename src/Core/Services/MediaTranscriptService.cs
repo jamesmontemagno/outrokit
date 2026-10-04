@@ -7,49 +7,60 @@ using Whisper.net;
 
 namespace PodcastMetadataGenerator.Core.Services;
 
-public class VideoTranscriptService
+/// <summary>
+/// Transcribes the audio of a video or audio file to SRT, locally, using ffmpeg and Whisper.
+/// </summary>
+public class MediaTranscriptService
 {
     // whisper.cpp emits this marker instead of text for silent audio.
     private const string BlankAudioMarker = "[BLANK_AUDIO]";
 
-    private static readonly HashSet<string> VideoExtensions = new(StringComparer.OrdinalIgnoreCase)
+    private static readonly HashSet<string> MediaExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
-        ".mp4", ".mov", ".mkv", ".avi", ".webm", ".m4v", ".wmv", ".mpeg", ".mpg"
+        // Video
+        ".mp4", ".mov", ".mkv", ".avi", ".webm", ".m4v", ".wmv", ".mpeg", ".mpg",
+        // Audio
+        ".mp3", ".wav", ".wave"
     };
 
     private readonly AppSettings _settings;
     private readonly WhisperModelService _modelService;
 
-    public VideoTranscriptService(AppSettings settings, WhisperModelService? modelService = null)
+    public MediaTranscriptService(AppSettings settings, WhisperModelService? modelService = null)
     {
         _settings = settings;
         _modelService = modelService ?? new WhisperModelService();
     }
 
     /// <summary>
-    /// Whether the path has a recognized video extension. Use <see cref="IsVideoFileAsync"/> to confirm the content.
+    /// Whether the path has a recognized video or audio extension.
+    /// Use <see cref="HasAudioStreamAsync"/> to confirm the content.
     /// </summary>
-    public static bool HasVideoExtension(string path) => VideoExtensions.Contains(Path.GetExtension(path));
+    public static bool HasMediaExtension(string path) => MediaExtensions.Contains(Path.GetExtension(path));
 
-    public async Task<bool> IsVideoFileAsync(string path, CancellationToken cancellationToken = default)
+    /// <summary>
+    /// Whether ffmpeg can decode an audio stream from the file, which is what transcription needs
+    /// whether the file is a video or audio-only.
+    /// </summary>
+    public async Task<bool> HasAudioStreamAsync(string path, CancellationToken cancellationToken = default)
     {
         EnsureInputExists(path);
 
         var result = await RunFfmpegAsync(
-            ["-nostdin", "-hide_banner", "-loglevel", "error", "-i", path, "-map", "0:v:0", "-frames:v", "1", "-f", "null", "-"],
+            ["-nostdin", "-hide_banner", "-loglevel", "error", "-i", path, "-map", "0:a:0", "-frames:a", "1", "-f", "null", "-"],
             cancellationToken);
         return result.ExitCode == 0;
     }
 
     public async Task<string> TranscribeToSrtAsync(
-        string videoPath,
-        IProgress<VideoTranscriptionProgress>? progress = null,
+        string mediaPath,
+        IProgress<MediaTranscriptionProgress>? progress = null,
         CancellationToken cancellationToken = default)
     {
-        EnsureInputExists(videoPath);
+        EnsureInputExists(mediaPath);
         var modelPath = _modelService.GetInstalledModelPath(_settings)
             ?? throw new InvalidOperationException(
-                "No initialized Whisper model is available. Install one from Settings before transcribing video.");
+                "No initialized Whisper model is available. Install one from Settings before transcribing.");
 
         var temporaryWavPath = Path.Combine(Path.GetTempPath(), $"podcast-metadata-{Guid.NewGuid():N}.wav");
         Exception? transcriptionException = null;
@@ -57,7 +68,7 @@ public class VideoTranscriptService
         {
             var extraction = await RunFfmpegAsync(
                 [
-                    "-nostdin", "-hide_banner", "-loglevel", "error", "-y", "-i", videoPath,
+                    "-nostdin", "-hide_banner", "-loglevel", "error", "-y", "-i", mediaPath,
                     "-vn", "-acodec", "pcm_s16le", "-ar", "16000", "-ac", "1", temporaryWavPath
                 ],
                 cancellationToken);
@@ -66,8 +77,8 @@ public class VideoTranscriptService
             {
                 throw new InvalidOperationException(
                     extraction.Error.Contains("does not contain any stream", StringComparison.OrdinalIgnoreCase)
-                        ? "The video does not contain an audio track to transcribe."
-                        : $"ffmpeg could not extract audio from the video: {extraction.Error}");
+                        ? "The file does not contain an audio track to transcribe."
+                        : $"ffmpeg could not extract audio from the file: {extraction.Error}");
             }
 
             using var factory = WhisperFactory.FromPath(modelPath);
@@ -78,14 +89,14 @@ public class VideoTranscriptService
             await using var processor = factory.CreateBuilder()
                 .WithLanguage("auto")
                 .Build();
-            progress?.Report(new VideoTranscriptionProgress(TimeSpan.Zero, audioDuration));
+            progress?.Report(new MediaTranscriptionProgress(TimeSpan.Zero, audioDuration));
             
             var srt = new StringBuilder();
             var segmentNumber = 1;
             await foreach (var segment in processor.ProcessAsync(audioStream, cancellationToken))
             {
                 var position = segment.End < audioDuration ? segment.End : audioDuration;
-                progress?.Report(new VideoTranscriptionProgress(position, audioDuration));
+                progress?.Report(new MediaTranscriptionProgress(position, audioDuration));
                 var text = segment.Text.Trim();
                 if (text.Length == 0 || text == BlankAudioMarker)
                 {
@@ -103,10 +114,10 @@ public class VideoTranscriptService
 
             if (segmentNumber == 1)
             {
-                throw new InvalidOperationException("Whisper did not detect any speech in the video's audio.");
+                throw new InvalidOperationException("Whisper did not detect any speech in the audio.");
             }
 
-            progress?.Report(new VideoTranscriptionProgress(audioDuration, audioDuration));
+            progress?.Report(new MediaTranscriptionProgress(audioDuration, audioDuration));
             return srt.ToString();
         }
         catch (Exception ex)
@@ -246,7 +257,7 @@ public class VideoTranscriptService
     private sealed record FfmpegResult(int ExitCode, string Error);
 }
 
-public sealed record VideoTranscriptionProgress(TimeSpan Position, TimeSpan Duration)
+public sealed record MediaTranscriptionProgress(TimeSpan Position, TimeSpan Duration)
 {
     public double Percentage => Duration <= TimeSpan.Zero
         ? 0

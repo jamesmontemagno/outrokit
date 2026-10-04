@@ -19,7 +19,7 @@ Generate podcast metadata (titles, descriptions, chapters, SRT subtitles) from t
 - **📑 Chapter Generation** - Auto-generate YouTube-compatible chapter markers with timestamps
 - **🎬 SRT Conversion** - Convert transcripts to valid SRT subtitle format
 - **🔄 Multiple Transcript Formats** - Support for Zencastr, time-range, SRT formats, and plain text
-- **🎥 Video Transcription** - Validate video with ffmpeg and generate SRT transcripts locally with Whisper.net
+- **🎧 Video & Audio Transcription** - Start from a video or audio file (`.mp3`, `.wav`) and generate an SRT transcript locally with ffmpeg and Whisper.net
 - **📂 File Browser** - Built-in file browser or drag-and-drop support
 - **⚡ Streaming Responses** - Watch AI responses generate in real-time
 - **📋 Copy to Clipboard** - Copy titles, descriptions, chapters, or everything at once; finished output is printed unwrapped so it also selects cleanly in the terminal
@@ -30,7 +30,7 @@ Generate podcast metadata (titles, descriptions, chapters, SRT subtitles) from t
 
 - [.NET 10.0 SDK](https://dotnet.microsoft.com/download) or later
 - A GitHub Copilot subscription and authentication, unless using BYOK
-- [ffmpeg](https://ffmpeg.org/download.html) available on `PATH`, or its executable path configured in Settings (only needed for video transcription)
+- [ffmpeg](https://ffmpeg.org/download.html) available on `PATH`, or its executable path configured in Settings (only needed to transcribe video or audio files)
 
 The `GitHub.Copilot.SDK` package bundles a compatible Copilot runtime. Installing the Copilot CLI separately is optional, but useful when you want to sign in interactively or use a local CLI override.
 
@@ -110,15 +110,18 @@ podcast-metadata-generator /path/to/transcript.txt
 dotnet run -- /path/to/transcript.txt
 ```
 
-### Console App - With a Video File
+### Console App - With a Video or Audio File
 
-Open **Settings → Video Transcription Settings**, choose a Whisper GGML model, then download and initialize it. After setup, select **Load Transcript or Video → Video file**, or pass the video on the command line:
+Open **Settings → Transcription Settings**, choose a Whisper GGML model, then download and initialize it. After setup, select **Load Transcript, Video, or Audio → Video or audio file**, or pass the file on the command line:
 
 ```bash
 podcast-metadata-generator /path/to/episode.mp4
+podcast-metadata-generator /path/to/episode.mp3
 ```
 
-The app validates the video with ffmpeg, asks where to save the `.srt`, transcribes the audio locally, and loads that SRT into the existing metadata flow. Model downloads and transcription can take a while; press **Ctrl+C** to cancel either one and return to the menu.
+Supported video formats are `.mp4`, `.mov`, `.mkv`, `.avi`, `.webm`, `.m4v`, `.wmv`, `.mpeg`, and `.mpg`. Supported audio formats are `.mp3` and `.wav`.
+
+The app checks the file for an audio track with ffmpeg, asks where to save the `.srt`, transcribes the audio locally, and loads that SRT into the existing metadata flow. Model downloads and transcription can take a while; press **Ctrl+C** to cancel either one and return to the menu.
 
 Models are downloaded from the Whisper.net Hugging Face repository into `~/.podcast-metadata-generator/models`. Smaller models are faster and use less memory; larger models generally improve accuracy. English (`.en`) variants only transcribe English, while the other models are multilingual.
 
@@ -215,7 +218,7 @@ Access settings from the main menu to configure:
 
 ### General Settings
 - **AI Model** - Select from available Copilot models (dynamically fetched from CLI)
-- **ffmpeg Path** - Executable path or command used to validate videos and extract 16 kHz mono audio
+- **ffmpeg Path** - Executable path or command used to check video and audio files and extract 16 kHz mono audio
 - **Whisper GGML Model** - Select, download, and initialize a local Whisper.net model for transcription
 - **Output Directory** - Default location for saved files
 - **Podcast Name** - Your podcast name (used in prompts for better context)

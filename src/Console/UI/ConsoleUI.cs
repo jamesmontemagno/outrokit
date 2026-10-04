@@ -455,12 +455,14 @@ public static class ConsoleUI
             
             items.Add("❌ Cancel");
             
+            // Names are escaped for display only; brackets in a file or folder name are not markup.
             var selection = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("[bold]Select a file or navigate:[/]")
                     .PageSize(15)
                     .MoreChoicesText("[grey](Move up/down to see more)[/]")
                     .HighlightStyle(Style.Parse("blue"))
+                    .UseConverter(Markup.Escape)
                     .AddChoices(items));
             
             if (selection == "❌ Cancel")
@@ -497,7 +499,7 @@ public static class ConsoleUI
         return discoveryType switch
         {
             FileDiscoveryType.Transcript => ext is ".txt" or ".srt" or ".vtt" or ".json" or ".md" or ".csv",
-            FileDiscoveryType.Video => VideoTranscriptService.HasVideoExtension(fileName),
+            FileDiscoveryType.Media => MediaTranscriptService.HasMediaExtension(fileName),
             _ => false
         };
     }
@@ -573,7 +575,7 @@ public static class ConsoleUI
     public enum FileDiscoveryType
     {
         Transcript,
-        Video
+        Media
     }
     
     /// <summary>

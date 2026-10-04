@@ -81,12 +81,12 @@ public class AppWorkflow
         }
         
         // If an input path is provided as an argument, route it through the matching flow.
-        // Anything that is not a known video type is loaded as a transcript, as before.
+        // Anything that is not a known video or audio type is loaded as a transcript, as before.
         if (args.Length > 0 && File.Exists(args[0]))
         {
-            if (VideoTranscriptService.HasVideoExtension(args[0]))
+            if (MediaTranscriptService.HasMediaExtension(args[0]))
             {
-                await ProcessVideoAsync(args[0]);
+                await ProcessMediaAsync(args[0]);
             }
             else
             {
@@ -129,11 +129,11 @@ public class AppWorkflow
             
             if (_transcript == null)
             {
-                choices.Add("📂 Load Transcript or Video");
+                choices.Add("📂 Load Transcript, Video, or Audio");
             }
             else
             {
-                choices.Add("📂 Load Different Transcript or Video");
+                choices.Add("📂 Load Different Transcript, Video, or Audio");
                 choices.Add("🚀 Generate All Metadata");
                 choices.Add("📝 Generate Titles");
                 choices.Add("📄 Generate Descriptions");
@@ -156,8 +156,8 @@ public class AppWorkflow
             
             switch (action)
             {
-                case "📂 Load Transcript or Video":
-                case "📂 Load Different Transcript or Video":
+                case "📂 Load Transcript, Video, or Audio":
+                case "📂 Load Different Transcript, Video, or Audio":
                     await PromptAndLoadInputAsync();
                     break;
                     
@@ -212,7 +212,7 @@ public class AppWorkflow
     {
         var inputType = ConsoleUI.SelectFromList(
             "What would you like to provide?",
-            new[] { "📄 Transcript file", "🎥 Video file" });
+            new[] { "📄 Transcript file", "🎬 Video or audio file" });
 
         if (inputType == "📄 Transcript file")
         {
@@ -224,52 +224,52 @@ public class AppWorkflow
             return;
         }
 
-        var videoPath = ConsoleUI.AskFilePath(
-            "Select a video file:",
+        var mediaPath = ConsoleUI.AskFilePath(
+            "Select a video or audio file:",
             mustExist: true,
-            discoveryType: ConsoleUI.FileDiscoveryType.Video);
-        await ProcessVideoAsync(videoPath);
+            discoveryType: ConsoleUI.FileDiscoveryType.Media);
+        await ProcessMediaAsync(mediaPath);
     }
 
-    private async Task ProcessVideoAsync(string videoPath)
+    private async Task ProcessMediaAsync(string mediaPath)
     {
         try
         {
             if (_whisperModelService.GetInstalledModelPath(_settings) is null)
             {
-                ConsoleUI.ShowWarning("A Whisper model must be installed before a video can be transcribed.");
-                if (!AnsiConsole.Confirm("Open video transcription settings now?", defaultValue: true))
+                ConsoleUI.ShowWarning("A Whisper model must be installed before a video or audio file can be transcribed.");
+                if (!AnsiConsole.Confirm("Open transcription settings now?", defaultValue: true))
                 {
                     return;
                 }
 
-                await EditVideoTranscriptionSettingsAsync();
+                await EditTranscriptionSettingsAsync();
                 if (_whisperModelService.GetInstalledModelPath(_settings) is null)
                 {
-                    ConsoleUI.ShowWarning("Video transcription was cancelled because no Whisper model is installed.");
+                    ConsoleUI.ShowWarning("Transcription was cancelled because no Whisper model is installed.");
                     return;
                 }
             }
 
-            var videoTranscriptService = new VideoTranscriptService(_settings, _whisperModelService);
-            var isVideo = await AnsiConsole.Status()
+            var transcriptService = new MediaTranscriptService(_settings, _whisperModelService);
+            var hasAudio = await AnsiConsole.Status()
                 .Spinner(Spinner.Known.Dots)
                 .SpinnerStyle(Style.Parse("blue"))
-                .StartAsync("Confirming the selected file is a video...", _ =>
-                    videoTranscriptService.IsVideoFileAsync(videoPath));
+                .StartAsync("Checking the file for an audio track...", _ =>
+                    transcriptService.HasAudioStreamAsync(mediaPath));
 
-            if (!isVideo)
+            if (!hasAudio)
             {
-                ConsoleUI.ShowError("The selected file does not contain a readable video stream.");
+                ConsoleUI.ShowError("The selected file does not contain a readable audio track.");
                 return;
             }
 
-            ConsoleUI.ShowSuccess($"Confirmed video file: {Path.GetFileName(videoPath)}");
+            ConsoleUI.ShowSuccess($"Found audio to transcribe: {Path.GetFileName(mediaPath)}");
 
             // Ask up front so the transcript is written the moment a long transcription finishes,
             // rather than being held in memory behind a prompt.
-            var defaultDirectory = Path.GetDirectoryName(Path.GetFullPath(videoPath)) ?? Environment.CurrentDirectory;
-            var defaultPath = Path.Combine(defaultDirectory, $"{Path.GetFileNameWithoutExtension(videoPath)}.srt");
+            var defaultDirectory = Path.GetDirectoryName(Path.GetFullPath(mediaPath)) ?? Environment.CurrentDirectory;
+            var defaultPath = Path.Combine(defaultDirectory, $"{Path.GetFileNameWithoutExtension(mediaPath)}.srt");
             var transcriptPath = ConsoleUI.AskSaveFilePath(
                 "Where should the transcript be saved?",
                 defaultPath);
@@ -292,7 +292,7 @@ public class AppWorkflow
                         maxValue: 100);
                     task.IsIndeterminate = true;
 
-                    var progress = new InlineProgress<VideoTranscriptionProgress>(update =>
+                    var progress = new InlineProgress<MediaTranscriptionProgress>(update =>
                     {
                         task.IsIndeterminate = false;
                         task.Value = update.Percentage;
@@ -300,7 +300,7 @@ public class AppWorkflow
                             $"[blue]Transcribing {FormatDuration(update.Position)} / {FormatDuration(update.Duration)}[/]";
                     });
 
-                    return await videoTranscriptService.TranscribeToSrtAsync(videoPath, progress, cancellationToken);
+                    return await transcriptService.TranscribeToSrtAsync(mediaPath, progress, cancellationToken);
                 }));
 
             await File.WriteAllTextAsync(transcriptPath, srt, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
@@ -309,11 +309,11 @@ public class AppWorkflow
         }
         catch (OperationCanceledException)
         {
-            ConsoleUI.ShowWarning("Video transcription cancelled.");
+            ConsoleUI.ShowWarning("Transcription cancelled.");
         }
         catch (Exception ex)
         {
-            ConsoleUI.ShowError($"Video transcription failed: {ex.Message}");
+            ConsoleUI.ShowError($"Transcription failed: {ex.Message}");
         }
     }
     
@@ -850,7 +850,7 @@ public class AppWorkflow
                 new[] 
                 { 
                     "🤖 Change Model", 
-                    "🎥 Video Transcription Settings",
+                    "🎧 Transcription Settings",
                     "📁 Change Output Directory", 
                     "🎙️ Podcast Info (Name & Hosts)",
                     "📝 Episode Context",
@@ -897,8 +897,8 @@ public class AppWorkflow
                     ConsoleUI.ShowSuccess($"Output directory set to: {_settings.OutputDirectory}");
                     break;
 
-                case "🎥 Video Transcription Settings":
-                    await EditVideoTranscriptionSettingsAsync();
+                case "🎧 Transcription Settings":
+                    await EditTranscriptionSettingsAsync();
                     break;
                     
                 case "🎙️ Podcast Info (Name & Hosts)":
@@ -945,14 +945,14 @@ public class AppWorkflow
         }
     }
 
-    private async Task EditVideoTranscriptionSettingsAsync()
+    private async Task EditTranscriptionSettingsAsync()
     {
         while (true)
         {
             var model = WhisperModelCatalog.Get(_settings.WhisperModel);
             var installedPath = _whisperModelService.GetInstalledModelPath(_settings);
             var action = ConsoleUI.SelectFromList(
-                $"[bold]Video Transcription[/]\nffmpeg: [blue]{Markup.Escape(_settings.FfmpegPath)}[/]\n" +
+                $"[bold]Video and Audio Transcription[/]\nffmpeg: [blue]{Markup.Escape(_settings.FfmpegPath)}[/]\n" +
                 $"Model: [blue]{Markup.Escape(model.DisplayName)}[/] ({model.ApproximateSize}) " +
                 (installedPath is null ? "[yellow]not installed[/]" : "[green]initialized[/]"),
                 new[]

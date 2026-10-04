@@ -117,7 +117,7 @@ public class AppSettings
     public string FfmpegPath { get; set; } = "ffmpeg";
 
     /// <summary>
-    /// Whisper.net GGML model selected for video transcription.
+    /// Whisper.net GGML model selected for transcribing video and audio files.
     /// </summary>
     public string WhisperModel { get; set; } = "Base";
 
