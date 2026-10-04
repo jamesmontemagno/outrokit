@@ -1,0 +1,13 @@
+Podcast Metadata Generator is now OutroKit.
+
+This file is only in the PodcastMetadataGenerator package. When the app finds it,
+it tells you how to move to the OutroKit package:
+
+  dnx OutroKit
+
+or, if you installed it as a tool:
+
+  dotnet tool uninstall -g PodcastMetadataGenerator
+  dotnet tool install -g OutroKit
+
+https://outrokit.com/

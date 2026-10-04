@@ -71,6 +71,10 @@ public class AppWorkflow
         
         // Show header with ASCII art and Copilot status
         ConsoleUI.ShowHeader(copilotStatus);
+        if (PackageIdentity.IsLegacyPackage)
+        {
+            ConsoleUI.ShowRenamedPackageNotice();
+        }
         
         // Check if Copilot is not ready
         if (copilotStatus != null && (!copilotStatus.IsInstalled || (!copilotStatus.IsTokenSet && !copilotStatus.IsAuthenticated)))

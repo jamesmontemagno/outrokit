@@ -22,7 +22,7 @@ It runs on the user's own machine as a single command, uses their GitHub Copilot
 
 ## Operating Context
 
-- Run from a terminal: `dnx PodcastMetadataGenerator` (no install) or `dotnet tool install -g PodcastMetadataGenerator`, then `outrokit [file]`.
+- Run from a terminal: `dnx OutroKit` (no install) or `dotnet tool install -g OutroKit`, then `outrokit [file]`.
 - Interactive, menu-driven UI (Spectre.Console): load a file, generate titles / descriptions / chapters / SRT, copy to clipboard, save results, burn captions into a video, settings.
 - Inputs: transcripts in Zencastr, time-range, SRT, or plain text formats; video (`.mp4`, `.mov`, `.mkv`, `.avi`, `.webm`, `.m4v`, `.wmv`, `.mpeg`, `.mpg`); audio (`.mp3`, `.wav`). Burning captions takes a video and a captions file (`.srt`, `.vtt`, `.ass`, `.ssa`); no transcript needs to be loaded.
 - Outputs, named after the input file (per `OutputService.cs`): `<name>_titles.txt`, `<name>_description_short.txt`, `<name>_description_medium.txt`, `<name>_description_long.txt`, `<name>_chapters.txt`, `<name>.srt`, `<name>_manifest.json`. The README's output table lists older unprefixed names. A burned video is saved as `<video name>-captioned` next to the original, as `.mp4`, `.mov`, `.mkv`, or `.m4v`.
@@ -44,7 +44,7 @@ It runs on the user's own machine as a single command, uses their GitHub Copilot
 
 ## Brand Commitments
 
-- Name: OutroKit, in the app, README, and site (renamed from Podcast Metadata Generator by James Montemagno, 2026-10-04). Copy says "episode" and "show" and does not assume a podcast. The NuGet package ID stays `PodcastMetadataGenerator`; the command is `outrokit`. The settings folder stays `~/.podcast-metadata-generator` so saved settings and models carry over.
+- Name: OutroKit, in the app, README, and site (renamed from Podcast Metadata Generator by James Montemagno, 2026-10-04). Copy says "episode" and "show" and does not assume a podcast. The NuGet package is `OutroKit` and the command is `outrokit`. The original `PodcastMetadataGenerator` package is still published as a compatibility package: the same app under its old command, `podcast-metadata-generator`, with a startup notice telling people to switch (two-package rename requested by James Montemagno, 2026-10-04). The settings folder stays `~/.podcast-metadata-generator` so saved settings and models carry over.
 - Site: https://outrokit.com (domain set by James Montemagno, 2026-10-04).
 - For caption formats the app cannot burn, and for captions that need more work first, the app, README, and site link to CaptionStack (https://captionstack.app/), a free in-browser caption converter (link requested by James Montemagno, 2026-10-04).
 - Author: James Montemagno. MIT licensed, open source on GitHub.
@@ -52,7 +52,7 @@ It runs on the user's own machine as a single command, uses their GitHub Copilot
 ## Evidence on Hand
 
 - README.md is the source of truth for install commands, formats, outputs, and settings.
-- Published on NuGet as `PodcastMetadataGenerator`; latest GitHub release v1.3.2.
+- Published on NuGet as `PodcastMetadataGenerator` through v1.4.0. The `OutroKit` package does not exist on nuget.org until the first release after the rename.
 - Two terminal screenshots are linked from the README (hosted on GitHub user attachments).
 - Any example episode shown on the site must be made up and clearly labeled as an example (confirmed 2026-10-04). Do not present invented output as real tool output, and do not fabricate testimonials, user counts, or benchmarks.
 

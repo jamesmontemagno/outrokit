@@ -43,20 +43,21 @@ jobs:
       - name: Build Solution
         run: dotnet build PodcastMetadataGenerator.sln --configuration Release --no-restore
 
-      - name: Create NuGet package (Console tool)
-        run: |
-          dotnet pack src/Console/PodcastMetadataGenerator.Console.csproj \
-            --configuration Release \
-            --output ./artifacts \
-            --no-build \
-            -p:Version=${{ steps.version.outputs.VERSION }}
+      # Packs OutroKit and PodcastMetadataGenerator, the app's original package, which now tells
+      # people to move to OutroKit. See CONTRIBUTING.md for when to stop publishing the old one.
+      - name: Create NuGet packages (Console tool)
+        run: .github/scripts/pack-tool.sh ./artifacts "${{ steps.version.outputs.VERSION }}"
 
+      # OutroKit goes first: the old package points people at it, so it must exist.
+      # NUGET_API_KEY has to be allowed to push both package IDs.
       - name: Push to NuGet.org
         run: |
-          dotnet nuget push ./artifacts/*.nupkg \
-            --api-key ${{ secrets.NUGET_API_KEY }} \
-            --source https://api.nuget.org/v3/index.json \
-            --skip-duplicate
+          for package in OutroKit PodcastMetadataGenerator; do
+            dotnet nuget push ./artifacts/$package.*.nupkg \
+              --api-key ${{ secrets.NUGET_API_KEY }} \
+              --source https://api.nuget.org/v3/index.json \
+              --skip-duplicate
+          done
 
       - name: Upload package artifact
         uses: actions/upload-artifact@v4

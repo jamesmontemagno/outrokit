@@ -45,6 +45,20 @@ public static class ConsoleUI
     }
     
     /// <summary>
+    /// Tells someone running the original package how to move to the renamed one.
+    /// </summary>
+    public static void ShowRenamedPackageNotice()
+    {
+        AnsiConsole.MarkupLine(
+            $"[yellow]![/] [bold]This package has a new name: {PackageIdentity.PackageId}.[/] Switch to it to keep getting updates.");
+        AnsiConsole.MarkupLine($"  Next time, start the app with: [cyan]dnx {PackageIdentity.PackageId}[/]");
+        AnsiConsole.MarkupLine(
+            $"  Installed it as a tool? Run [cyan]dotnet tool uninstall -g {PackageIdentity.LegacyPackageId}[/], then [cyan]dotnet tool install -g {PackageIdentity.PackageId}[/], and start it with [cyan]outrokit[/].");
+        AnsiConsole.MarkupLine("  [grey]Your settings and downloaded models carry over.[/]");
+        AnsiConsole.WriteLine();
+    }
+
+    /// <summary>
     /// Shows Copilot SDK runtime status.
     /// </summary>
     public static void ShowCopilotStatus(CopilotAuthService.CopilotStatus status)

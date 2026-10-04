@@ -71,6 +71,15 @@ The tests in `tests/` burn captions into short clips that ffmpeg generates on th
 - `UI/` - Console UI components
 - `Program.cs` - Application entry point
 
+### NuGet Packages
+
+The console app is published as two tool packages, and `.github/scripts/pack-tool.sh` packs and checks both:
+
+- **`OutroKit`** is the app, with the command `outrokit`.
+- **`PodcastMetadataGenerator`** is the app's original package. A tool package cannot depend on another package, so it carries the same app under its old ID and old command, and tells people at startup to move to `OutroKit`.
+
+When the old package is no longer needed, deprecate it on nuget.org with `OutroKit` as the alternate package, and remove it from the push step in `.github/workflows/release.yml`.
+
 ## Style Guidelines
 
 ### C# Style

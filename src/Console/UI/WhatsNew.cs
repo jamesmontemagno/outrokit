@@ -27,7 +27,7 @@ public static class WhatsNew
         new(Version: null,
         [
             new("📼", "Now called OutroKit",
-                "Podcast Metadata Generator is now OutroKit, with a new look and a home at outrokit.com. It works the same for podcasts and videos alike. If you installed it as a tool, start it with outrokit from now on; dnx PodcastMetadataGenerator works as before, and your settings carry over."),
+                "Podcast Metadata Generator is now OutroKit, with a new look and a home at outrokit.com. It works the same for podcasts and videos alike. The package has a new name too: start it with dnx OutroKit, or run dotnet tool install -g OutroKit and then outrokit. The old package still works and shows how to switch, and your settings carry over."),
             new("🔥", "Burn captions into video",
                 "Pick a video and a captions file (.srt, .vtt, .ass, or .ssa) from Burn Captions into Video on the main menu and get a new video with the captions drawn into the picture. You confirm the text size and position each time; set your defaults under Settings → Caption Settings. This needs an ffmpeg that includes libass, such as Homebrew's ffmpeg-full, and the app tells you if yours does not. For captions in another format, or that need more work first, try captionstack.app."),
             new("🤖", "Change Model no longer crashes",

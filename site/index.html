@@ -73,8 +73,8 @@ FORM: Blank Tape J-Card, 6th of 7 grounded directions; staged as the unfolded ca
               <div class="cassette__write">
                 <span class="cassette__side" aria-hidden="true">A</span>
                 <p class="printed" id="hero-cmd-label">Have .NET 10? Run this</p>
-                <button class="copy copy--label" type="button" data-copy="dnx PodcastMetadataGenerator" hidden>Copy</button>
-                <code class="cassette__cmd">dnx PodcastMetadataGenerator</code>
+                <button class="copy copy--label" type="button" data-copy="dnx OutroKit" hidden>Copy</button>
+                <code class="cassette__cmd">dnx OutroKit</code>
               </div>
               <div class="cassette__window" aria-hidden="true">
                 <svg class="reel reel--full" viewBox="0 0 100 100"><circle class="reel__tape" cx="50" cy="50" r="49"/><g class="reel__hub"><circle cx="50" cy="50" r="19"/><path d="M50 31v9M50 60v9M33.5 40.5l7.8 4.5M58.7 55l7.8 4.5M33.5 59.5l7.8-4.5M58.7 45l7.8-4.5"/></g></svg>
@@ -240,15 +240,14 @@ FORM: Blank Tape J-Card, 6th of 7 grounded directions; staged as the unfolded ca
           <li class="track" id="a4">
             <div class="track__name"><span class="track__no">A4</span><h3>Run it</h3></div>
             <div class="track__body">
-              <div class="cmd cmd--lead"><pre><code>dnx PodcastMetadataGenerator</code></pre></div>
+              <div class="cmd cmd--lead"><pre><code>dnx OutroKit</code></pre></div>
               <p><span class="mono">dnx</span> comes with .NET 10. It fetches the latest version and starts it, with nothing left to maintain. If it asks whether to download the package, answer yes.</p>
               <p class="expect">You should see the OutroKit banner, then a Copilot status table ending in <span class="mono">Copilot runtime is ready to use!</span></p>
-              <p class="aside">The package is still called <span class="mono">PodcastMetadataGenerator</span>, the app&rsquo;s name before it became OutroKit.</p>
               <h4>Prefer to keep it installed?</h4>
-              <div class="cmd"><pre><code>dotnet tool install -g PodcastMetadataGenerator</code></pre></div>
+              <div class="cmd"><pre><code>dotnet tool install -g OutroKit</code></pre></div>
               <p>From then on, start it with:</p>
               <div class="cmd"><pre><code>outrokit</code></pre></div>
-              <p class="aside">Update later with <span class="mono">dotnet tool update -g PodcastMetadataGenerator</span>.</p>
+              <p class="aside">Update later with <span class="mono">dotnet tool update -g OutroKit</span>.</p>
             </div>
           </li>
 
@@ -294,7 +293,7 @@ FORM: Blank Tape J-Card, 6th of 7 grounded directions; staged as the unfolded ca
             <div class="track__body">
               <p>Start the app, choose <strong>Load Transcript, Video, or Audio</strong>, then say which kind of file you have. <strong>Browse for file</strong> lets you walk your folders with the arrow keys. <strong>Type or paste path</strong> also accepts a file dragged onto the terminal window.</p>
               <p>Or hand it the file as you start:</p>
-              <div class="cmd"><pre><code>dnx PodcastMetadataGenerator "my episode.mp3"</code></pre></div>
+              <div class="cmd"><pre><code>dnx OutroKit "my episode.mp3"</code></pre></div>
               <dl class="accepts">
                 <div><dt>Transcripts</dt><dd>Zencastr, time-range, SRT, or plain text. <a href="#formats">See the formats</a>.</dd></div>
                 <div><dt>Video</dt><dd><span class="mono">.mp4 .mov .mkv .avi .webm .m4v .wmv .mpeg .mpg</span></dd></div>
@@ -512,10 +511,10 @@ Thanks for having me!</code></pre>
   <footer class="outro">
     <div class="wrap">
       <p class="outro__line">That is the whole tape.</p>
-      <div class="cmd cmd--outro"><pre><code>dnx PodcastMetadataGenerator</code></pre></div>
+      <div class="cmd cmd--outro"><pre><code>dnx OutroKit</code></pre></div>
       <ul class="outro__links">
         <li><a href="https://github.com/jamesmontemagno/podcast-metadata-generator">Source on GitHub</a></li>
-        <li><a href="https://www.nuget.org/packages/PodcastMetadataGenerator">Package on NuGet</a></li>
+        <li><a href="https://www.nuget.org/packages/OutroKit">Package on NuGet</a></li>
         <li><a href="https://github.com/jamesmontemagno/podcast-metadata-generator/releases">Release notes</a></li>
         <li><a href="https://github.com/jamesmontemagno/podcast-metadata-generator/blob/main/LICENSE">MIT License</a></li>
       </ul>

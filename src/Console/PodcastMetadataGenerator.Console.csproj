@@ -11,12 +11,11 @@
     <!-- NuGet Package Configuration -->
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>outrokit</ToolCommandName>
-    <!-- The package keeps its original ID so existing installs and `dnx PodcastMetadataGenerator` keep working. -->
-    <PackageId>PodcastMetadataGenerator</PackageId>
+    <PackageId>OutroKit</PackageId>
     <Title>OutroKit</Title>
     <PackageVersion>1.2.1</PackageVersion>
     <Authors>James Montemagno</Authors>
-    <Description>OutroKit writes the titles, descriptions, chapters, and subtitles for your episode from its transcript, video, or audio, using GitHub Copilot. It can also burn captions into a video. Formerly Podcast Metadata Generator.</Description>
+    <Description>OutroKit writes the titles, descriptions, chapters, and subtitles for your episode from its transcript, video, or audio, using GitHub Copilot. It can also burn captions into a video.</Description>
     <PackageTags>outrokit;podcast;video;youtube;metadata;ai;copilot;transcripts;chapters;srt;subtitles;captions</PackageTags>
     <PackageProjectUrl>https://outrokit.com/</PackageProjectUrl>
     <RepositoryUrl>https://github.com/jamesmontemagno/podcast-metadata-generator</RepositoryUrl>
@@ -26,6 +25,22 @@
     <!-- Enable reflection-based JSON serialization -->
     <JsonSerializerIsReflectionEnabledByDefault>true</JsonSerializerIsReflectionEnabledByDefault>
   </PropertyGroup>
+
+  <!--
+    The app's original package. A tool package cannot depend on another package, so the renamed
+    app is also packed under its old ID and command, with a marker file that makes it tell people
+    to move to OutroKit. Pack it with -p:LegacyPackage=true; .github/scripts/pack-tool.sh does both.
+  -->
+  <PropertyGroup Condition="'$(LegacyPackage)' == 'true'">
+    <PackageId>PodcastMetadataGenerator</PackageId>
+    <ToolCommandName>podcast-metadata-generator</ToolCommandName>
+    <Title>Podcast Metadata Generator (now OutroKit)</Title>
+    <Description>This package has been renamed to OutroKit: run "dnx OutroKit" or "dotnet tool install -g OutroKit". It still installs the same app, which writes the titles, descriptions, chapters, and subtitles for your episode using GitHub Copilot.</Description>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(LegacyPackage)' == 'true'">
+    <None Update="renamed-package.txt" Pack="true" PackagePath="tools/$(TargetFramework)/any/" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Core\PodcastMetadataGenerator.Core.csproj" />

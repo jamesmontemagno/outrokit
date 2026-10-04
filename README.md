@@ -2,7 +2,7 @@
 
 OutroKit writes the titles, descriptions, chapters, and SRT subtitles for your episode from its transcript, video, or audio, using AI powered by the GitHub Copilot SDK. It works for podcasts and videos alike.
 
-> OutroKit was called Podcast Metadata Generator. The NuGet package keeps that name, so `dnx PodcastMetadataGenerator` works as before. If you installed it as a tool, the command is now `outrokit`. Your settings carry over.
+> OutroKit was called Podcast Metadata Generator, and its NuGet package is now `OutroKit`. The old `PodcastMetadataGenerator` package still works and tells you how to switch: run `dnx OutroKit`, or if you installed it as a tool, run `dotnet tool uninstall -g PodcastMetadataGenerator` and then `dotnet tool install -g OutroKit`. Your settings carry over.
 
 ![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet)
 ![License](https://img.shields.io/badge/license-MIT-green)
@@ -80,14 +80,16 @@ copilot
 ### Just run it with .NET 10+ (Recommended)
 
 ```bash
-dnx PodcastMetadataGenerator
+dnx OutroKit
 ```
 
 ### As a .NET Tool
 
 ```bash
-dotnet tool install -g PodcastMetadataGenerator
+dotnet tool install -g OutroKit
 ```
+
+Then start it with `outrokit`.
 
 ### From Source
 
