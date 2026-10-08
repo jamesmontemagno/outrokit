@@ -651,12 +651,11 @@ public static class ConsoleUI
         IReadOnlyCollection<DescriptionLength>? preselected = null,
         string title = "Which descriptions would you like to generate?")
     {
-        var selected = preselected is { Count: > 0 }
-            ? preselected
-            : Enum.GetValues<DescriptionLength>();
+        var selected = preselected ?? Enum.GetValues<DescriptionLength>();
         
         var prompt = new MultiSelectionPrompt<DescriptionLength>()
             .Title(title)
+            .NotRequired()
             .PageSize(10)
             .InstructionsText("[grey](Press [blue]<space>[/] to toggle, [green]<enter>[/] to confirm)[/]")
             .UseConverter(length =>
