@@ -23,6 +23,7 @@ public class AppWorkflow
     
     private Transcript? _transcript;
     private GenerationResult _result = new();
+    private List<DescriptionLength> _descriptionLengths = [.. Enum.GetValues<DescriptionLength>()];
 
     private readonly ConcurrentQueue<PendingPermission> _pendingPermissions = new();
 
@@ -658,6 +659,8 @@ public class AppWorkflow
         try
         {
             var titleStyle = ConsoleUI.SelectTitleStyle(_settings.TitleStyle);
+            var descriptionLengths = ConsoleUI.SelectDescriptionLengths(_descriptionLengths);
+            _descriptionLengths = descriptionLengths;
             
             await EnsureGeneratorInitializedAsync();
             
@@ -672,8 +675,15 @@ public class AppWorkflow
             }
             
             // Generate descriptions
-            ConsoleUI.ShowInfo("Generating descriptions...");
-            await GenerateDescriptionsInternalAsync();
+            if (descriptionLengths.Count > 0)
+            {
+                ConsoleUI.ShowInfo("Generating descriptions...");
+                await GenerateDescriptionsInternalAsync(descriptionLengths);
+            }
+            else
+            {
+                _result.Descriptions.Clear();
+            }
             
             // Generate chapters
             ConsoleUI.ShowInfo("Generating chapters...");
@@ -762,8 +772,17 @@ public class AppWorkflow
         
         try
         {
+            var lengths = ConsoleUI.SelectDescriptionLengths(_descriptionLengths);
+            _descriptionLengths = lengths;
+            
+            if (lengths.Count == 0)
+            {
+                ConsoleUI.ShowWarning("No descriptions selected.");
+                return;
+            }
+            
             await EnsureGeneratorInitializedAsync();
-            await GenerateDescriptionsInternalAsync();
+            await GenerateDescriptionsInternalAsync(lengths);
             
             await OfferCopyAsync(CopyScope.Descriptions);
         }
@@ -773,9 +792,12 @@ public class AppWorkflow
         }
     }
     
-    private async Task GenerateDescriptionsInternalAsync()
+    private async Task GenerateDescriptionsInternalAsync(IReadOnlyList<DescriptionLength> lengths)
     {
-        foreach (var length in Enum.GetValues<DescriptionLength>())
+        // Descriptions from an earlier run would otherwise outlive the lengths the user just unchecked
+        _result.Descriptions.Clear();
+        
+        foreach (var length in lengths)
         {
             _result.Descriptions[length] = await RunStreamingGenerationAsync(
                 $"{length} Description",

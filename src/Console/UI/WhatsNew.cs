@@ -26,6 +26,8 @@ public static class WhatsNew
     [
         new(Version: "1.6.0",
         [
+            new("📝", "Choose which descriptions to generate",
+                "Generating descriptions now starts with a checklist of Short, Medium, and Long, so you can generate just the one you need instead of all three. Generate All asks the same question up front, and your choice is remembered for the rest of the session."),
             new("✅", "Caption quality checks",
                 "Before burning captions into a video, OutroKit checks timing, overlaps, duration, line length, line count, and reading speed. It can safely fix common SRT and WebVTT issues in a temporary copy, so your original captions stay unchanged."),
             new("🎨", "Four caption appearances",

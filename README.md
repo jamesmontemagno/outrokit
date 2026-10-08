@@ -20,7 +20,7 @@ OutroKit writes the titles, descriptions, chapters, and SRT subtitles for your e
 
 - **🎯 Title Generation** - Get multiple creative title suggestions for your episode
 - **🎨 Title Styles** - Pick a style (balanced, descriptive, curiosity hook, question, how-to, playful, professional, SEO, or mixed) each time you generate titles
-- **📝 Description Generation** - Create short, medium, and long descriptions optimized for different platforms
+- **📝 Description Generation** - Create short, medium, and long descriptions optimized for different platforms, picking which lengths to generate each time
 - **📑 Chapter Generation** - Auto-generate YouTube-compatible chapter markers with timestamps
 - **🎬 SRT Conversion** - Convert transcripts to valid SRT subtitle format
 - **🔄 Multiple Transcript Formats** - Support for Zencastr, time-range, SRT formats, and plain text
