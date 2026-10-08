@@ -626,6 +626,23 @@ public static class ConsoleUI
                 return $"{Markup.Escape(position.GetDisplayName())}{suffix} [grey]- {Markup.Escape(position.GetDescription())}[/]";
             });
     }
+
+    /// <summary>
+    /// Prompts for a caption appearance, listing the default first so Enter accepts it.
+    /// </summary>
+    public static CaptionAppearance SelectCaptionAppearance(
+        CaptionAppearance defaultAppearance,
+        string title = "Caption appearance:")
+    {
+        return SelectFromList(
+            title,
+            CaptionStyles.AllAppearances.OrderByDescending(appearance => appearance == defaultAppearance).ToList(),
+            appearance =>
+            {
+                var suffix = appearance == defaultAppearance ? " [green](default)[/]" : "";
+                return $"{Markup.Escape(appearance.GetDisplayName())}{suffix} [grey]- {Markup.Escape(appearance.GetDescription())}[/]";
+            });
+    }
     
     /// <summary>
     /// Shows descriptions in a formatted way.

@@ -172,6 +172,11 @@ public class AppSettings
     /// </summary>
     public CaptionPosition CaptionPosition { get; set; } = CaptionStyles.DefaultPosition;
 
+    /// <summary>
+    /// Default visual treatment for captions burned into a video. Confirmed each time captions are burned.
+    /// </summary>
+    public CaptionAppearance CaptionAppearance { get; set; } = CaptionStyles.DefaultAppearance;
+
     #endregion
     
     #region Output Settings

@@ -93,6 +93,29 @@ public sealed class CaptionBurnServiceTests(MediaFixture media)
     }
 
     [CaptionFfmpegFact]
+    public async Task Burns_four_visually_distinct_caption_appearances()
+    {
+        var directory = media.NewDirectory();
+        var frameHashes = new HashSet<string>();
+
+        foreach (var appearance in CaptionStyles.AllAppearances)
+        {
+            var output = Path.Combine(directory, $"{appearance}.mp4");
+            await media.CreateBurnService().BurnAsync(
+                media.Landscape,
+                media.Srt,
+                output,
+                new CaptionStyle(CaptionSize.Medium, CaptionPosition.Bottom, appearance));
+
+            var frame = await media.ReadFrameAsync(output, MediaFixture.DuringCaption);
+            Assert.True(frame.BottomThird > 50, $"No visible text was rendered for {appearance}.");
+            frameHashes.Add(Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(frame.Pixels)));
+        }
+
+        Assert.Equal(4, frameHashes.Count);
+    }
+
+    [CaptionFfmpegFact]
     public async Task Burns_vtt_captions()
     {
         var output = Path.Combine(media.NewDirectory(), "captioned.mp4");

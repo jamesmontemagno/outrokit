@@ -111,6 +111,7 @@ public class SettingsService
         WhisperModelPath = settings.WhisperModelPath,
         CaptionSize = settings.CaptionSize,
         CaptionPosition = settings.CaptionPosition,
+        CaptionAppearance = settings.CaptionAppearance,
         OutputDirectory = settings.OutputDirectory,
         TitleCount = settings.TitleCount,
         TitleMaxWords = settings.TitleMaxWords,
@@ -157,6 +158,11 @@ public class SettingsService
         if (!Enum.IsDefined(settings.CaptionPosition))
         {
             settings.CaptionPosition = CaptionStyles.DefaultPosition;
+        }
+
+        if (!Enum.IsDefined(settings.CaptionAppearance))
+        {
+            settings.CaptionAppearance = CaptionStyles.DefaultAppearance;
         }
 
         return settings;

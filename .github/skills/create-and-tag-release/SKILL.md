@@ -1,8 +1,8 @@
 ---
-description: "Create and publish a new release for this repo with a v-prefixed semver tag"
-name: "Create And Tag Release"
+name: create-and-tag-release
+description: Create and publish a new release for this repo with a v-prefixed semver tag
+disable-model-invocation: true
 argument-hint: "version (e.g. 1.2.3)"
-agent: "agent"
 ---
 Create and tag a new release for this repository using the provided version argument.
 
