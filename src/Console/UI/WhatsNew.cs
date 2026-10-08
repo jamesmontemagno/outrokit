@@ -24,7 +24,7 @@ public static class WhatsNew
 {
     public static IReadOnlyList<WhatsNewRelease> Releases { get; } =
     [
-        new(Version: null,
+        new(Version: "1.6.0",
         [
             new("✅", "Caption quality checks",
                 "Before burning captions into a video, OutroKit checks timing, overlaps, duration, line length, line count, and reading speed. It can safely fix common SRT and WebVTT issues in a temporary copy, so your original captions stay unchanged."),
