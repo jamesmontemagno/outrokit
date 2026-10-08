@@ -645,6 +645,46 @@ public static class ConsoleUI
     }
     
     /// <summary>
+    /// Prompts for which description lengths to generate, preselecting the supplied lengths.
+    /// </summary>
+    public static List<DescriptionLength> SelectDescriptionLengths(
+        IReadOnlyCollection<DescriptionLength>? preselected = null,
+        string title = "Which descriptions would you like to generate?")
+    {
+        var selected = preselected is { Count: > 0 }
+            ? preselected
+            : Enum.GetValues<DescriptionLength>();
+        
+        var prompt = new MultiSelectionPrompt<DescriptionLength>()
+            .Title(title)
+            .PageSize(10)
+            .InstructionsText("[grey](Press [blue]<space>[/] to toggle, [green]<enter>[/] to confirm)[/]")
+            .UseConverter(length =>
+            {
+                var hint = length switch
+                {
+                    DescriptionLength.Short => "2-3 sentences",
+                    DescriptionLength.Medium => "1-2 paragraphs",
+                    DescriptionLength.Long => "3-4 paragraphs",
+                    _ => ""
+                };
+                
+                return $"{length} [grey]- {hint}[/]";
+            });
+        
+        foreach (var length in Enum.GetValues<DescriptionLength>())
+        {
+            var item = prompt.AddChoice(length);
+            if (selected.Contains(length))
+            {
+                item.Select();
+            }
+        }
+        
+        return AnsiConsole.Prompt(prompt);
+    }
+    
+    /// <summary>
     /// Shows descriptions in a formatted way.
     /// </summary>
     public static void ShowDescriptions(Dictionary<DescriptionLength, string> descriptions)
