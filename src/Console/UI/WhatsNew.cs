@@ -24,7 +24,7 @@ public static class WhatsNew
 {
     public static IReadOnlyList<WhatsNewRelease> Releases { get; } =
     [
-        new(Version: null,
+        new(Version: "1.6.0",
         [
             new("📝", "Choose which descriptions to generate",
                 "Generating descriptions now starts with a checklist of Short, Medium, and Long, so you can generate just the one you need instead of all three. Generate All asks the same question up front, and your choice is remembered for the rest of the session."),
