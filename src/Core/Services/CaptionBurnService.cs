@@ -368,9 +368,21 @@ public partial class CaptionBurnService
         // .ass files: 2 is bottom center and 6 is top center.
         var alignment = style.Position == CaptionPosition.Top ? 6 : 2;
 
+        var appearance = style.Appearance switch
+        {
+            CaptionAppearance.ContrastPanel =>
+                "PrimaryColour=&H00FFFFFF,OutlineColour=&H66000000,BackColour=&H66000000,Bold=0,BorderStyle=3,Outline=4,Shadow=0",
+            CaptionAppearance.BoldImpact =>
+                "PrimaryColour=&H0000D7FF,OutlineColour=&H00000000,BackColour=&H00000000,Bold=-1,BorderStyle=1,Outline=2.4,Shadow=1.2",
+            CaptionAppearance.CleanShadow =>
+                "PrimaryColour=&H00F5F5F5,OutlineColour=&H80000000,BackColour=&H80000000,Bold=0,BorderStyle=1,Outline=0.6,Shadow=1.5",
+            _ =>
+                "PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,BackColour=&H00000000,Bold=0,BorderStyle=1,Outline=1.2,Shadow=0"
+        };
+
         return string.Create(
             CultureInfo.InvariantCulture,
-            $"FontSize={fontSize},Alignment={alignment},MarginV=12,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,BorderStyle=1,Outline=1.2,Shadow=0");
+            $"FontSize={fontSize},Alignment={alignment},MarginV=12,{appearance}");
     }
 
     private static VideoDetails ParseVideoDetails(string ffmpegLog)

@@ -14,12 +14,19 @@ public sealed class SettingsServiceTests : IDisposable
     {
         var service = new SettingsService(_path);
 
-        await service.SaveAsync(new AppSettings { CaptionSize = CaptionSize.Large, CaptionPosition = CaptionPosition.Top });
+        await service.SaveAsync(new AppSettings
+        {
+            CaptionSize = CaptionSize.Large,
+            CaptionPosition = CaptionPosition.Top,
+            CaptionAppearance = CaptionAppearance.BoldImpact
+        });
         var loaded = await service.LoadAsync();
 
         Assert.Equal(CaptionSize.Large, loaded.CaptionSize);
         Assert.Equal(CaptionPosition.Top, loaded.CaptionPosition);
+        Assert.Equal(CaptionAppearance.BoldImpact, loaded.CaptionAppearance);
         Assert.Contains("\"CaptionSize\": \"Large\"", await File.ReadAllTextAsync(_path));
+        Assert.Contains("\"CaptionAppearance\": \"BoldImpact\"", await File.ReadAllTextAsync(_path));
     }
 
     [Fact]
@@ -31,6 +38,7 @@ public sealed class SettingsServiceTests : IDisposable
 
         Assert.Equal(CaptionSize.Medium, loaded.CaptionSize);
         Assert.Equal(CaptionPosition.Bottom, loaded.CaptionPosition);
+        Assert.Equal(CaptionAppearance.ClassicOutline, loaded.CaptionAppearance);
         Assert.Equal(7, loaded.TitleCount);
         Assert.Equal("/somewhere/ffmpeg", loaded.FfmpegPath);
     }
@@ -38,12 +46,15 @@ public sealed class SettingsServiceTests : IDisposable
     [Fact]
     public async Task Out_of_range_caption_settings_fall_back_without_losing_the_rest()
     {
-        await File.WriteAllTextAsync(_path, """{ "CaptionSize": 42, "CaptionPosition": 9, "TitleCount": 7 }""");
+        await File.WriteAllTextAsync(
+            _path,
+            """{ "CaptionSize": 42, "CaptionPosition": 9, "CaptionAppearance": 99, "TitleCount": 7 }""");
 
         var loaded = await new SettingsService(_path).LoadAsync();
 
         Assert.Equal(CaptionSize.Medium, loaded.CaptionSize);
         Assert.Equal(CaptionPosition.Bottom, loaded.CaptionPosition);
+        Assert.Equal(CaptionAppearance.ClassicOutline, loaded.CaptionAppearance);
         Assert.Equal(7, loaded.TitleCount);
     }
 }

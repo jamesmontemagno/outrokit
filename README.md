@@ -25,7 +25,7 @@ OutroKit writes the titles, descriptions, chapters, and SRT subtitles for your e
 - **🎬 SRT Conversion** - Convert transcripts to valid SRT subtitle format
 - **🔄 Multiple Transcript Formats** - Support for Zencastr, time-range, SRT formats, and plain text
 - **🎧 Video & Audio Transcription** - Start from a video or audio file (`.mp3`, `.wav`) and generate an SRT transcript locally with ffmpeg and Whisper.net
-- **🔥 Burn Captions into Video** - Draw an `.srt`, `.vtt`, `.ass`, or `.ssa` captions file into the picture of a video with ffmpeg. For other caption formats, or captions that need more work first, use [CaptionStack](https://captionstack.app/)
+- **🔥 Burn Captions into Video** - Draw an `.srt`, `.vtt`, `.ass`, or `.ssa` captions file into the picture of a video with four appearance choices. For other caption formats, or captions that need more work first, use [CaptionStack](https://captionstack.app/)
 - **📂 File Browser** - Built-in file browser or drag-and-drop support
 - **⚡ Streaming Responses** - Watch AI responses generate in real-time
 - **📋 Copy to Clipboard** - Copy titles, descriptions, chapters, or everything at once; finished output is printed unwrapped so it also selects cleanly in the terminal
@@ -140,7 +140,7 @@ Models are downloaded from the Whisper.net Hugging Face repository into `~/.podc
 
 Select **Burn Captions into Video** from the main menu, then choose a video and a captions file (`.srt`, `.vtt`, `.ass`, or `.ssa`). No transcript needs to be loaded, and an SRT made by the app from the same video works as the captions file.
 
-The app asks you to confirm the caption text size (Small, Medium, or Large) and position (Bottom or Top), then where to save the result. The default is `<video name>-captioned` next to the original, and the original is never overwritten. Captions are white with a dark outline and are sized to the video, so they look the same at 720p and 4K and stay proportionate on portrait video. An `.ass` or `.ssa` file keeps its own fonts, sizes, and positions.
+Before burning, the app checks caption timing and readability and reports invalid times, overlaps, empty cues, short durations, long lines, too many lines, and fast reading speeds. For SRT and WebVTT files, it can safely clean whitespace, remove empty cues, rewrap text, trim suitable overlaps, and extend captions into available time. Fixes are applied only to a temporary copy used for the burn; the original caption file is never changed. Remaining findings can be reviewed manually or left unchanged. The app then asks you to confirm the caption appearance, text size (Small, Medium, or Large), and position (Bottom or Top), then where to save the result. Choose Classic Outline, Contrast Panel, Bold Impact, or Clean Shadow; Classic Outline is the default. The default output is `<video name>-captioned` next to the original, and the original video is never overwritten. Captions are sized to the video, so they look the same at 720p and 4K and stay proportionate on portrait video. An `.ass` or `.ssa` file keeps its own fonts, sizes, and positions.
 
 Burning captions re-encodes the picture as H.264, so it takes a while on long videos. The result is saved as `.mp4`, `.mov`, `.mkv`, or `.m4v`; a source in another format is saved as `.mp4`. Audio is copied unchanged when the format stays the same and converted to AAC otherwise. Press **Ctrl+C** to cancel and return to the menu; a cancelled or failed burn saves nothing and leaves an existing file as it was.
 
@@ -276,7 +276,7 @@ Access settings from the main menu to configure:
 - **AI Model** - Select from available Copilot models (dynamically fetched from CLI)
 - **ffmpeg Path** - Executable path or command used to check video and audio files, extract 16 kHz mono audio, and burn captions into video
 - **Whisper GGML Model** - Select, download, and initialize a local Whisper.net model for transcription
-- **Caption Size and Position** - Default text size (default: Medium) and position (default: Bottom) for captions burned into video. You are asked to confirm or change them each time you burn captions
+- **Caption Appearance, Size, and Position** - Default appearance (default: Classic Outline), text size (default: Medium), and position (default: Bottom) for captions burned into video. You are asked to confirm or change them each time you burn captions
 - **Output Directory** - Default location for saved files
 - **Show Name** - The name of your show (used in prompts for better context)
 - **Host Names** - Host names (used in prompts)

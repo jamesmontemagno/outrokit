@@ -335,6 +335,7 @@ public class AppWorkflow
     
     private async Task BurnCaptionsAsync()
     {
+        string? fixedCaptionPath = null;
         try
         {
             var burnService = new CaptionBurnService(_settings);
@@ -386,16 +387,59 @@ public class AppWorkflow
 
             ConsoleUI.ShowSuccess($"Found {captionCount} captions in {Path.GetFileName(captionPath)}");
 
-            var style = new CaptionStyle(_settings.CaptionSize, _settings.CaptionPosition);
+            var qualityService = new CaptionQualityService();
+            var qualityReport = await qualityService.AnalyzeAsync(captionPath);
+            var qualityAction = ShowCaptionQualityReport(qualityReport);
+            if (qualityAction == CaptionQualityAction.Cancel)
+            {
+                ConsoleUI.ShowInfo("Caption burn cancelled before encoding.");
+                return;
+            }
+
+            if (qualityAction == CaptionQualityAction.ApplyFixes)
+            {
+                var originalContent = await File.ReadAllTextAsync(captionPath);
+                var fixResult = qualityService.ApplySafeFixes(originalContent, Path.GetExtension(captionPath));
+                if (fixResult.Report.CueCount == 0)
+                {
+                    ConsoleUI.ShowError("The safe fixes removed every empty cue, so there are no captions left to burn.");
+                    return;
+                }
+
+                fixedCaptionPath = Path.Combine(
+                    Path.GetTempPath(),
+                    $"outrokit-fixed-captions-{Guid.NewGuid():N}{Path.GetExtension(captionPath).ToLowerInvariant()}");
+                await File.WriteAllTextAsync(fixedCaptionPath, fixResult.Content);
+                captionPath = fixedCaptionPath;
+
+                ConsoleUI.ShowSuccess(
+                    $"Applied {fixResult.AppliedFixCount} safe fixes to a temporary copy. The original captions were not changed.");
+                if (fixResult.Report.HasIssues)
+                {
+                    ConsoleUI.ShowWarning(
+                        $"{fixResult.Report.ErrorCount} errors and {fixResult.Report.WarningCount} warnings remain and may need manual review.");
+                }
+                else
+                {
+                    ConsoleUI.ShowSuccess("All caption quality checks now pass.");
+                }
+            }
+
+            var style = new CaptionStyle(
+                _settings.CaptionSize,
+                _settings.CaptionPosition,
+                _settings.CaptionAppearance);
             if (CaptionBurnService.HasOwnStyling(captionPath))
             {
                 ConsoleUI.ShowInfo("This captions file sets its own fonts and positions, which are kept as they are.");
             }
             else
             {
+                var appearance = ConsoleUI.SelectCaptionAppearance(_settings.CaptionAppearance);
                 style = new CaptionStyle(
                     ConsoleUI.SelectCaptionSize(_settings.CaptionSize),
-                    ConsoleUI.SelectCaptionPosition(_settings.CaptionPosition));
+                    ConsoleUI.SelectCaptionPosition(_settings.CaptionPosition),
+                    appearance);
             }
 
             var outputPath = ConsoleUI.AskSaveFilePath(
@@ -453,6 +497,69 @@ public class AppWorkflow
         {
             ConsoleUI.ShowError($"Could not burn captions: {ex.Message}");
         }
+        finally
+        {
+            if (fixedCaptionPath is not null)
+            {
+                try
+                {
+                    File.Delete(fixedCaptionPath);
+                }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                {
+                    ConsoleUI.ShowWarning($"Could not remove the temporary fixed captions file: {ex.Message}");
+                }
+            }
+        }
+    }
+
+    private static CaptionQualityAction ShowCaptionQualityReport(CaptionQualityReport report)
+    {
+        if (!report.HasIssues)
+        {
+            ConsoleUI.ShowSuccess($"Caption quality check passed: {report.CueCount} cues meet the basic readability checks.");
+            return CaptionQualityAction.Continue;
+        }
+
+        var lines = new List<string>
+        {
+            $"{report.CueCount} cues checked: {report.ErrorCount} errors, {report.WarningCount} warnings.",
+            report.FixableCount > 0
+                ? $"{report.FixableCount} findings can be fixed safely in a temporary copy."
+                : "These findings need manual review.",
+            "The original caption file will not be changed."
+        };
+        lines.AddRange(report.Findings.Take(12).Select(finding =>
+            $"Cue {finding.CueNumber}: {finding.Check} - {finding.Message}"));
+        if (report.Findings.Count > 12)
+        {
+            lines.Add($"...and {report.Findings.Count - 12} more findings.");
+        }
+
+        ConsoleUI.ShowPanel("Caption quality check", string.Join(Environment.NewLine, lines), Color.Yellow);
+        var choices = new List<string>();
+        if (report.FixableCount > 0)
+        {
+            choices.Add($"Fix {report.FixableCount} findings and continue");
+        }
+        choices.Add("Continue unchanged");
+        choices.Add("Cancel burn");
+        var action = ConsoleUI.SelectFromList(
+            "What would you like to do?",
+            choices);
+        return action switch
+        {
+            "Continue unchanged" => CaptionQualityAction.Continue,
+            "Cancel burn" => CaptionQualityAction.Cancel,
+            _ => CaptionQualityAction.ApplyFixes
+        };
+    }
+
+    private enum CaptionQualityAction
+    {
+        Continue,
+        ApplyFixes,
+        Cancel
     }
 
     /// <summary>
@@ -998,7 +1105,7 @@ public class AppWorkflow
                     : $"{Markup.Escape(whisperModel.DisplayName)} [green](initialized)[/]");
             generalTable.AddRow(
                 "[blue]Captions[/]",
-                $"{_settings.CaptionSize.GetDisplayName()}, {_settings.CaptionPosition.GetDisplayName().ToLowerInvariant()} [grey](default, confirmed each time you burn captions)[/]");
+                $"{Markup.Escape(_settings.CaptionAppearance.GetDisplayName())}, {_settings.CaptionSize.GetDisplayName()}, {_settings.CaptionPosition.GetDisplayName().ToLowerInvariant()} [grey](default, confirmed each time you burn captions)[/]");
             generalTable.AddRow("[blue]Show Name[/]", 
                 string.IsNullOrEmpty(_settings.PodcastName) 
                     ? "[grey](not set)[/]" 
@@ -1221,13 +1328,15 @@ public class AppWorkflow
         {
             var action = ConsoleUI.SelectFromList(
                 "[bold]Burning Captions into Video[/]\n" +
+                $"Appearance: [blue]{Markup.Escape(_settings.CaptionAppearance.GetDisplayName())}[/]\n" +
                 $"Text size: [blue]{Markup.Escape(_settings.CaptionSize.GetDisplayName())}[/]\n" +
                 $"Position: [blue]{Markup.Escape(_settings.CaptionPosition.GetDisplayName())}[/]\n" +
                 $"ffmpeg: [blue]{Markup.Escape(_settings.FfmpegPath)}[/]\n" +
-                "[grey]You confirm size and position each time you burn captions.[/]\n" +
+                "[grey]You confirm appearance, size, and position each time you burn captions.[/]\n" +
                 $"[grey]To convert or rework a captions file, try CaptionStack: {CaptionBurnService.CaptionToolsUrl}[/]",
                 new[]
                 {
+                    "🎨 Default Appearance",
                     "🔠 Default Text Size",
                     "↕️ Default Position",
                     "🛠️ Configure ffmpeg",
@@ -1236,6 +1345,12 @@ public class AppWorkflow
 
             switch (action)
             {
+                case "🎨 Default Appearance":
+                    _settings.CaptionAppearance = ConsoleUI.SelectCaptionAppearance(
+                        _settings.CaptionAppearance,
+                        "Default caption appearance:");
+                    break;
+
                 case "🔠 Default Text Size":
                     _settings.CaptionSize = ConsoleUI.SelectCaptionSize(
                         _settings.CaptionSize,
