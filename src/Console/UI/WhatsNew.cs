@@ -24,6 +24,13 @@ public static class WhatsNew
 {
     public static IReadOnlyList<WhatsNewRelease> Releases { get; } =
     [
+        new(Version: null,
+        [
+            new("💾", "Choose what to save",
+                "Save Results now lets you choose individual titles, descriptions, chapters, SRT subtitles, or the manifest, or save Everything at once. The suggested folder is next to your transcript unless you have set a different Output Directory in Settings."),
+            new("🧹", "Auto-fix SRT captions",
+                "Choose Auto Fix SRT from the main menu to check an SRT file and apply safe readability fixes. The corrected captions are saved to a separate file, leaving your original unchanged.")
+        ]),
         new(Version: "1.6.0",
         [
             new("📝", "Choose which descriptions to generate",
