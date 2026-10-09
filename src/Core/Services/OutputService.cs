@@ -3,6 +3,17 @@ using PodcastMetadataGenerator.Core.Models;
 
 namespace PodcastMetadataGenerator.Core.Services;
 
+public enum OutputArtifact
+{
+    Titles,
+    ShortDescription,
+    MediumDescription,
+    LongDescription,
+    Chapters,
+    Srt,
+    Manifest
+}
+
 /// <summary>
 /// Handles output file generation (descriptions, chapters, manifest, SRT).
 /// </summary>
@@ -28,30 +39,68 @@ public class OutputService
         string outputDirectory, 
         Transcript transcript, 
         GenerationResult result,
-        AppSettings settings)
+        AppSettings settings) =>
+        await SaveSelectedAsync(
+            outputDirectory,
+            transcript,
+            result,
+            settings,
+            Enum.GetValues<OutputArtifact>());
+
+    /// <summary>
+    /// Saves only the selected metadata artifacts to the specified output directory.
+    /// Returns the list of files created.
+    /// </summary>
+    public async Task<List<string>> SaveSelectedAsync(
+        string outputDirectory,
+        Transcript transcript,
+        GenerationResult result,
+        AppSettings settings,
+        IReadOnlyCollection<OutputArtifact> artifacts)
     {
         var createdFiles = new List<string>();
-        
+        var selectedArtifacts = artifacts.ToHashSet();
+        if (selectedArtifacts.Count == 0)
+        {
+            return createdFiles;
+        }
+
         // Ensure output directory exists
         Directory.CreateDirectory(outputDirectory);
         
         var baseName = Path.GetFileNameWithoutExtension(transcript.FilePath);
         
         // Save titles
-        var titlesPath = Path.Combine(outputDirectory, $"{baseName}_titles.txt");
-        await File.WriteAllTextAsync(titlesPath, string.Join(Environment.NewLine, result.Titles));
-        createdFiles.Add(titlesPath);
+        if (selectedArtifacts.Contains(OutputArtifact.Titles))
+        {
+            var titlesPath = Path.Combine(outputDirectory, $"{baseName}_titles.txt");
+            await File.WriteAllTextAsync(titlesPath, string.Join(Environment.NewLine, result.Titles));
+            createdFiles.Add(titlesPath);
+        }
         
         // Save descriptions
-        foreach (var (length, description) in result.Descriptions)
+        foreach (var length in Enum.GetValues<DescriptionLength>())
         {
+            var artifact = length switch
+            {
+                DescriptionLength.Short => OutputArtifact.ShortDescription,
+                DescriptionLength.Medium => OutputArtifact.MediumDescription,
+                DescriptionLength.Long => OutputArtifact.LongDescription,
+                _ => throw new ArgumentOutOfRangeException(nameof(length), length, null)
+            };
+            if (!selectedArtifacts.Contains(artifact)
+                || !result.Descriptions.TryGetValue(length, out var description))
+            {
+                continue;
+            }
+
             var descPath = Path.Combine(outputDirectory, $"{baseName}_description_{length.ToString().ToLower()}.txt");
             await File.WriteAllTextAsync(descPath, description);
             createdFiles.Add(descPath);
         }
         
         // Save chapters (as YouTube format and raw list)
-        if (result.Chapters.Count > 0)
+        if (selectedArtifacts.Contains(OutputArtifact.Chapters) && result.Chapters.Count > 0)
         {
             var chaptersPath = Path.Combine(outputDirectory, $"{baseName}_chapters.txt");
             var chaptersContent = _srtConverter.FormatChaptersForYouTube(result.Chapters);
@@ -60,10 +109,24 @@ public class OutputService
         }
         
         // Convert and save SRT if we have timestamps
-        if (transcript.HasTimestamps)
+        var includeSrt = selectedArtifacts.Contains(OutputArtifact.Srt) && transcript.HasTimestamps;
+        string? srtFileName = null;
+        if (includeSrt)
         {
+            srtFileName = $"{baseName}.srt";
+            var srtPath = Path.Combine(outputDirectory, srtFileName);
+            if (CaptionBurnService.IsSameFile(srtPath, transcript.FilePath))
+            {
+                srtFileName = $"{baseName}_subtitles.srt";
+                srtPath = Path.Combine(outputDirectory, srtFileName);
+                if (CaptionBurnService.IsSameFile(srtPath, transcript.FilePath))
+                {
+                    throw new IOException(
+                        "The SRT output path resolves to the source transcript. Choose a different output directory.");
+                }
+            }
+
             var srtResult = _srtConverter.ConvertToSrt(transcript);
-            var srtPath = Path.Combine(outputDirectory, $"{baseName}.srt");
             await File.WriteAllTextAsync(srtPath, srtResult.Content);
             createdFiles.Add(srtPath);
             
@@ -72,11 +135,14 @@ public class OutputService
         }
         
         // Save manifest
-        var manifestPath = Path.Combine(outputDirectory, $"{baseName}_manifest.json");
-        var manifest = CreateManifest(transcript, result, settings);
-        var manifestJson = JsonSerializer.Serialize(manifest, JsonOptions);
-        await File.WriteAllTextAsync(manifestPath, manifestJson);
-        createdFiles.Add(manifestPath);
+        if (selectedArtifacts.Contains(OutputArtifact.Manifest))
+        {
+            var manifestPath = Path.Combine(outputDirectory, $"{baseName}_manifest.json");
+            var manifest = CreateManifest(transcript, result, settings, srtFileName);
+            var manifestJson = JsonSerializer.Serialize(manifest, JsonOptions);
+            await File.WriteAllTextAsync(manifestPath, manifestJson);
+            createdFiles.Add(manifestPath);
+        }
         
         return createdFiles;
     }
@@ -114,7 +180,10 @@ public class OutputService
         }
         
         // Manifest
-        var manifest = CreateManifest(transcript, result, settings);
+        var srtFileName = transcript.HasTimestamps
+            ? Path.GetFileNameWithoutExtension(transcript.FilePath) + ".srt"
+            : null;
+        var manifest = CreateManifest(transcript, result, settings, srtFileName);
         content["manifest"] = JsonSerializer.Serialize(manifest, JsonOptions);
         
         return content;
@@ -155,7 +224,8 @@ public class OutputService
     private static Manifest CreateManifest(
         Transcript transcript, 
         GenerationResult result, 
-        AppSettings settings)
+        AppSettings settings,
+        string? srtFileName)
     {
         return new Manifest
         {
@@ -178,9 +248,7 @@ public class OutputService
                 Title = c.Title,
                 Summary = c.Summary
             }).ToList(),
-            SrtPath = transcript.HasTimestamps 
-                ? Path.GetFileNameWithoutExtension(transcript.FilePath) + ".srt" 
-                : null,
+            SrtPath = srtFileName,
             DurationSeconds = transcript.DurationSeconds
         };
     }

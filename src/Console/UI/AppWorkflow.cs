@@ -43,6 +43,8 @@ public class AppWorkflow
 
     private const string CopyDoneChoice = "✅ Done";
 
+    private sealed record SaveResultChoice(string Label, OutputArtifact? Artifact);
+
     private static IRenderable BuildStreamingView(string header, string content, int frame)
     {
         IRenderable body = string.IsNullOrEmpty(content)
@@ -150,9 +152,17 @@ public class AppWorkflow
             {
                 choices.Add("👁️ View Results");
                 choices.Add("📋 Copy to Clipboard");
+            }
+
+            if (_result.Titles.Count > 0
+                || _result.Descriptions.Count > 0
+                || _result.Chapters.Count > 0
+                || !string.IsNullOrEmpty(_result.SrtContent))
+            {
                 choices.Add("💾 Save Results");
             }
             
+            choices.Add("🧹 Auto Fix SRT");
             choices.Add("🔥 Burn Captions into Video");
             choices.Add("✨ What's New");
             choices.Add("⚙️ Settings");
@@ -200,6 +210,10 @@ public class AppWorkflow
                     await SaveResultsAsync();
                     break;
                     
+                case "🧹 Auto Fix SRT":
+                    await AutoFixSrtAsync();
+                    break;
+
                 case "🔥 Burn Captions into Video":
                     await BurnCaptionsAsync();
                     break;
@@ -331,6 +345,84 @@ public class AppWorkflow
         catch (Exception ex)
         {
             ConsoleUI.ShowError($"Transcription failed: {ex.Message}");
+        }
+    }
+
+    private async Task AutoFixSrtAsync()
+    {
+        try
+        {
+            var captionPath = ConsoleUI.AskFilePath(
+                "Select the SRT file to fix:",
+                mustExist: true,
+                discoveryType: ConsoleUI.FileDiscoveryType.Srt);
+            if (!Path.GetExtension(captionPath).Equals(".srt", StringComparison.OrdinalIgnoreCase))
+            {
+                ConsoleUI.ShowError("Auto Fix SRT only supports .srt files.");
+                return;
+            }
+
+            var qualityService = new CaptionQualityService();
+            var originalContent = await File.ReadAllTextAsync(captionPath);
+            var report = qualityService.Analyze(originalContent, ".srt");
+            if (report.CueCount == 0)
+            {
+                ConsoleUI.ShowError("No captions could be read from that SRT file.");
+                return;
+            }
+
+            ShowCaptionQualitySummary(report, "in a separate output file");
+            if (report.FixableCount == 0)
+            {
+                if (report.HasIssues)
+                {
+                    ConsoleUI.ShowInfo("No safe automatic fixes are available; no output file was written.");
+                }
+                return;
+            }
+
+            var fixResult = qualityService.ApplySafeFixes(originalContent, ".srt");
+            if (fixResult.AppliedFixCount == 0)
+            {
+                ConsoleUI.ShowInfo("No safe fixes were applied; no output file was written.");
+                return;
+            }
+
+            if (fixResult.Report.CueCount == 0)
+            {
+                ConsoleUI.ShowError("The safe fixes removed every empty cue, so there are no captions left to save.");
+                return;
+            }
+
+            var fullCaptionPath = Path.GetFullPath(captionPath);
+            var directory = Path.GetDirectoryName(fullCaptionPath) ?? Environment.CurrentDirectory;
+            var defaultOutputPath = Path.Combine(
+                directory,
+                $"{Path.GetFileNameWithoutExtension(fullCaptionPath)}-fixed.srt");
+            var outputPath = ConsoleUI.AskSaveFilePath(
+                "Where should the fixed SRT be saved?",
+                defaultOutputPath,
+                [".srt"],
+                path => CaptionBurnService.IsSameFile(path, captionPath)
+                    ? "That is the original SRT. Choose a different name so it is not overwritten."
+                    : null);
+
+            await File.WriteAllTextAsync(outputPath, fixResult.Content);
+            ConsoleUI.ShowSuccess(
+                $"Saved {fixResult.AppliedFixCount} safe fixes to {outputPath}. The original SRT was not changed.");
+            if (fixResult.Report.HasIssues)
+            {
+                ConsoleUI.ShowWarning(
+                    $"{fixResult.Report.ErrorCount} errors and {fixResult.Report.WarningCount} warnings remain and may need manual review.");
+            }
+            else
+            {
+                ConsoleUI.ShowSuccess("All caption quality checks now pass.");
+            }
+        }
+        catch (Exception ex)
+        {
+            ConsoleUI.ShowError($"Could not auto-fix SRT: {ex.Message}");
         }
     }
     
@@ -516,28 +608,12 @@ public class AppWorkflow
 
     private static CaptionQualityAction ShowCaptionQualityReport(CaptionQualityReport report)
     {
+        ShowCaptionQualitySummary(report, "in a temporary copy");
         if (!report.HasIssues)
         {
-            ConsoleUI.ShowSuccess($"Caption quality check passed: {report.CueCount} cues meet the basic readability checks.");
             return CaptionQualityAction.Continue;
         }
 
-        var lines = new List<string>
-        {
-            $"{report.CueCount} cues checked: {report.ErrorCount} errors, {report.WarningCount} warnings.",
-            report.FixableCount > 0
-                ? $"{report.FixableCount} findings can be fixed safely in a temporary copy."
-                : "These findings need manual review.",
-            "The original caption file will not be changed."
-        };
-        lines.AddRange(report.Findings.Take(12).Select(finding =>
-            $"Cue {finding.CueNumber}: {finding.Check} - {finding.Message}"));
-        if (report.Findings.Count > 12)
-        {
-            lines.Add($"...and {report.Findings.Count - 12} more findings.");
-        }
-
-        ConsoleUI.ShowPanel("Caption quality check", string.Join(Environment.NewLine, lines), Color.Yellow);
         var choices = new List<string>();
         if (report.FixableCount > 0)
         {
@@ -554,6 +630,32 @@ public class AppWorkflow
             "Cancel burn" => CaptionQualityAction.Cancel,
             _ => CaptionQualityAction.ApplyFixes
         };
+    }
+
+    private static void ShowCaptionQualitySummary(CaptionQualityReport report, string fixLocation)
+    {
+        if (!report.HasIssues)
+        {
+            ConsoleUI.ShowSuccess($"Caption quality check passed: {report.CueCount} cues meet the basic readability checks.");
+            return;
+        }
+
+        var lines = new List<string>
+        {
+            $"{report.CueCount} cues checked: {report.ErrorCount} errors, {report.WarningCount} warnings.",
+            report.FixableCount > 0
+                ? $"{report.FixableCount} findings can be fixed safely {fixLocation}."
+                : "These findings need manual review.",
+            "The original caption file will not be changed."
+        };
+        lines.AddRange(report.Findings.Take(12).Select(finding =>
+            $"Cue {finding.CueNumber}: {finding.Check} - {finding.Message}"));
+        if (report.Findings.Count > 12)
+        {
+            lines.Add($"...and {report.Findings.Count - 12} more findings.");
+        }
+
+        ConsoleUI.ShowPanel("Caption quality check", string.Join(Environment.NewLine, lines), Color.Yellow);
     }
 
     private enum CaptionQualityAction
@@ -1060,44 +1162,111 @@ public class AppWorkflow
             ConsoleUI.ShowError("No transcript loaded.");
             return;
         }
-        
-        var outputDir = ConsoleUI.AskText(
-            "Enter output directory:",
-            defaultValue: _settings.OutputDirectory,
-            validator: path => !string.IsNullOrWhiteSpace(path));
-        
+
+        var availableChoices = new List<SaveResultChoice>();
+        if (_result.Titles.Count > 0)
+        {
+            availableChoices.Add(new("Title suggestions", OutputArtifact.Titles));
+        }
+        foreach (var length in Enum.GetValues<DescriptionLength>())
+        {
+            if (_result.Descriptions.ContainsKey(length))
+            {
+                var artifact = length switch
+                {
+                    DescriptionLength.Short => OutputArtifact.ShortDescription,
+                    DescriptionLength.Medium => OutputArtifact.MediumDescription,
+                    DescriptionLength.Long => OutputArtifact.LongDescription,
+                    _ => throw new ArgumentOutOfRangeException(nameof(length), length, null)
+                };
+                availableChoices.Add(new($"{length} description", artifact));
+            }
+        }
+        if (_result.Chapters.Count > 0)
+        {
+            availableChoices.Add(new("Chapters", OutputArtifact.Chapters));
+        }
+        if (_transcript.HasTimestamps)
+        {
+            availableChoices.Add(new("SRT subtitles", OutputArtifact.Srt));
+        }
+        availableChoices.Add(new("Manifest (JSON)", OutputArtifact.Manifest));
+
+        var selectionChoices = new List<SaveResultChoice> { new("Everything", null) };
+        selectionChoices.AddRange(availableChoices);
+        var selectedChoices = ConsoleUI.SelectMultiple(
+            "Select what to save:",
+            selectionChoices,
+            choice => choice.Label);
+        if (selectedChoices.Count == 0)
+        {
+            ConsoleUI.ShowInfo("Nothing selected; no files were saved.");
+            return;
+        }
+
+        var selectedArtifacts = selectedChoices.Any(choice => choice.Artifact is null)
+            ? availableChoices.Select(choice => choice.Artifact!.Value).ToArray()
+            : selectedChoices.Select(choice => choice.Artifact!.Value).Distinct().ToArray();
+        string outputDir;
+        List<string> savedFiles;
         try
         {
-            var savedFiles = await AnsiConsole.Status()
+            var suggestedOutputDirectory = GetSuggestedOutputDirectory(_transcript.FilePath, _settings.OutputDirectory);
+            outputDir = ConsoleUI.AskText(
+                "Enter output directory:",
+                defaultValue: suggestedOutputDirectory,
+                validator: path => !string.IsNullOrWhiteSpace(path));
+
+            savedFiles = await AnsiConsole.Status()
                 .Spinner(Spinner.Known.Dots)
                 .SpinnerStyle(Style.Parse("blue"))
                 .StartAsync("Saving results...", async ctx =>
                 {
-                    return await _outputService.SaveAllAsync(
+                    return await _outputService.SaveSelectedAsync(
                         outputDir,
                         _transcript,
                         _result,
-                        _settings);
+                        _settings,
+                        selectedArtifacts);
                 });
-            
-            ConsoleUI.ShowSuccess($"Saved {savedFiles.Count} files to: {outputDir}");
-            
-            var table = new Table()
-                .RoundedBorder()
-                .BorderColor(Color.Green)
-                .AddColumn("Saved Files");
-            
-            foreach (var file in savedFiles)
-            {
-                table.AddRow(Markup.Escape(Path.GetFileName(file)));
-            }
-            
-            AnsiConsole.Write(table);
         }
         catch (Exception ex)
         {
             ConsoleUI.ShowError($"Failed to save: {ex.Message}");
+            return;
         }
+
+        ConsoleUI.ShowSuccess($"Saved {savedFiles.Count} file(s) to: {Path.GetFullPath(outputDir)}");
+
+        var table = new Table()
+            .RoundedBorder()
+            .BorderColor(Color.Green)
+            .AddColumn("Saved Files");
+
+        foreach (var file in savedFiles)
+        {
+            table.AddRow(Markup.Escape(Path.GetFileName(file)));
+        }
+
+        AnsiConsole.Write(table);
+    }
+
+    private static string GetSuggestedOutputDirectory(string transcriptPath, string configuredOutputDirectory)
+    {
+        var configuredPath = Path.TrimEndingDirectorySeparator(Path.GetFullPath(configuredOutputDirectory));
+        var currentPath = Path.TrimEndingDirectorySeparator(Path.GetFullPath(Environment.CurrentDirectory));
+        var pathComparison = OperatingSystem.IsWindows()
+            ? StringComparison.OrdinalIgnoreCase
+            : StringComparison.Ordinal;
+        if (!string.Equals(configuredPath, currentPath, pathComparison))
+        {
+            return configuredPath;
+        }
+
+        var transcriptDirectory = Path.GetDirectoryName(Path.GetFullPath(transcriptPath));
+        return transcriptDirectory is not null && Directory.Exists(transcriptDirectory)
+            ? transcriptDirectory
+            : configuredPath;
     }
     
     private async Task SettingsMenuAsync()

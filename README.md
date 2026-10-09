@@ -23,12 +23,14 @@ OutroKit writes the titles, descriptions, chapters, and SRT subtitles for your e
 - **📝 Description Generation** - Create short, medium, and long descriptions optimized for different platforms, picking which lengths to generate each time
 - **📑 Chapter Generation** - Auto-generate YouTube-compatible chapter markers with timestamps
 - **🎬 SRT Conversion** - Convert transcripts to valid SRT subtitle format
+- **🧹 Auto Fix SRT** - Check an `.srt` file for readability issues, apply safe fixes, and save a corrected copy without changing the original
 - **🔄 Multiple Transcript Formats** - Support for Zencastr, time-range, SRT formats, and plain text
 - **🎧 Video & Audio Transcription** - Start from a video or audio file (`.mp3`, `.wav`) and generate an SRT transcript locally with ffmpeg and Whisper.net
 - **🔥 Burn Captions into Video** - Draw an `.srt`, `.vtt`, `.ass`, or `.ssa` captions file into the picture of a video with four appearance choices. For other caption formats, or captions that need more work first, use [CaptionStack](https://captionstack.app/)
 - **📂 File Browser** - Built-in file browser or drag-and-drop support
 - **⚡ Streaming Responses** - Watch AI responses generate in real-time
 - **📋 Copy to Clipboard** - Copy titles, descriptions, chapters, or everything at once; finished output is printed unwrapped so it also selects cleanly in the terminal
+- **💾 Choose what to save** - Save selected titles, descriptions, chapters, SRT subtitles, and the manifest, or everything at once; the suggested output folder is next to the transcript unless you configured another folder in Settings
 - **🤖 Model Selection** - Choose from multiple AI models (GPT-5, Claude, Gemini)
 - **⚙️ Configurable Settings** - Customize generation parameters and save preferences
 - **✨ What's New** - See the latest features from the main menu
@@ -135,6 +137,14 @@ Supported video formats are `.mp4`, `.mov`, `.mkv`, `.avi`, `.webm`, `.m4v`, `.w
 The app checks the file for an audio track with ffmpeg, asks where to save the `.srt`, transcribes the audio locally, and loads that SRT into the existing metadata flow. Model downloads and transcription can take a while; press **Ctrl+C** to cancel either one and return to the menu.
 
 Models are downloaded from the Whisper.net Hugging Face repository into `~/.podcast-metadata-generator/models`. Smaller models are faster and use less memory; larger models generally improve accuracy. English (`.en`) variants only transcribe English, while the other models are multilingual.
+
+### Console App - Auto Fix SRT
+
+Select **Auto Fix SRT** from the main menu and choose an `.srt` file. OutroKit checks caption timing and readability, applies safe fixes, and suggests a `<filename>-fixed.srt` file next to the original. The original is never changed; issues that cannot be safely fixed are reported for manual review.
+
+### Console App - Save Results
+
+Choose **Save Results** from the main menu to select the generated titles, individual descriptions, chapters, SRT subtitles, and manifest to save. Choose **Everything** to save all available results. The output folder defaults to the folder containing the loaded transcript; a custom **Output Directory** set under Settings takes precedence, and you can edit the folder for each save. If the generated SRT would overwrite the source transcript, OutroKit saves it as a separate `*_subtitles.srt` file.
 
 ### Console App - Burn Captions into a Video
 

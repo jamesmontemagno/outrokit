@@ -542,6 +542,7 @@ public static class ConsoleUI
             FileDiscoveryType.Media => MediaTranscriptService.HasMediaExtension(fileName),
             FileDiscoveryType.Video => MediaTranscriptService.HasVideoExtension(fileName),
             FileDiscoveryType.Captions => CaptionBurnService.HasCaptionExtension(fileName),
+            FileDiscoveryType.Srt => ext == ".srt",
             _ => false
         };
     }
@@ -707,7 +708,8 @@ public static class ConsoleUI
         Transcript,
         Media,
         Video,
-        Captions
+        Captions,
+        Srt
     }
     
     /// <summary>
