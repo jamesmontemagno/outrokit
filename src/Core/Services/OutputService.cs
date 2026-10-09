@@ -119,6 +119,11 @@ public class OutputService
             {
                 srtFileName = $"{baseName}_subtitles.srt";
                 srtPath = Path.Combine(outputDirectory, srtFileName);
+                if (CaptionBurnService.IsSameFile(srtPath, transcript.FilePath))
+                {
+                    throw new IOException(
+                        "The SRT output path resolves to the source transcript. Choose a different output directory.");
+                }
             }
 
             var srtResult = _srtConverter.ConvertToSrt(transcript);

@@ -101,6 +101,29 @@ public sealed class OutputServiceTests : IDisposable
             manifest.RootElement.GetProperty("srtPath").GetString());
     }
 
+    [SymbolicLinkFact]
+    public async Task Does_not_overwrite_source_srt_through_a_fallback_symlink()
+    {
+        var outputDirectory = Path.Combine(_root, "linked-source");
+        Directory.CreateDirectory(outputDirectory);
+        var sourcePath = Path.Combine(outputDirectory, "episode.srt");
+        const string originalContent = "original subtitle file";
+        await File.WriteAllTextAsync(sourcePath, originalContent);
+        File.CreateSymbolicLink(
+            Path.Combine(outputDirectory, "episode_subtitles.srt"),
+            sourcePath);
+
+        await Assert.ThrowsAsync<IOException>(() => _service.SaveSelectedAsync(
+            outputDirectory,
+            CreateTranscript(sourcePath),
+            new GenerationResult(),
+            new AppSettings(),
+            [OutputArtifact.Srt, OutputArtifact.Manifest]));
+
+        Assert.Equal(originalContent, await File.ReadAllTextAsync(sourcePath));
+        Assert.False(File.Exists(Path.Combine(outputDirectory, "episode_manifest.json")));
+    }
+
     public void Dispose()
     {
         Directory.Delete(_root, recursive: true);
