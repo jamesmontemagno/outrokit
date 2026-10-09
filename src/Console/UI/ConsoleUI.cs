@@ -824,7 +824,7 @@ public static class ConsoleUI
     }
     
     /// <summary>
-    /// Shows the most recent entries from <see cref="WhatsNew"/>.
+    /// Shows full details for the newest release and titles only for older releases.
     /// </summary>
     public static void ShowWhatsNew(int maxReleases = 3)
     {
@@ -835,8 +835,9 @@ public static class ConsoleUI
             Style = Style.Parse("blue")
         });
 
-        foreach (var release in WhatsNew.Releases.Take(maxReleases))
+        for (var releaseIndex = 0; releaseIndex < Math.Min(maxReleases, WhatsNew.Releases.Count); releaseIndex++)
         {
+            var release = WhatsNew.Releases[releaseIndex];
             AnsiConsole.WriteLine();
             AnsiConsole.MarkupLine($"[bold blue]{Markup.Escape(release.Heading)}[/]");
             AnsiConsole.WriteLine();
@@ -848,6 +849,14 @@ public static class ConsoleUI
 
             foreach (var item in release.Items)
             {
+                if (releaseIndex > 0)
+                {
+                    grid.AddRow(
+                        new Markup(Markup.Escape(item.Icon)),
+                        new Markup(Markup.Escape(item.Title)));
+                    continue;
+                }
+
                 grid.AddRow(
                     new Markup(Markup.Escape(item.Icon)),
                     new Rows(

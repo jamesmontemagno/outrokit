@@ -33,7 +33,7 @@ OutroKit writes the titles, descriptions, chapters, and SRT subtitles for your e
 - **💾 Choose what to save** - Save selected titles, descriptions, chapters, SRT subtitles, and the manifest, or everything at once; the suggested output folder is next to the transcript unless you configured another folder in Settings
 - **🤖 Model Selection** - Choose from multiple AI models (GPT-5, Claude, Gemini)
 - **⚙️ Configurable Settings** - Customize generation parameters and save preferences
-- **✨ What's New** - See the latest features from the main menu
+- **✨ What's New** - See full details for the latest release and compact, title-only updates for older releases from the main menu
 
 ## 📋 Prerequisites
 

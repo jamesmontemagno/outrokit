@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Core\PodcastMetadataGenerator.Core.csproj" />
+    <ProjectReference Include="..\..\src\Console\PodcastMetadataGenerator.Console.csproj" />
   </ItemGroup>
 
 </Project>

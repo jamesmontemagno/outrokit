@@ -24,17 +24,19 @@ public static class WhatsNew
 {
     public static IReadOnlyList<WhatsNewRelease> Releases { get; } =
     [
-        new(Version: null,
+        new(Version: "1.7.0",
         [
             new("💾", "Choose what to save",
                 "Save Results now lets you choose individual titles, descriptions, chapters, SRT subtitles, or the manifest, or save Everything at once. The suggested folder is next to your transcript unless you have set a different Output Directory in Settings."),
             new("🧹", "Auto-fix SRT captions",
-                "Choose Auto Fix SRT from the main menu to check an SRT file and apply safe readability fixes. The corrected captions are saved to a separate file, leaving your original unchanged.")
+                "Choose Auto Fix SRT from the main menu to check an SRT file and apply safe readability fixes. The corrected captions are saved to a separate file, leaving your original unchanged."),
+            new("📝", "Choose which descriptions to generate",
+                "Generating descriptions now starts with a checklist of Short, Medium, and Long, so you can generate just the one you need instead of all three. Generate All asks the same question up front, and your choice is remembered for the rest of the session."),
+            new("✨", "A shorter What's New",
+                "What's New on the main menu keeps full details for the newest release and shows only feature titles for older releases, so you can quickly catch up.")
         ]),
         new(Version: "1.6.0",
         [
-            new("📝", "Choose which descriptions to generate",
-                "Generating descriptions now starts with a checklist of Short, Medium, and Long, so you can generate just the one you need instead of all three. Generate All asks the same question up front, and your choice is remembered for the rest of the session."),
             new("✅", "Caption quality checks",
                 "Before burning captions into a video, OutroKit checks timing, overlaps, duration, line length, line count, and reading speed. It can safely fix common SRT and WebVTT issues in a temporary copy, so your original captions stay unchanged."),
             new("🎨", "Four caption appearances",
