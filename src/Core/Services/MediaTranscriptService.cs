@@ -20,7 +20,7 @@ public class MediaTranscriptService
 
     private static readonly HashSet<string> AudioExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
-        ".mp3", ".wav", ".wave"
+        ".mp3", ".wav", ".wave", ".m4a", ".aac", ".flac", ".ogg", ".opus", ".mp2"
     };
 
     private readonly AppSettings _settings;
@@ -37,7 +37,12 @@ public class MediaTranscriptService
     /// Use <see cref="HasAudioStreamAsync"/> to confirm the content.
     /// </summary>
     public static bool HasMediaExtension(string path) =>
-        HasVideoExtension(path) || AudioExtensions.Contains(Path.GetExtension(path));
+        HasVideoExtension(path) || HasAudioExtension(path);
+
+    /// <summary>
+    /// Whether the path has a recognized audio extension.
+    /// </summary>
+    public static bool HasAudioExtension(string path) => AudioExtensions.Contains(Path.GetExtension(path));
 
     /// <summary>
     /// Whether the path has a recognized video extension.
