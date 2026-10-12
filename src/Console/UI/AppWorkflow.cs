@@ -250,6 +250,9 @@ public class AppWorkflow
                 "Select a transcript file:",
                 mustExist: true,
                 discoveryType: ConsoleUI.FileDiscoveryType.Transcript);
+            if (transcriptPath is null)
+                return;
+
             await LoadTranscriptAsync(transcriptPath);
             return;
         }
@@ -258,6 +261,9 @@ public class AppWorkflow
             "Select a video or audio file:",
             mustExist: true,
             discoveryType: ConsoleUI.FileDiscoveryType.Media);
+        if (mediaPath is null)
+            return;
+
         await ProcessMediaAsync(mediaPath);
     }
 
@@ -356,6 +362,9 @@ public class AppWorkflow
                 "Select the SRT file to fix:",
                 mustExist: true,
                 discoveryType: ConsoleUI.FileDiscoveryType.Srt);
+            if (captionPath is null)
+                return;
+
             if (!Path.GetExtension(captionPath).Equals(".srt", StringComparison.OrdinalIgnoreCase))
             {
                 ConsoleUI.ShowError("Auto Fix SRT only supports .srt files.");
@@ -441,6 +450,9 @@ public class AppWorkflow
                 "Select the video to add captions to:",
                 mustExist: true,
                 discoveryType: ConsoleUI.FileDiscoveryType.Video);
+            if (videoPath is null)
+                return;
+
             if (!MediaTranscriptService.HasVideoExtension(videoPath))
             {
                 ConsoleUI.ShowError(
@@ -460,6 +472,9 @@ public class AppWorkflow
                 mustExist: true,
                 startDirectory: Path.GetDirectoryName(Path.GetFullPath(videoPath)),
                 discoveryType: ConsoleUI.FileDiscoveryType.Captions);
+            if (captionPath is null)
+                return;
+
             if (!CaptionBurnService.HasCaptionExtension(captionPath))
             {
                 ConsoleUI.ShowError("Captions must be an .srt, .vtt, .ass, or .ssa file.");
