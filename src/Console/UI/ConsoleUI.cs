@@ -10,6 +10,12 @@ namespace PodcastMetadataGenerator.Console.UI;
 /// </summary>
 public static class ConsoleUI
 {
+    /// <summary>The menu entry that backs out of a file prompt.</summary>
+    private const string CancelChoice = "❌ Cancel";
+
+    /// <summary>What the user types to back out of a save-path prompt.</summary>
+    private const string CancelWord = "cancel";
+
     /// <summary>
     /// Shows the OutroKit banner.
     /// </summary>
@@ -321,15 +327,38 @@ public static class ConsoleUI
         bool mustExist = true,
         string? startDirectory = null,
         FileDiscoveryType discoveryType = FileDiscoveryType.Transcript)
+        => AskFilePathOrCancel(prompt, mustExist, startDirectory, discoveryType, allowCancel: false)!;
+
+    /// <summary>
+    /// Prompts for a file path like <see cref="AskFilePath"/>, returning null when
+    /// <paramref name="allowCancel"/> is set and the user backs out instead of picking a file.
+    /// </summary>
+    public static string? AskFilePathOrCancel(
+        string prompt,
+        bool mustExist = true,
+        string? startDirectory = null,
+        FileDiscoveryType discoveryType = FileDiscoveryType.Transcript,
+        bool allowCancel = true)
     {
         while (true)
         {
+            var choices = new List<string> { "📂 Browse for file", "⌨️ Type or paste path" };
+            if (allowCancel)
+            {
+                choices.Add(CancelChoice);
+            }
+
             // Offer browse option or direct input
             var choice = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title(prompt)
-                    .AddChoices("📂 Browse for file", "⌨️ Type or paste path"));
-            
+                    .AddChoices(choices));
+
+            if (choice == CancelChoice)
+            {
+                return null;
+            }
+
             string path;
             
             if (choice.StartsWith("📂"))
@@ -377,15 +406,34 @@ public static class ConsoleUI
         string defaultPath,
         IReadOnlyList<string> extensions,
         Func<string, string?>? validate = null)
+        => AskSaveFilePathOrCancel(prompt, defaultPath, extensions, validate, allowCancel: false)!;
+
+    /// <summary>
+    /// Prompts for a save path like <see cref="AskSaveFilePath"/>, returning null when
+    /// <paramref name="allowCancel"/> is set and the user types <c>cancel</c> instead of a path.
+    /// </summary>
+    public static string? AskSaveFilePathOrCancel(
+        string prompt,
+        string defaultPath,
+        IReadOnlyList<string> extensions,
+        Func<string, string?>? validate = null,
+        bool allowCancel = true)
     {
         while (true)
         {
+            var cancelHint = allowCancel ? " [grey](or type cancel)[/]" : "";
             // File names routinely contain [brackets], which Spectre would parse as markup,
             // and it does not escape a prompt's default value itself.
             var path = AnsiConsole.Prompt(
-                new TextPrompt<string>($"{prompt} [green]({Markup.Escape(defaultPath)})[/]:")
+                new TextPrompt<string>($"{prompt} [green]({Markup.Escape(defaultPath)})[/]{cancelHint}:")
                     .DefaultValue(defaultPath)
                     .HideDefaultValue());
+
+            if (allowCancel && string.Equals(path.Trim(), CancelWord, StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
+
             path = CleanFilePath(path);
 
             if (extensions.Count > 0
@@ -493,7 +541,7 @@ public static class ConsoleUI
                 continue;
             }
             
-            items.Add("❌ Cancel");
+            items.Add(CancelChoice);
             
             // Names are escaped for display only; brackets in a file or folder name are not markup.
             var selection = AnsiConsole.Prompt(
@@ -505,7 +553,7 @@ public static class ConsoleUI
                     .UseConverter(Markup.Escape)
                     .AddChoices(items));
             
-            if (selection == "❌ Cancel")
+            if (selection == CancelChoice)
             {
                 return null;
             }
@@ -540,6 +588,7 @@ public static class ConsoleUI
         {
             FileDiscoveryType.Transcript => ext is ".txt" or ".srt" or ".vtt" or ".json" or ".md" or ".csv",
             FileDiscoveryType.Media => MediaTranscriptService.HasMediaExtension(fileName),
+            FileDiscoveryType.Audio => MediaTranscriptService.HasAudioExtension(fileName),
             FileDiscoveryType.Video => MediaTranscriptService.HasVideoExtension(fileName),
             FileDiscoveryType.Captions => CaptionBurnService.HasCaptionExtension(fileName),
             FileDiscoveryType.Srt => ext == ".srt",
@@ -707,6 +756,7 @@ public static class ConsoleUI
     {
         Transcript,
         Media,
+        Audio,
         Video,
         Captions,
         Srt

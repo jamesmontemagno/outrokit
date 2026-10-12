@@ -24,6 +24,11 @@ public static class WhatsNew
 {
     public static IReadOnlyList<WhatsNewRelease> Releases { get; } =
     [
+        new(Version: null,
+        [
+            new("🎵", "Replace a video's audio",
+                "Choose Replace Audio in Video from the main menu to optionally save the original audio, select a processed replacement track, and export a new MP4 without re-encoding the picture. Every file prompt can be backed out of, and a summary at the end shows the files used, the resolution, and the new video's length and size.")
+        ]),
         new(Version: "1.7.0",
         [
             new("💾", "Choose what to save",

@@ -163,6 +163,7 @@ public class AppWorkflow
             }
             
             choices.Add("🧹 Auto Fix SRT");
+            choices.Add("🎵 Replace Audio in Video");
             choices.Add("🔥 Burn Captions into Video");
             choices.Add("✨ What's New");
             choices.Add("⚙️ Settings");
@@ -212,6 +213,10 @@ public class AppWorkflow
                     
                 case "🧹 Auto Fix SRT":
                     await AutoFixSrtAsync();
+                    break;
+
+                case "🎵 Replace Audio in Video":
+                    await ReplaceAudioInVideoAsync();
                     break;
 
                 case "🔥 Burn Captions into Video":
@@ -426,6 +431,220 @@ public class AppWorkflow
         }
     }
     
+    private async Task ReplaceAudioInVideoAsync()
+    {
+        string? extractedAudioPath = null;
+        try
+        {
+            if (!await ValidateFfmpegPathAsync())
+            {
+                return;
+            }
+
+            ConsoleUI.ShowSuccess($"ffmpeg is ready: {_settings.FfmpegPath}");
+
+            var videoPath = ConsoleUI.AskFilePathOrCancel(
+                "Select the video to swap audio in:",
+                mustExist: true,
+                discoveryType: ConsoleUI.FileDiscoveryType.Video);
+            if (videoPath is null)
+            {
+                ShowAudioReplacementCancelled(extractedAudioPath);
+                return;
+            }
+
+            var directory = Path.GetDirectoryName(Path.GetFullPath(videoPath)) ?? Environment.CurrentDirectory;
+            var originalName = Path.GetFileNameWithoutExtension(videoPath);
+            var audioReplacementService = new AudioReplacementService(_settings);
+
+            if (AnsiConsole.Confirm("Export the original audio track to a separate file before replacing it?", defaultValue: true))
+            {
+                var audioOutputPath = ConsoleUI.AskSaveFilePathOrCancel(
+                    "Where should the original audio be saved?",
+                    Path.Combine(directory, $"{originalName}-original-audio.wav"),
+                    [".wav", ".mp3", ".m4a"],
+                    path => string.Equals(Path.GetFullPath(path), Path.GetFullPath(videoPath), StringComparison.OrdinalIgnoreCase)
+                        ? "Choose a different path; the extracted audio cannot overwrite the source video."
+                        : null);
+                if (audioOutputPath is null)
+                {
+                    ShowAudioReplacementCancelled(extractedAudioPath);
+                    return;
+                }
+
+                await ConsoleCancellation.RunAsync(cancellationToken => AnsiConsole.Status()
+                    .Spinner(Spinner.Known.Dots)
+                    .SpinnerStyle(Style.Parse("blue"))
+                    .StartAsync("Extracting the original audio track...", async _ =>
+                    {
+                        await audioReplacementService.ExtractAudioAsync(
+                            videoPath,
+                            audioOutputPath,
+                            cancellationToken);
+                        return true;
+                    }));
+
+                extractedAudioPath = audioOutputPath;
+                ConsoleUI.ShowSuccess($"Saved original audio: {extractedAudioPath}");
+            }
+
+            var replacementAudioPath = ConsoleUI.AskFilePathOrCancel(
+                "Select the replacement audio file:",
+                mustExist: true,
+                discoveryType: ConsoleUI.FileDiscoveryType.Audio);
+            if (replacementAudioPath is null)
+            {
+                ShowAudioReplacementCancelled(extractedAudioPath);
+                return;
+            }
+
+            var outputPath = ConsoleUI.AskSaveFilePathOrCancel(
+                "Where should the new video be saved?",
+                Path.Combine(directory, $"{originalName}-replaced-audio.mp4"),
+                [".mp4"],
+                path =>
+                    string.Equals(Path.GetFullPath(path), Path.GetFullPath(videoPath), StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(Path.GetFullPath(path), Path.GetFullPath(replacementAudioPath), StringComparison.OrdinalIgnoreCase)
+                        ? "Choose a different output path so the new file does not overwrite the source video or audio input."
+                        : null);
+            if (outputPath is null)
+            {
+                ShowAudioReplacementCancelled(extractedAudioPath);
+                return;
+            }
+
+            ConsoleUI.ShowInfo("Replacing the audio with ffmpeg. The picture is copied as-is, so this is quick. Press Ctrl+C to cancel.");
+
+            await ConsoleCancellation.RunAsync(cancellationToken => AnsiConsole.Status()
+                .Spinner(Spinner.Known.Dots)
+                .SpinnerStyle(Style.Parse("blue"))
+                .StartAsync("Replacing the audio track and exporting the new MP4...", async _ =>
+                {
+                    await audioReplacementService.ReplaceAudioAsync(
+                        videoPath,
+                        replacementAudioPath,
+                        outputPath,
+                        cancellationToken);
+                    return true;
+                }));
+
+            ConsoleUI.ShowSuccess($"Saved video with the new audio track: {outputPath}");
+            await ShowAudioReplacementSummaryAsync(videoPath, extractedAudioPath, replacementAudioPath, outputPath);
+        }
+        catch (OperationCanceledException)
+        {
+            ShowAudioReplacementCancelled(extractedAudioPath, "Audio replacement cancelled. No new video was saved.");
+        }
+        catch (Exception ex)
+        {
+            ConsoleUI.ShowError($"Audio replacement failed: {ex.Message}");
+            if (extractedAudioPath is not null)
+            {
+                ConsoleUI.ShowInfo($"The original audio that was already exported is still at: {extractedAudioPath}");
+            }
+        }
+    }
+
+    private static void ShowAudioReplacementCancelled(
+        string? extractedAudioPath,
+        string message = "Audio replacement cancelled. No new video was saved.")
+    {
+        ConsoleUI.ShowWarning(message);
+        if (extractedAudioPath is not null)
+        {
+            ConsoleUI.ShowInfo($"The original audio that was already exported is still at: {extractedAudioPath}");
+        }
+    }
+
+    /// <summary>
+    /// Reports what the finished replacement produced, including the picture it kept unchanged.
+    /// </summary>
+    private async Task ShowAudioReplacementSummaryAsync(
+        string videoPath,
+        string? extractedAudioPath,
+        string replacementAudioPath,
+        string outputPath)
+    {
+        var table = new Table()
+            .RoundedBorder()
+            .BorderColor(Color.Green)
+            .Title("[bold green]Audio Replacement Summary[/]")
+            .HideHeaders()
+            .AddColumn("Item")
+            .AddColumn("Value");
+
+        table.AddRow("[blue]Original video[/]", Markup.Escape(videoPath));
+        table.AddRow(
+            "[blue]Original audio[/]",
+            extractedAudioPath is null ? "[grey]Not exported[/]" : Markup.Escape(extractedAudioPath));
+        table.AddRow("[blue]New audio[/]", Markup.Escape(replacementAudioPath));
+        table.AddRow("[blue]New video[/]", Markup.Escape(outputPath));
+
+        try
+        {
+            var burnService = new CaptionBurnService(_settings);
+            var source = await burnService.GetVideoDetailsAsync(videoPath);
+            var result = await burnService.GetVideoDetailsAsync(outputPath);
+            var resolutionMatches = source.Width == result.Width && source.Height == result.Height;
+            table.AddRow(
+                "[blue]Resolution[/]",
+                resolutionMatches
+                    ? $"{result.Width}x{result.Height} [green](unchanged)[/]"
+                    : $"{result.Width}x{result.Height} [yellow](source was {source.Width}x{source.Height})[/]");
+            table.AddRow("[blue]Duration[/]", FormatDuration(result.Duration));
+        }
+        catch (Exception ex)
+        {
+            ConsoleUI.ShowWarning($"Could not read the new video's details: {ex.Message}");
+        }
+
+        try
+        {
+            table.AddRow("[blue]Size[/]", FormatByteSize(new FileInfo(outputPath).Length));
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            // The file is saved; its size is only extra detail.
+        }
+
+        AnsiConsole.WriteLine();
+        AnsiConsole.Write(table);
+        AnsiConsole.WriteLine();
+    }
+
+    private async Task<bool> ValidateFfmpegPathAsync(bool promptToFix = true)
+    {
+        try
+        {
+            await FfmpegCommand.ValidateAsync(_settings.FfmpegPath, CancellationToken.None);
+            return true;
+        }
+        catch (FfmpegNotFoundException ex)
+        {
+            ConsoleUI.ShowWarning(ex.Message);
+            if (promptToFix && AnsiConsole.Confirm("Open transcription settings now?", defaultValue: true))
+            {
+                await EditTranscriptionSettingsAsync();
+                try
+                {
+                    await FfmpegCommand.ValidateAsync(_settings.FfmpegPath, CancellationToken.None);
+                    return true;
+                }
+                catch (Exception retryEx)
+                {
+                    ConsoleUI.ShowError($"The configured ffmpeg still fails validation: {retryEx.Message}");
+                }
+            }
+
+            return false;
+        }
+        catch (Exception ex)
+        {
+            ConsoleUI.ShowWarning($"The ffmpeg at '{_settings.FfmpegPath}' could not be validated: {ex.Message}");
+            return false;
+        }
+    }
+
     private async Task BurnCaptionsAsync()
     {
         string? fixedCaptionPath = null;
@@ -1460,6 +1679,10 @@ public class AppWorkflow
                     _settings.FfmpegPath = ConsoleUI.AskText(
                         "Enter the ffmpeg executable path or command:",
                         defaultValue: _settings.FfmpegPath);
+                    if (!await ValidateFfmpegPathAsync(promptToFix: false))
+                    {
+                        ConsoleUI.ShowError("The ffmpeg path is invalid. Configure a working ffmpeg executable or command before continuing.");
+                    }
                     break;
 
                 case "🧠 Choose Whisper GGML Model":
