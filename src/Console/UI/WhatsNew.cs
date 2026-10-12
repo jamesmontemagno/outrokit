@@ -24,6 +24,11 @@ public static class WhatsNew
 {
     public static IReadOnlyList<WhatsNewRelease> Releases { get; } =
     [
+        new(Version: null,
+        [
+            new("📂", "Cancel or switch drives while picking files",
+                "Choose Cancel, leave a typed path blank, or cancel the browser to return to your current task. The file browser also lists available drives, so you can switch drives without typing a path.")
+        ]),
         new(Version: "1.7.0",
         [
             new("💾", "Choose what to save",

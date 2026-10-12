@@ -315,8 +315,9 @@ public static class ConsoleUI
     /// <summary>
     /// Prompts for file path with existence validation and file browser option.
     /// Handles drag-and-drop paths that may have quotes or escape characters.
+    /// Returns null when the user cancels.
     /// </summary>
-    public static string AskFilePath(
+    public static string? AskFilePath(
         string prompt,
         bool mustExist = true,
         string? startDirectory = null,
@@ -328,7 +329,7 @@ public static class ConsoleUI
             var choice = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title(prompt)
-                    .AddChoices("📂 Browse for file", "⌨️ Type or paste path"));
+                    .AddChoices("📂 Browse for file", "⌨️ Type or paste path", "❌ Cancel"));
             
             string path;
             
@@ -336,17 +337,21 @@ public static class ConsoleUI
             {
                 var browsedPath = BrowseForFile(startDirectory, discoveryType);
                 if (browsedPath == null)
-                    continue; // User cancelled, show menu again
+                    return null;
                 path = browsedPath;
+            }
+            else if (choice == "❌ Cancel")
+            {
+                return null;
             }
             else
             {
                 path = AnsiConsole.Prompt(
-                    new TextPrompt<string>("Enter file path (drag & drop supported):")
+                    new TextPrompt<string>("Enter file path (drag & drop supported; leave blank to cancel):")
                         .AllowEmpty());
                 
                 if (string.IsNullOrWhiteSpace(path))
-                    continue;
+                    return null;
                 
                 // Clean up drag-and-drop paths
                 path = CleanFilePath(path);
@@ -468,6 +473,13 @@ public static class ConsoleUI
             AnsiConsole.MarkupLine($"[grey]Current: {Markup.Escape(currentDir)}[/]");
             
             var items = new List<string> { "📁 .." };
+            var drives = Environment.GetLogicalDrives()
+                .Where(Directory.Exists)
+                .ToArray();
+            if (drives.Length > 1)
+            {
+                items.AddRange(drives.Select(drive => $"💽 {drive}"));
+            }
             
             try
             {
@@ -489,7 +501,11 @@ public static class ConsoleUI
             catch (UnauthorizedAccessException)
             {
                 ShowError("Access denied to this directory");
-                currentDir = Directory.GetParent(currentDir)?.FullName ?? currentDir;
+                var parent = Directory.GetParent(currentDir);
+                if (parent == null)
+                    return null;
+
+                currentDir = parent.FullName;
                 continue;
             }
             
@@ -516,6 +532,10 @@ public static class ConsoleUI
                 {
                     currentDir = parent.FullName;
                 }
+            }
+            else if (selection.StartsWith("💽 "))
+            {
+                currentDir = selection[3..]; // Remove "💽 " prefix
             }
             else if (selection.StartsWith("📁 "))
             {
