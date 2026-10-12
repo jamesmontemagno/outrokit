@@ -27,7 +27,9 @@ public static class WhatsNew
         new(Version: null,
         [
             new("🎵", "Replace a video's audio",
-                "Choose Replace Audio in Video from the main menu to optionally save the original audio, select a processed replacement track, and export a new MP4 without re-encoding the picture. Every file prompt can be backed out of, and a summary at the end shows the files used, the resolution, and the new video's length and size.")
+                "Choose Replace Audio in Video from the main menu to optionally save the original audio, select a processed replacement track, and export a new MP4 without re-encoding the picture. Every file prompt can be backed out of, and a summary at the end shows the files used, the resolution, and the new video's length and size."),
+            new("📂", "Cancel or switch drives while picking files",
+                "Choose Cancel, leave a typed path blank, or cancel the browser to return to your current task. The file browser also lists available drives, so you can switch drives without typing a path.")
         ]),
         new(Version: "1.7.0",
         [
