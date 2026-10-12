@@ -15,14 +15,14 @@ public sealed class AudioReplacementService(AppSettings settings)
         EnsureInputExists(videoPath, "video");
         EnsureDifferentPaths(videoPath, outputPath);
 
-        return FfmpegCommand.RunAsync(
+        return RunToOutputAsync(
             settings.FfmpegPath,
             [
                 "-nostdin", "-hide_banner", "-loglevel", "error", "-y",
                 "-i", videoPath,
-                "-vn", "-map", "0:a:0",
-                outputPath
+                "-vn", "-map", "0:a:0"
             ],
+            outputPath,
             cancellationToken);
     }
 
@@ -42,20 +42,58 @@ public sealed class AudioReplacementService(AppSettings settings)
         EnsureDifferentPaths(videoPath, outputPath);
         EnsureDifferentPaths(audioPath, outputPath);
 
-        return FfmpegCommand.RunAsync(
+        return RunToOutputAsync(
             settings.FfmpegPath,
             [
                 "-nostdin", "-hide_banner", "-loglevel", "error", "-y",
                 "-i", videoPath,
                 "-i", audioPath,
+                "-filter_complex", "[1:a:0]apad[replacement]",
                 "-map", "0:v:0",
-                "-map", "1:a:0",
+                "-map", "[replacement]",
                 "-c:v", "copy",
                 "-c:a", "aac",
                 "-movflags", "+faststart",
-                outputPath
+                "-shortest"
             ],
+            outputPath,
             cancellationToken);
+    }
+
+    private static async Task RunToOutputAsync(
+        string ffmpegPath,
+        IReadOnlyList<string> arguments,
+        string outputPath,
+        CancellationToken cancellationToken)
+    {
+        var fullOutputPath = Path.GetFullPath(outputPath);
+        var directory = Path.GetDirectoryName(fullOutputPath)
+            ?? throw new ArgumentException("The output path must include a directory.", nameof(outputPath));
+        var extension = Path.GetExtension(fullOutputPath);
+        var partialPath = Path.Combine(
+            directory,
+            $".{Path.GetFileNameWithoutExtension(fullOutputPath)}.{Guid.NewGuid():N}.partial{extension}");
+        var argumentsWithPartialPath = new List<string>(arguments) { partialPath };
+        Exception? operationException = null;
+        try
+        {
+            await FfmpegCommand.RunAsync(ffmpegPath, argumentsWithPartialPath, cancellationToken);
+            if (!File.Exists(partialPath) || new FileInfo(partialPath).Length == 0)
+            {
+                throw new InvalidOperationException("ffmpeg finished without writing the output file.");
+            }
+
+            File.Move(partialPath, fullOutputPath, overwrite: true);
+        }
+        catch (Exception ex)
+        {
+            operationException = ex;
+            throw;
+        }
+        finally
+        {
+            await TemporaryFileCleanup.DeleteAsync(partialPath, operationException);
+        }
     }
 
     private static void EnsureInputExists(string path, string description)
@@ -68,10 +106,7 @@ public sealed class AudioReplacementService(AppSettings settings)
 
     private static void EnsureDifferentPaths(string inputPath, string outputPath)
     {
-        if (string.Equals(
-            Path.GetFullPath(inputPath),
-            Path.GetFullPath(outputPath),
-            StringComparison.OrdinalIgnoreCase))
+        if (CaptionBurnService.IsSameFile(inputPath, outputPath))
         {
             throw new ArgumentException("The output path cannot overwrite an input file.", nameof(outputPath));
         }
