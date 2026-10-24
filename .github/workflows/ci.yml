@@ -61,6 +61,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Hosted Windows puts RUNNER_TEMP on the temporary drive; set both paths before any NuGet use.
+      - name: Use temporary drive for NuGet (Windows)
+        if: runner.os == 'Windows' && runner.environment == 'github-hosted'
+        shell: pwsh
+        run: |
+          "NUGET_PACKAGES=$(Join-Path $env:RUNNER_TEMP 'nuget-packages')" >> $env:GITHUB_ENV
+          "NUGET_HTTP_CACHE_PATH=$(Join-Path $env:RUNNER_TEMP 'nuget-http-cache')" >> $env:GITHUB_ENV
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
@@ -69,7 +77,7 @@ jobs:
       - name: Cache NuGet packages
         uses: actions/cache@v4
         with:
-          path: ~/.nuget/packages
+          path: ${{ env.NUGET_PACKAGES || '~/.nuget/packages' }}
           key: nuget-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/*.csproj', '**/*.props', '**/*.targets', '**/packages.lock.json', '**/[Nn]u[Gg]et.[Cc]onfig', '**/global.json') }}
           restore-keys: |
             nuget-${{ runner.os }}-${{ runner.arch }}-

@@ -69,6 +69,8 @@ Ordinary CI cancels superseded runs for the same pull request or branch, without
 
 Build, test, and pack jobs cache downloaded NuGet packages by runner OS, architecture, and dependency inputs. Each fresh job still restores its own project assets (explicitly for build, implicitly for test and pack); cache hits never skip validation. Older caches for the same OS and architecture can seed downloads when dependencies change. These optimizations reduce redundant runner work and improve feedback time, not billed costs on the public repository's standard runners.
 
+On GitHub-hosted Windows, CI sets `NUGET_PACKAGES` and `NUGET_HTTP_CACHE_PATH` to separate directories under `RUNNER_TEMP` before .NET setup, cache restore, or tests. The remote package cache uses that effective packages location; the HTTP cache is local to the job and is not uploaded. Linux, both Mac architectures, and release publishing keep their existing paths. Changing the package path changes the Actions cache version automatically, so the first Windows run starts a new cache without changing the OS/architecture/dependency keys. This placement is motivated by [Windows NuGet disk-location measurements](https://awakecoding.com/posts/speeding-up-dotnet-builds-on-windows-nuget-cache/); it is not a measured OutroKit speedup or a guarantee of faster warm-cache builds.
+
 ### Project Structure
 
 - `Models/` - Data models and settings
