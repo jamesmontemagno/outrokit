@@ -63,6 +63,12 @@ dotnet run
 
 The tests in `tests/` burn captions into short clips that ffmpeg generates on the spot, so most of them need an ffmpeg that includes libass. They look for `ffmpeg` on your `PATH`, then for Homebrew's `ffmpeg-full`; set `PMG_TEST_FFMPEG` to use a different one. Tests that cannot find a suitable ffmpeg are skipped locally. CI sets `PMG_TEST_REQUIRE_FFMPEG=1`, which makes them fail instead, and runs them on Linux, Windows, and both kinds of Mac.
 
+### Continuous Integration
+
+Ordinary CI cancels superseded runs for the same pull request or branch, without cancelling other workflows such as releases or site deployments. The full test matrix and both NuGet package checks still run for the latest commit.
+
+Build, test, and pack jobs cache downloaded NuGet packages by runner OS, architecture, and dependency inputs. Each fresh job still restores its own project assets (explicitly for build, implicitly for test and pack); cache hits never skip validation. Older caches for the same OS and architecture can seed downloads when dependencies change. These optimizations reduce redundant runner work and improve feedback time, not billed costs on the public repository's standard runners.
+
 ### Project Structure
 
 - `Models/` - Data models and settings
