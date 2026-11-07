@@ -35,7 +35,7 @@ public class SettingsService
     /// <summary>
     /// Loads settings from disk, returning defaults if not found.
     /// </summary>
-    public async Task<AppSettings> LoadAsync()
+    public async Task<AppSettings> LoadAsync(bool throwOnError = false)
     {
         try
         {
@@ -43,10 +43,11 @@ public class SettingsService
                 return Normalize(new AppSettings());
             
             var json = await File.ReadAllTextAsync(_settingsPath);
-            var settings = JsonSerializer.Deserialize<AppSettings>(json, JsonOptions) ?? new AppSettings();
+            var settings = JsonSerializer.Deserialize<AppSettings>(json, JsonOptions)
+                ?? throw new JsonException("The settings file must contain a JSON object.");
             return Normalize(settings);
         }
-        catch
+        catch when (!throwOnError)
         {
             // Return defaults on any error
             return Normalize(new AppSettings());

@@ -34,16 +34,17 @@ OutroKit writes the titles, descriptions, chapters, and SRT subtitles for your e
 - **🤖 Model Selection** - Choose from multiple AI models (GPT-5, Claude, Gemini)
 - **⚙️ Configurable Settings** - Customize generation parameters and save preferences
 - **✨ What's New** - See full details for the latest release and compact, title-only updates for older releases from the main menu
+- **Agent-callable commands** - Generate metadata, transcribe, convert or fix captions, burn captions, and extract or replace audio without interactive menus, with JSON results and safe explicit output paths
 
 ## 📋 Prerequisites
 
 - [.NET 10.0 SDK](https://dotnet.microsoft.com/download) or later
-- A GitHub Copilot account and authentication, unless using BYOK. The free Copilot plan works
-- [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/set-up/install-copilot-cli) installed (see below)
+- A GitHub Copilot account and authentication, unless using BYOK, for the interactive app and AI metadata commands. The free Copilot plan works
+- [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/set-up/install-copilot-cli) installed for the interactive app and AI metadata commands (see below)
 - [ffmpeg](https://ffmpeg.org/download.html) available on `PATH`, or its executable path configured in Settings (only needed to transcribe video or audio files and to burn captions into video)
   - Burning captions needs an ffmpeg built with libass, which provides the `subtitles` filter. Homebrew's standard `ffmpeg` formula leaves it out; `brew install ffmpeg-full` includes it
 
-The app reaches Copilot through the Copilot CLI installed on your computer, on every system and whether you run the NuGet tool or build from source. It does not bundle a Copilot runtime, which keeps the package to about 11 MB. Make sure `copilot` is on your `PATH`, or set `COPILOT_CLI_PATH` to the executable. If the app cannot find it, it shows how to install it.
+The app reaches Copilot through the Copilot CLI installed on your computer, on every system and whether you run the NuGet tool or build from source. It does not bundle a Copilot runtime. Make sure `copilot` is on your `PATH`, or set `COPILOT_CLI_PATH` to the executable. If the app cannot find it, it shows how to install it. The noninteractive transcription, caption, subtitle conversion, audio, and Whisper model commands run without a Copilot readiness check or authentication.
 
 ### Installing GitHub Copilot CLI
 
@@ -101,7 +102,155 @@ dotnet build PodcastMetadataGenerator.sln
 
 - [Using GitHub Copilot SDK built-in APIs in .NET](docs/copilot-sdk-dotnet-built-in-apis.md)
 
+## Agent skills in the NuGet package
+
+OutroKit bundles focused [Agent Skills](https://agentskills.io/) alongside the
+tool, following the [NuGet skill-delivery convention](https://devblogs.microsoft.com/dotnet/delivering-skills-in-nuget-packages/).
+The `OutroKit` and legacy `PodcastMetadataGenerator` packages carry the same files
+at `skills/<name>/SKILL.md`, matched to the app version:
+
+| Skill | Helps your agent with |
+|-------|-----------------------|
+| `outrokit-episode-metadata` | Agent-callable titles, descriptions, and publishing-kit JSON |
+| `outrokit-youtube-chapters` | Real topic-boundary timestamps and YouTube chapter publishing checks |
+| `outrokit-captions` | Local transcription, SRT readability fixes, and safe styled caption burns |
+| `outrokit-audio` | Original-audio extraction and processed-track replacement without re-encoding the picture |
+
+These skills tell your agent how to invoke the [noninteractive commands](#agent-cli)
+below, interpret their JSON responses, and escalate decisions to you. Starting
+OutroKit without a subcommand still opens the interactive app. Installing the
+tool does **not** automatically register skills with your editor or load them
+into the app's Copilot SDK sessions.
+
+For a published version containing skills, the article's `dotnet-inspect` tool
+can discover them directly from NuGet:
+
+```bash
+dotnet tool install -g dotnet-inspect
+dotnet-inspect package OutroKit -S Skills
+```
+
+To make them available to Copilot in your own repository, download the `.nupkg`
+for the version you use from NuGet and extract its `skills/` directory, then copy
+the desired skill folders into your repository's `.github/skills/`. For example,
+with `unzip` on macOS or Linux (replace `<version>` with your package version):
+
+```bash
+unzip "OutroKit.<version>.nupkg" 'skills/*' -d ./outrokit-package
+mkdir -p .github/skills
+cp -R ./outrokit-package/skills/outrokit-* .github/skills/
+```
+
+Review the instructions before enabling them, check for existing folders before
+copying, and do not overwrite customized skills without review. Use only packages
+from maintainers you trust. Refresh the copied skills when updating OutroKit.
+Because this is a **tool** package, do not add it as a `PackageReference` just to
+obtain skills; project-dependency skill installers are not the installation path
+for this package. From a source checkout, the same documents live in [`skills/`](skills/).
+
 ## 📖 Usage
+
+### Agent CLI
+
+Use `outrokit --help` and `outrokit <command> --help` to discover the installed
+version's options. Replace `outrokit` with `dnx OutroKit` to run without a global
+installation. Existing `outrokit` and `outrokit /path/to/transcript.txt` usage
+still opens the interactive app.
+
+| Command | Result |
+|---------|--------|
+| `metadata <transcript>` | Requested titles, description lengths, and/or checked chapters as JSON |
+| `transcribe <media> --output <file.srt>` | Local Whisper transcription; requires an existing model and ffmpeg |
+| `srt convert <transcript> --output <file.srt>` | SRT from existing timestamps, with conversion warnings |
+| `captions check <captions>` | Readability report for SRT, WebVTT, ASS, or SSA |
+| `captions fix <captions.srt> --output <fixed.srt>` | Separate corrected SRT and remaining findings |
+| `captions burn <video> --captions <file> --output <video.mp4>` | Captioned H.264 video, with optional style and safe fixes |
+| `audio extract <video> --output <audio.wav>` | Original audio; WAV, MP3, M4A, or FLAC output |
+| `audio replace <video> --audio <track> --output <video.mp4>` | Original picture with AAC replacement audio, padded or trimmed to the video length |
+| `models list` / `models download --whisper-model Base` | Whisper model catalog / explicitly downloaded and initialized model path |
+
+For example, start with a timed transcript and select only the metadata needed:
+
+```bash
+outrokit metadata "/path/to/episode.srt" \
+  --artifacts Titles Descriptions Chapters --lengths Short Medium \
+  --style Seo --context "This episode's guest and subject" \
+  --output "/path/to/episode-metadata.json"
+
+outrokit captions check "/path/to/episode.srt"
+outrokit captions fix "/path/to/episode.srt" --output "/path/to/episode-fixed.srt"
+outrokit captions burn "/path/to/episode.mp4" \
+  --captions "/path/to/episode-fixed.srt" --output "/path/to/episode-captioned.mp4" \
+  --appearance ContrastPanel --size Large --position Bottom --fix
+```
+
+Metadata defaults to **Titles and Descriptions**, with all three description
+lengths. Use `--artifacts` to select `Titles`, `Descriptions`, and/or `Chapters`,
+and `--lengths` to select `Short`, `Medium`, and/or `Long`. Titles are suggestions:
+the command never silently picks one. To condition descriptions on your choice,
+pass `--title "Your selected title"` in a descriptions invocation.
+
+Metadata accepts transcripts, not media. Chapters and SRT conversion require
+real timestamps; untimed chapter requests fail before contacting AI. Chapters
+are checked for valid times, a zero start, at least three markers, 10-second
+minimum durations including the final chapter, transcript-supported starts, and
+the configured title word limit. Review whether the boundaries actually match
+the topics and final edited video.
+
+Download a Whisper model explicitly if one is not already installed:
+
+```bash
+outrokit models download --whisper-model Base
+outrokit transcribe "/path/to/episode.mp4" --output "/path/to/episode.srt" \
+  --whisper-model-path "/path/returned/by/download/ggml-base.bin"
+```
+
+Downloads do not save app preferences. Transcription never implicitly downloads
+a missing model. Local commands do not need Copilot authentication; only metadata
+uses AI and sends transcript content to the configured provider.
+
+**Response contract.** Each command emits one JSON object on stdout:
+`{"success":true,"command":"...","result":{...},"error":null}`. Failures set
+`success:false` and provide `error.code`, `error.message`, and optional
+`error.details`; diagnostics also go to stderr. Help and version are plain text.
+Metadata is in `result.metadata` (`titles`, `descriptions`, `chapters`);
+descriptions are keyed by `Short`, `Medium`, and `Long`. Saved metadata paths
+are in `result.savedFiles`; other file-producing commands return `result.output`.
+Metadata's optional `.json` output contains `input`, `model`, and `metadata`,
+not the response envelope and not separate text exports.
+
+| Exit code | Meaning |
+|-----------|---------|
+| `0` | Operation completed; inspect any report or warnings before publishing |
+| `1` | Operation failed |
+| `2` | Invalid arguments, input, or settings |
+| `3` | SDK permission needs a user decision |
+| `4` | Caption quality findings remain |
+| `130` | Cancelled or timeout expired |
+
+`captions fix` can save a corrected file and still return **4** if findings
+remain; inspect its `result.output` and `result.report`. Burns with findings
+are blocked without writing video: use `--fix` for safe SRT/WebVTT fixes and
+only add `--allow-issues` after reviewing and explicitly accepting remaining
+findings. ASS/SSA keep their embedded styling; appearance overrides and `--fix`
+are rejected for those formats.
+
+**Safety and settings.** Every writer requires a separate destination; metadata
+can instead return JSON only on stdout. Existing outputs require explicit
+`--overwrite`, and inputs cannot be overwritten even through an output symlink.
+Failed or cancelled writes leave existing files unchanged. `--settings` reads
+an optional settings file; invalid files fail rather than silently falling back.
+CLI overrides do not save preferences. Use `--ffmpeg`, `--model` (metadata), and
+`--timeout-seconds` as needed; the default timeout is 1800 seconds and the maximum
+is 86400. Ctrl+C cancels an active command.
+
+Metadata sessions disable tools for transcript-only generation. If the SDK
+still requests permission, exit **3** returns the exact request description and
+ID in `error.details`. The agent must ask you to approve or deny it. Retry with
+`--approve-permission <id>` only after approval, or `--deny-permission <id>` after
+denial if you want to continue with that action rejected. A decision is consumed
+once for that matching request, never applied to other actions; stopping without
+retrying is also safe.
 
 ### Console App - Interactive Mode
 
@@ -132,7 +281,7 @@ outrokit /path/to/episode.mp4
 outrokit /path/to/episode.mp3
 ```
 
-Supported video formats are `.mp4`, `.mov`, `.mkv`, `.avi`, `.webm`, `.m4v`, `.wmv`, `.mpeg`, and `.mpg`. Supported audio formats are `.mp3` and `.wav`.
+Supported video formats are `.mp4`, `.mov`, `.mkv`, `.avi`, `.webm`, `.m4v`, `.wmv`, `.mpeg`, and `.mpg`. Supported audio formats are `.mp3`, `.wav`, `.wave`, `.m4a`, `.aac`, `.flac`, `.ogg`, `.opus`, and `.mp2`.
 
 The app checks the file for an audio track with ffmpeg, asks where to save the `.srt`, transcribes the audio locally, and loads that SRT into the existing metadata flow. Model downloads and transcription can take a while; press **Ctrl+C** to cancel either one and return to the menu.
 

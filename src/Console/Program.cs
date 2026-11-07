@@ -1,5 +1,11 @@
+using PodcastMetadataGenerator.Console.Cli;
 using PodcastMetadataGenerator.Console.UI;
 using PodcastMetadataGenerator.Core.Services;
+
+if (CliApplication.ShouldRun(args))
+{
+    return await new CliApplication().RunAsync(args, System.Console.Out, System.Console.Error);
+}
 
 // Check Copilot status
 var copilotAuth = new CopilotAuthService();

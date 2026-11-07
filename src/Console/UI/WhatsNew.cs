@@ -26,6 +26,10 @@ public static class WhatsNew
     [
         new(Version: null,
         [
+            new("🤖", "Commands your agent can call",
+                "Run metadata, transcription, caption checks and fixes, caption burns, and audio extraction or replacement straight from the command line without menu prompts. Use outrokit --help for the commands; they return JSON, keep settings unchanged, and protect your original files."),
+            new("📦", "Agent skills included",
+                "The NuGet package includes skills that teach your coding agent how to call OutroKit for episode metadata, YouTube chapters, captions, and audio workflows. See Agent skills in the package README to enable them in your repository; starting the app without a subcommand still opens the usual menus."),
             new("🎵", "Replace a video's audio",
                 "Choose Replace Audio in Video from the main menu to optionally save the original audio, select a processed replacement track, and export a new MP4 without re-encoding the picture. Every file prompt can be backed out of, and a summary at the end shows the files used, the resolution, and the new video's length and size."),
             new("📂", "Cancel or switch drives while picking files",

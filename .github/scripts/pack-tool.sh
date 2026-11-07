@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Packs the console app as two NuGet tool packages and checks what each one contains:
+# Packs the console app as two NuGet tool packages and checks their commands and bundled skills:
 #   OutroKit                  the app, with the command "outrokit"
 #   PodcastMetadataGenerator  the same app under its original ID and command, which tells
 #                             people to move to OutroKit
@@ -11,6 +11,12 @@ output="${1:?Usage: pack-tool.sh <output-directory> [version]}"
 version="${2:-}"
 project="src/Console/PodcastMetadataGenerator.Console.csproj"
 marker="renamed-package.txt"
+skill_listing="$(find skills -type f | LC_ALL=C sort)"
+skill_count="$(grep -cE '^skills/[^/]+/SKILL\.md$' <<<"$skill_listing" || true)"
+if [ "$skill_count" -eq 0 ]; then
+  echo "error: no agent skills found under skills/<name>/SKILL.md" >&2
+  exit 1
+fi
 
 version_arguments=()
 if [ -n "$version" ]; then
@@ -62,7 +68,21 @@ check() {
     exit 1
   fi
 
-  echo "ok: $(basename "$package") installs the command \"$command\""
+  local packaged_skills skill_path
+  packaged_skills="$(grep '^skills/' <<<"$listing" | LC_ALL=C sort || true)"
+  if [ "$packaged_skills" != "$skill_listing" ]; then
+    echo "error: $package does not contain the expected skills/ layout" >&2
+    diff -u <(printf '%s\n' "$skill_listing") <(printf '%s\n' "$packaged_skills") >&2 || true
+    exit 1
+  fi
+  while IFS= read -r skill_path; do
+    if ! cmp -s "$skill_path" <(unzip -p "$package" "$skill_path"); then
+      echo "error: $package: $skill_path differs from its source" >&2
+      exit 1
+    fi
+  done <<<"$skill_listing"
+
+  echo "ok: $(basename "$package") installs the command \"$command\" with $skill_count agent skills"
 }
 
 check OutroKit outrokit no

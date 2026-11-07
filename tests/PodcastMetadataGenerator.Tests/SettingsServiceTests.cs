@@ -1,5 +1,6 @@
 using PodcastMetadataGenerator.Core.Models;
 using PodcastMetadataGenerator.Core.Services;
+using System.Text.Json;
 
 namespace PodcastMetadataGenerator.Tests;
 
@@ -56,5 +57,18 @@ public sealed class SettingsServiceTests : IDisposable
         Assert.Equal(CaptionPosition.Bottom, loaded.CaptionPosition);
         Assert.Equal(CaptionAppearance.ClassicOutline, loaded.CaptionAppearance);
         Assert.Equal(7, loaded.TitleCount);
+    }
+
+    [Theory]
+    [InlineData("not JSON")]
+    [InlineData("null")]
+    public async Task Strict_loading_surfaces_invalid_settings_but_interactive_loading_keeps_defaults(string content)
+    {
+        await File.WriteAllTextAsync(_path, content);
+        var service = new SettingsService(_path);
+        await Assert.ThrowsAsync<JsonException>(() => service.LoadAsync(throwOnError: true));
+        var interactive = await service.LoadAsync();
+        Assert.Equal(5, interactive.TitleCount);
+        Assert.Equal(AvailableModels.PreferredDefaultModelId, interactive.Model);
     }
 }
