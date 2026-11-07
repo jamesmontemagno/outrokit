@@ -10,10 +10,11 @@ namespace PodcastMetadataGenerator.Core.Services;
 /// <summary>
 /// Generates episode metadata using the GitHub Copilot SDK.
 /// </summary>
-public partial class MetadataGenerator : IAsyncDisposable
+public partial class MetadataGenerator : IMetadataGenerator
 {
     private readonly AppSettings _settings;
     private readonly Func<PermissionRequest, PermissionInvocation, Task<bool>>? _permissionApprovalCallback;
+    private readonly bool _disableTools;
     private CopilotClient? _client;
     private bool _isInitialized;
     private string? _resolvedModel;
@@ -26,26 +27,28 @@ public partial class MetadataGenerator : IAsyncDisposable
     
     public MetadataGenerator(
         AppSettings settings,
-        Func<PermissionRequest, PermissionInvocation, Task<bool>>? permissionApprovalCallback = null)
+        Func<PermissionRequest, PermissionInvocation, Task<bool>>? permissionApprovalCallback = null,
+        bool disableTools = false)
     {
         _settings = settings;
         _permissionApprovalCallback = permissionApprovalCallback;
+        _disableTools = disableTools;
     }
     
     /// <summary>
     /// Initializes the Copilot client.
     /// </summary>
-    public async Task InitializeAsync()
+    public async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
         if (_isInitialized) return;
         
         try
         {
             _client = CopilotClientFactory.CreateClient();
-            await _client.StartAsync();
+            await _client.StartAsync(cancellationToken);
             _isInitialized = true;
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             throw new InvalidOperationException($"Failed to initialize Copilot client: {ex.Message}", ex);
         }
@@ -61,7 +64,7 @@ public partial class MetadataGenerator : IAsyncDisposable
         Action<string>? onChunk = null,
         CancellationToken cancellationToken = default)
     {
-        await EnsureInitializedAsync();
+        await EnsureInitializedAsync(cancellationToken);
         
         var response = await SendPromptWithStreamingAsync(
             PromptTemplates.TitleSystemPrompt,
@@ -90,7 +93,7 @@ public partial class MetadataGenerator : IAsyncDisposable
         Action<string>? onChunk = null,
         CancellationToken cancellationToken = default)
     {
-        await EnsureInitializedAsync();
+        await EnsureInitializedAsync(cancellationToken);
         
         var response = await SendPromptWithStreamingAsync(
             PromptTemplates.DescriptionSystemPrompt,
@@ -134,7 +137,7 @@ public partial class MetadataGenerator : IAsyncDisposable
         Action<string>? onChunk = null,
         CancellationToken cancellationToken = default)
     {
-        await EnsureInitializedAsync();
+        await EnsureInitializedAsync(cancellationToken);
         
         var response = await SendPromptWithStreamingAsync(
             PromptTemplates.ChapterSystemPrompt,
@@ -177,11 +180,11 @@ public partial class MetadataGenerator : IAsyncDisposable
         return chapters;
     }
     
-    private async Task EnsureInitializedAsync()
+    private async Task EnsureInitializedAsync(CancellationToken cancellationToken)
     {
         if (!_isInitialized || _client == null)
         {
-            await InitializeAsync();
+            await InitializeAsync(cancellationToken);
         }
     }
     
@@ -215,15 +218,16 @@ public partial class MetadataGenerator : IAsyncDisposable
                 ClientName = CopilotClientFactory.ClientName,
                 Model = _settings.Model,
                 OnPermissionRequest = HandlePermissionRequestAsync,
+                AvailableTools = _disableTools ? [] : null,
                 Streaming = true, // Always use streaming for better responsiveness
                 SystemMessage = new SystemMessageConfig
                 {
                     Mode = SystemMessageMode.Replace,
                     Content = SanitizeForJson(systemPrompt)
                 }
-            });
+            }, cancellationToken);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             throw new InvalidOperationException($"Failed to create session (model: {_settings.Model}): {ex.Message}", ex);
         }
@@ -264,9 +268,9 @@ public partial class MetadataGenerator : IAsyncDisposable
         
         try
         {
-            await session.SendAsync(new MessageOptions { Prompt = sanitizedPrompt });
+            await session.SendAsync(new MessageOptions { Prompt = sanitizedPrompt }, cancellationToken);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             throw new InvalidOperationException($"Failed to send message (prompt length: {sanitizedPrompt.Length} chars): {ex.Message}", ex);
         }

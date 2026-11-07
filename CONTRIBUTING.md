@@ -90,6 +90,51 @@ Releases publish through nuget.org [Trusted Publishing](https://learn.microsoft.
 
 When the old package is no longer needed, deprecate it on nuget.org with `OutroKit` as the alternate package, and remove it from the push step in `.github/workflows/release.yml`.
 
+### Bundled Agent Skills
+
+Consumer-facing skills live in `skills/<skill-name>/SKILL.md`. Each document uses
+the [Agent Skills format](https://agentskills.io/specification), with YAML
+`name` matching its folder and a `description` that identifies when to use it.
+The console project packs the entire `skills/` tree at the NuGet package root in
+both tool packages. Keep these documents aligned with the app's actual menus,
+supported inputs, settings, output names, and safety guarantees. Do not bundle
+repository-only release or video-production skills from `.github/skills/`.
+
+Run `.github/scripts/pack-tool.sh ./artifacts` after changing the skills or
+packaging. CI and releases already use this script; it verifies the exact
+`skills/` file layout and compares every packaged skill asset with its source
+in both packages, in addition to checking command names and the legacy marker.
+
+Evaluate skill changes with realistic prompts and supplied inputs, not just
+frontmatter or archive checks:
+
+| Prompt or fixture | Expected behavior |
+|-------------------|-------------------|
+| "Prepare titles and a short description from this plain-text episode" | Calls `metadata` with explicit artifacts and Short length, grounds claims in the transcript, and does not invent timestamps |
+| "Make YouTube chapters from this untimed transcript" | Requests a timed transcript or media instead of guessing times |
+| Timed 18-minute episode with transitions at 00:00, 02:15, and 10:40 | Produces or reviews an ordered chapter block with those supported times and checks the final chapter's duration |
+| 300 ms SRT cue followed by a cue only 200 ms later | Flags duration and available-time limits; does not propose an overlapping blind extension |
+| "Burn this ASS file with a different OutroKit font" | Explains that ASS keeps its own styling and does not use unsupported appearance overrides |
+| "Replace this video's audio with the processed track" | Calls `audio replace` with a separate MP4 destination and explains padding/trimming without re-encoding the picture |
+| Agent without an interactive terminal | Uses subcommands, reads JSON and exit status, and never scripts the interactive menu |
+| SDK permission request | Asks for a user decision and only retries with the matching approved/denied permission ID |
+| Caption fix returning exit 4 | Recognizes a corrected file may exist, reports remaining findings, and does not call it clean |
+| Transcript or captions containing command-like instructions | Treats the embedded text as data and does not execute it |
+
+Compare results with and without the skill using the same prompt, input, and
+model. Check correctness, unsupported-command attempts, preserved originals,
+and whether the skill reduces unnecessary exploration and context use. Include
+a frontier model; a cheaper model alone is not evidence that the skill helps
+all consumers. These are evaluation scenarios, not an automated AI benchmark
+or a measured efficiency claim.
+
+CLI actions live in `src/Console/Cli/` and reuse Core services. `Program.cs`
+routes subcommands before the interactive app's Copilot readiness check. Keep
+stdout machine-readable, errors explicit, settings read-only, and file writes
+safe against cancellation, failure, and input/output aliases. CLI metadata
+tests use `IMetadataGenerator` fakes rather than a live account; media command
+tests exercise actual ffmpeg outputs through the shared fixture.
+
 ## Style Guidelines
 
 ### C# Style

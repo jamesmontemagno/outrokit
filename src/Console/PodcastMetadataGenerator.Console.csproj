@@ -48,11 +48,13 @@
 
   <ItemGroup>
     <PackageReference Include="Spectre.Console" Version="0.54.0" />
+    <PackageReference Include="System.CommandLine" Version="2.0.0" />
     <PackageReference Include="TextCopy" Version="6.2.1" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+    <None Include="../../skills/**/*" Pack="true" PackagePath="skills/%(RecursiveDir)%(Filename)%(Extension)" />
   </ItemGroup>
 
 </Project>
