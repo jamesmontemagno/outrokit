@@ -114,89 +114,54 @@ public partial class TranscriptParser
     /// </summary>
     private List<TranscriptSegment> ParseZencastr(string[] lines)
     {
-        var segments = new List<TranscriptSegment>();
-        var i = 0;
-        
-        while (i < lines.Length)
+        var turns = new List<(long StartTimeMs, List<string> Lines)>();
+        foreach (var rawLine in lines)
         {
-            var line = lines[i].Trim();
-            
-            // Look for timestamp
+            var line = rawLine.Trim();
             var match = ZencastrTimestampRegex().Match(line);
-            if (!match.Success)
-            {
-                i++;
-                continue;
-            }
-            
-            var startTimeMs = ParseZencastrTimestamp(match);
-            i++;
-            
-            // Next line might be speaker
-            string? speaker = null;
-            if (i < lines.Length)
-            {
-                var potentialSpeaker = lines[i].Trim();
-                if (SpeakerRegex().IsMatch(potentialSpeaker) && potentialSpeaker.Length < 30)
-                {
-                    speaker = potentialSpeaker;
-                    i++;
-                }
-            }
-            
-            // Collect text until next timestamp or empty line
-            var textLines = new List<string>();
-            while (i < lines.Length)
-            {
-                var textLine = lines[i].Trim();
-                if (string.IsNullOrEmpty(textLine) || ZencastrTimestampRegex().IsMatch(textLine))
-                    break;
-                
-                // Skip if it looks like a speaker line for the next segment
-                if (SpeakerRegex().IsMatch(textLine) && textLine.Length < 30 && 
-                    i + 1 < lines.Length && !string.IsNullOrEmpty(lines[i + 1].Trim()) &&
-                    !ZencastrTimestampRegex().IsMatch(lines[i + 1].Trim()))
-                {
-                    // This is actually text, not a speaker
-                    textLines.Add(textLine);
-                }
-                else if (SpeakerRegex().IsMatch(textLine) && textLine.Length < 30)
-                {
-                    break;
-                }
-                else
-                {
-                    textLines.Add(textLine);
-                }
-                i++;
-            }
-            
-            if (textLines.Count > 0)
-            {
-                var text = string.Join(" ", textLines);
-                var endTimeMs = startTimeMs + _settings.DefaultSegmentDurationMs;
-                
-                segments.Add(new TranscriptSegment
-                {
-                    StartTimeMs = startTimeMs,
-                    EndTimeMs = endTimeMs,
-                    Speaker = speaker,
-                    Text = text
-                });
-            }
+            if (match.Success)
+                turns.Add((ParseZencastrTimestamp(match), []));
+            else if (turns.Count > 0 && line.Length > 0)
+                turns[^1].Lines.Add(line);
         }
         
-        // Adjust end times based on next segment's start time
-        for (var j = 0; j < segments.Count - 1; j++)
+        // A lone speaker-like line is ambiguous, so it only counts as a label
+        // (a turn with no text) if that name introduces text elsewhere.
+        var knownSpeakers = turns
+            .Where(turn => turn.Lines.Count > 1 && IsSpeakerLine(turn.Lines[0]))
+            .Select(turn => turn.Lines[0])
+            .ToHashSet();
+        
+        var segments = new List<TranscriptSegment>();
+        foreach (var (startTimeMs, turnLines) in turns.Where(turn => turn.Lines.Count > 0))
         {
-            var current = segments[j];
-            var next = segments[j + 1];
+            var hasSpeaker = IsSpeakerLine(turnLines[0])
+                && (turnLines.Count > 1 || knownSpeakers.Contains(turnLines[0]));
+            var textLines = hasSpeaker ? turnLines.Skip(1).ToList() : turnLines;
+            if (textLines.Count == 0)
+                continue;
             
-            segments[j] = current with { EndTimeMs = next.StartTimeMs };
+            segments.Add(new TranscriptSegment
+            {
+                StartTimeMs = startTimeMs,
+                EndTimeMs = startTimeMs + _settings.DefaultSegmentDurationMs,
+                Speaker = hasSpeaker ? turnLines[0] : null,
+                Text = string.Join(" ", textLines)
+            });
         }
         
-        return segments;
+        // Crosstalk can list a turn before one that started earlier, so a turn ends at the next
+        // later start in time rather than at the next turn in the file. Without that, turns get
+        // end times before their own starts, and repairing those delays every caption after them.
+        var distinctStarts = segments.Select(segment => segment.StartTimeMs).Distinct().Order().ToList();
+        var nextStarts = distinctStarts.Zip(distinctStarts.Skip(1)).ToDictionary(pair => pair.First, pair => pair.Second);
+        
+        return segments
+            .Select(segment => segment with { EndTimeMs = nextStarts.GetValueOrDefault(segment.StartTimeMs, segment.EndTimeMs) })
+            .ToList();
     }
+    
+    private static bool IsSpeakerLine(string line) => SpeakerRegex().IsMatch(line) && line.Length < 30;
     
     /// <summary>
     /// Parses time range format transcripts.

@@ -30,6 +30,11 @@ public class SrtConverter
             errors.Add("Warning: Segments were not in chronological order and have been sorted.");
         }
         
+        if (transcript.Format == TranscriptFormat.Zencastr)
+        {
+            sortedSegments = CombineTurnsSharingAStart(sortedSegments, errors);
+        }
+        
         long previousEndTime = 0;
         
         for (var i = 0; i < sortedSegments.Count; i++)
@@ -55,12 +60,7 @@ public class SrtConverter
             sb.AppendLine(sequenceNumber.ToString());
             sb.AppendLine($"{segment.StartTimeSrt} --> {segment.EndTimeSrt}");
             
-            // Add speaker prefix if available
-            var text = string.IsNullOrEmpty(segment.Speaker) 
-                ? segment.Text 
-                : $"{segment.Speaker}: {segment.Text}";
-            
-            sb.AppendLine(text);
+            sb.AppendLine(CueText(segment));
             sb.AppendLine(); // Blank line separator
             
             previousEndTime = segment.EndTimeMs;
@@ -184,6 +184,39 @@ public class SrtConverter
         
         return sb.ToString().TrimEnd();
     }
+    
+    /// <summary>
+    /// Zencastr turns have no end time of their own, so turns that start together get no time
+    /// between them. One cue per start keeps every line on its real timestamp, where separate
+    /// cues would have to overlap or start late.
+    /// </summary>
+    private static List<TranscriptSegment> CombineTurnsSharingAStart(List<TranscriptSegment> sortedSegments, List<string> errors)
+    {
+        var combined = new List<TranscriptSegment>();
+        foreach (var turns in sortedSegments.GroupBy(segment => segment.StartTimeMs))
+        {
+            if (turns.Count() == 1)
+            {
+                combined.Add(turns.First());
+                continue;
+            }
+            
+            combined.Add(new TranscriptSegment
+            {
+                StartTimeMs = turns.Key,
+                EndTimeMs = turns.Max(turn => turn.EndTimeMs),
+                Text = string.Join("\n", turns.Select(CueText))
+            });
+            errors.Add($"Warning: {turns.Count()} turns start at {combined[^1].StartTimeSrt} and were combined into cue {combined.Count}.");
+        }
+        
+        return combined;
+    }
+    
+    private static string CueText(TranscriptSegment segment) =>
+        string.IsNullOrEmpty(segment.Speaker)
+            ? segment.Text
+            : $"{segment.Speaker}: {segment.Text}";
     
     private static long ParseSrtTime(System.Text.RegularExpressions.Match match, int startGroup)
     {
