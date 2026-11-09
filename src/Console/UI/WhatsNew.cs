@@ -24,10 +24,13 @@ public static class WhatsNew
 {
     public static IReadOnlyList<WhatsNewRelease> Releases { get; } =
     [
-        new(Version: null,
+        new(Version: "1.8.1",
         [
             new("⏱️", "Captions stay in sync when people talk over each other",
-                "Converting a Zencastr transcript to SRT now keeps every caption on its own timestamp. Turns listed slightly out of order no longer push later captions late, and turns that start at the same moment share one caption. Short replies such as \"Like this\" are also kept instead of being dropped."),
+                "Converting a Zencastr transcript to SRT now keeps every caption on its own timestamp. Turns listed slightly out of order no longer push later captions late, and turns that start at the same moment share one caption. Short replies such as \"Like this\" are also kept instead of being dropped.")
+        ]),
+        new(Version: "1.8.0",
+        [
             new("🤖", "Commands your agent can call",
                 "Run metadata, transcription, caption checks and fixes, caption burns, and audio extraction or replacement straight from the command line without menu prompts. Use outrokit --help for the commands; they return JSON, keep settings unchanged, and protect your original files."),
             new("📦", "Agent skills included",
