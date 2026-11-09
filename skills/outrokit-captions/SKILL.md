@@ -25,7 +25,9 @@ Transcription supports recognized video and audio formats, including MP4, MOV,
 MKV, WebM, MP3, WAV, M4A, AAC, FLAC, Ogg, and Opus. Confirm the input has speech.
 Conversion requires existing SRT, Zencastr, or time-range timestamps; it cannot
 align plain text. Review returned conversion `warnings`, because conversion can
-adjust invalid or overlapping segment timing.
+adjust invalid or overlapping segment timing. For Zencastr transcripts, captions
+keep their own timestamps: warnings report turns that were sorted, or that share
+a start and were combined into one cue, so cues can be fewer than turns.
 
 Use an existing GGML model, or inspect `outrokit models list`. With the user's
 approval for the network download and storage:

@@ -46,10 +46,10 @@ public class Transcript
     public bool HasTimestamps => Segments.Count > 0;
     
     /// <summary>
-    /// Total duration in milliseconds based on the last segment's end time.
-    /// Returns 0 if no segments are parsed.
+    /// Total duration in milliseconds based on the latest segment end time, because the last
+    /// segment in the file is not always the last in time. Returns 0 if no segments are parsed.
     /// </summary>
-    public long DurationMs => Segments.Count > 0 ? Segments[^1].EndTimeMs : 0;
+    public long DurationMs => Segments.Count > 0 ? Segments.Max(segment => segment.EndTimeMs) : 0;
     
     /// <summary>
     /// Total duration in seconds.

@@ -386,9 +386,16 @@ The browser can keep running after the file is written; stop it with Ctrl+C.
 
 ### Zencastr Format
 ```
-00:00.00 Speaker 1: Hello and welcome to the show.
-00:15.50 Speaker 2: Thanks for having me!
+00:00.15
+James
+Hello and welcome to the show.
+
+1:02:15.50
+Frank
+Thanks for having me!
 ```
+
+Each turn is a timestamp line (`MM:SS.cc` or `H:MM:SS.cc`), a speaker line, and its text. These transcripts have no end times, so a caption runs until the next later turn starts. When people talk over each other, turns can be listed slightly out of order; `srt convert` sorts them without moving any timestamp, and combines turns with the same start into one caption with a line for each speaker. Both are reported in `warnings`.
 
 ### Time-Range Format
 ```

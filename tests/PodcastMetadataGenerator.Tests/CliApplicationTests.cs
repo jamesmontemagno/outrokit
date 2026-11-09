@@ -71,6 +71,25 @@ public sealed class CliApplicationTests : IDisposable
     }
 
     [Fact]
+    public async Task Converting_crosstalk_keeps_timing_and_reports_only_the_reorder()
+    {
+        var input = Write("crosstalk.txt",
+            "00:10.00\nJames\nFirst turn.\n\n00:12.00\nFrank\nSecond turn.\n\n" +
+            "00:11.50\nJames\nLike this\n\n00:13.00\nFrank\nLast turn.\n");
+        var output = Path.Combine(_directory, "crosstalk.srt");
+
+        var result = await Run(["srt", "convert", input, "--output", output]);
+
+        Assert.Equal(0, result.ExitCode);
+        var warnings = result.Json.GetProperty("result").GetProperty("warnings");
+        Assert.Equal("Warning: Segments were not in chronological order and have been sorted.",
+            Assert.Single(warnings.EnumerateArray()).GetString());
+        var srt = File.ReadAllText(output);
+        Assert.Contains("00:00:11,500 --> 00:00:12,000" + Environment.NewLine + "James: Like this", srt);
+        Assert.Contains("00:00:13,000 --> 00:00:18,000" + Environment.NewLine + "Frank: Last turn.", srt);
+    }
+
+    [Fact]
     public async Task Untimed_input_is_rejected_before_AI_or_SRT_writes()
     {
         var input = Write("transcript.txt", "Some untimed episode content.");
