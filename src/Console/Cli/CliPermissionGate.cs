@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using GitHub.Copilot;
+using Microsoft.Copilot;
 using PodcastMetadataGenerator.Core.Services;
 
 namespace PodcastMetadataGenerator.Console.Cli;

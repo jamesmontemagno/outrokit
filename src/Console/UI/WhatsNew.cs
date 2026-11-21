@@ -24,6 +24,11 @@ public static class WhatsNew
 {
     public static IReadOnlyList<WhatsNewRelease> Releases { get; } =
     [
+        new(Version: null,
+        [
+            new("🔌", "Works with the latest Copilot CLI",
+                "OutroKit now runs on the Microsoft Copilot SDK 2.0, so it connects to current Copilot CLI releases again instead of failing with a protocol version error. If your Copilot CLI is too old, OutroKit now tells you to run 'copilot update'.")
+        ]),
         new(Version: "1.8.1",
         [
             new("⏱️", "Captions stay in sync when people talk over each other",

@@ -2,7 +2,7 @@ using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using GitHub.Copilot;
+using Microsoft.Copilot;
 using PodcastMetadataGenerator.Core.Models;
 using PodcastMetadataGenerator.Core.Services;
 

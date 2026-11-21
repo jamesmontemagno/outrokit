@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
-using GitHub.Copilot;
-using GitHub.Copilot.Rpc;
+using Microsoft.Copilot;
+using Microsoft.Copilot.Rpc;
 using PodcastMetadataGenerator.Core.Copilot;
 using PodcastMetadataGenerator.Core.Models;
 using PodcastMetadataGenerator.Core.Prompts;
@@ -8,7 +8,7 @@ using PodcastMetadataGenerator.Core.Prompts;
 namespace PodcastMetadataGenerator.Core.Services;
 
 /// <summary>
-/// Generates episode metadata using the GitHub Copilot SDK.
+/// Generates episode metadata using the Microsoft Copilot SDK.
 /// </summary>
 public partial class MetadataGenerator : IMetadataGenerator
 {
@@ -50,7 +50,8 @@ public partial class MetadataGenerator : IMetadataGenerator
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            throw new InvalidOperationException($"Failed to initialize Copilot client: {ex.Message}", ex);
+            throw new InvalidOperationException(
+                CopilotClientFactory.DescribeVersionMismatch(ex) ?? $"Failed to initialize Copilot client: {ex.Message}", ex);
         }
     }
     
@@ -213,13 +214,13 @@ public partial class MetadataGenerator : IMetadataGenerator
 
             // Note: Streaming set to true causes serialization issues with large prompts
             // in some SDK versions, so we use streaming only when an onChunk handler is provided
-            session = await _client.CreateSessionAsync(new SessionConfig
+            session = await _client.CreateSessionAsync(new CreateSessionOptions
             {
                 ClientName = CopilotClientFactory.ClientName,
                 Model = _settings.Model,
-                OnPermissionRequest = HandlePermissionRequestAsync,
-                AvailableTools = _disableTools ? [] : null,
-                Streaming = true, // Always use streaming for better responsiveness
+                Permissions = new() { OnRequest = HandlePermissionRequestAsync },
+                Tools = new() { AvailableTools = _disableTools ? [] : null },
+                Events = new() { Streaming = true }, // Always use streaming for better responsiveness
                 SystemMessage = new SystemMessageConfig
                 {
                     Mode = SystemMessageMode.Replace,
@@ -295,7 +296,7 @@ public partial class MetadataGenerator : IMetadataGenerator
             return _resolvedModel;
         }
 
-        List<ModelInfo> models;
+        List<Model> models;
         try
         {
             models = (await client.ListModelsAsync(cancellationToken)).ToList();
@@ -340,7 +341,7 @@ public partial class MetadataGenerator : IMetadataGenerator
         };
     }
 
-#pragma warning disable GHCP001
+#pragma warning disable MCPSDK001
     private async Task<PermissionDecision> HandlePermissionRequestAsync(
         PermissionRequest request,
         PermissionInvocation invocation)
@@ -356,7 +357,7 @@ public partial class MetadataGenerator : IMetadataGenerator
             ? PermissionDecision.ApproveOnce()
             : PermissionDecision.Reject();
     }
-        #pragma warning restore GHCP001
+#pragma warning restore MCPSDK001
     
     /// <summary>
     /// Sanitizes text to avoid JSON serialization issues.

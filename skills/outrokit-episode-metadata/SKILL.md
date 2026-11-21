@@ -39,7 +39,8 @@ transcription do not silently update settings.
 AI metadata needs the installed, authenticated GitHub Copilot CLI, available
 on `PATH` or through `COPILOT_CLI_PATH`. It sends transcript content to the
 configured AI provider. Do not describe metadata generation as offline or ask
-the user to paste credentials.
+the user to paste credentials. If the error says the Copilot CLI is too old,
+ask the user to run `copilot update` before retrying.
 
 ## Generate and choose titles
 

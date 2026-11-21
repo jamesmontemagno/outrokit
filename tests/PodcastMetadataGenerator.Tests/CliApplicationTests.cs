@@ -1,5 +1,5 @@
 using System.Text.Json;
-using GitHub.Copilot;
+using Microsoft.Copilot;
 using PodcastMetadataGenerator.Console.Cli;
 using PodcastMetadataGenerator.Core.Models;
 using PodcastMetadataGenerator.Core.Services;

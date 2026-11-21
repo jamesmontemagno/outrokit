@@ -2,7 +2,7 @@
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 @inject AppSettings AppSettings
 @inject SettingsService SettingsService
-@using GitHub.Copilot
+@using Microsoft.Copilot.Rpc
 
 <PageTitle>Settings</PageTitle>
 
@@ -170,7 +170,7 @@
 </div>
 
 @code {
-    private List<ModelInfo> _models = [];
+    private List<Model> _models = [];
     private IReadOnlyList<ModelChoice> _modelChoices = [];
     private bool _showSaved;
     private bool _isLoadingModels = true;
@@ -245,7 +245,7 @@
         // Keep podcast name and host names
     }
 
-    private static string ResolveSelectedModel(IReadOnlyList<ModelInfo> models, string? selectedModel)
+    private static string ResolveSelectedModel(IReadOnlyList<Model> models, string? selectedModel)
     {
         var normalizedModel = selectedModel?.Trim();
 

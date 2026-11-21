@@ -10,7 +10,7 @@ web
 
 Podcasters and YouTubers who have a finished episode and still need to publish it. This includes people who have never installed .NET or used a command line (confirmed by James Montemagno, 2026-10-04). They arrive with a transcript, a video, or an audio file and want titles, show notes, chapter markers, and subtitles without writing them by hand.
 
-Secondary: developers who want to see a working GitHub Copilot SDK app in .NET.
+Secondary: developers who want to see a working Microsoft Copilot SDK app in .NET.
 
 ## Product Purpose
 
