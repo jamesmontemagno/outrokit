@@ -160,7 +160,7 @@ var session = await client.CreateSessionAsync(new CreateSessionOptions
 });
 ```
 
-Use this pattern when you want the agent to stay read-only or avoid shell access. OutroKit sets `AvailableTools = []` so metadata sessions only use the transcript it sends.
+Use this pattern when you want the agent to stay read-only or avoid shell access. OutroKit's noninteractive CLI sets `AvailableTools = []` so its metadata sessions only use the transcript it sends. The console menu and Blazor page leave built-in tools enabled, subject to permission prompts.
 
 ## Adding your own tool APIs
 
