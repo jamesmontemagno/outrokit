@@ -1,4 +1,4 @@
-using GitHub.Copilot;
+using Microsoft.Copilot;
 using PodcastMetadataGenerator.Core.Copilot;
 
 namespace PodcastMetadataGenerator.Core.Services;
@@ -95,7 +95,8 @@ public class CopilotAuthService
         }
         catch (Exception ex)
         {
-            return (false, false, $"Failed to check authentication: {ex.Message}", null, null, null);
+            var error = CopilotClientFactory.DescribeVersionMismatch(ex) ?? $"Failed to check authentication: {ex.Message}";
+            return (false, false, error, null, null, null);
         }
         finally
         {

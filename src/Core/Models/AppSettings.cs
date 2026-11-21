@@ -1,10 +1,10 @@
-using GitHub.Copilot;
+using Microsoft.Copilot.Rpc;
 using PodcastMetadataGenerator.Core.Copilot;
 
 namespace PodcastMetadataGenerator.Core.Models;
 
 /// <summary>
-/// Available AI models from the GitHub Copilot SDK.
+/// Available AI models from the Microsoft Copilot SDK.
 /// </summary>
 public static class AvailableModels
 {
@@ -19,7 +19,7 @@ public static class AvailableModels
     /// <summary>
     /// Fetches the list of available models with full metadata from the Copilot SDK.
     /// </summary>
-    public static async Task<List<ModelInfo>> GetModelsWithMetadataAsync(CancellationToken cancellationToken = default)
+    public static async Task<List<Model>> GetModelsWithMetadataAsync(CancellationToken cancellationToken = default)
     {
         try
         {
@@ -39,7 +39,7 @@ public static class AvailableModels
     /// Builds the entries for a model picker, one per model id. Models that would show the
     /// same label get their id appended so they can be told apart.
     /// </summary>
-    public static IReadOnlyList<ModelChoice> BuildChoices(IEnumerable<ModelInfo> models)
+    public static IReadOnlyList<ModelChoice> BuildChoices(IEnumerable<Model> models)
     {
         var choices = models
             .DistinctBy(m => m.Id, StringComparer.OrdinalIgnoreCase)
@@ -57,7 +57,7 @@ public static class AvailableModels
             .ToList();
     }
 
-    private static string FormatLabel(ModelInfo model)
+    private static string FormatLabel(Model model)
         => model.Billing?.Multiplier > 0
             ? $"{model.Name} (×{model.Billing.Multiplier:0.##})"
             : model.Name;
@@ -74,7 +74,7 @@ public static class AvailableModels
     /// <summary>
     /// Picks a valid model id from an already-fetched model list, preferring the provided selection.
     /// </summary>
-    public static string SelectModel(IReadOnlyList<ModelInfo> models, string? selectedModel)
+    public static string SelectModel(IReadOnlyList<Model> models, string? selectedModel)
     {
         var normalizedModel = selectedModel?.Trim();
 

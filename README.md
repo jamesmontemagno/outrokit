@@ -1,12 +1,12 @@
 # 📼 OutroKit
 
-OutroKit writes the titles, descriptions, chapters, and SRT subtitles for your episode from its transcript, video, or audio, using AI powered by the GitHub Copilot SDK. It works for podcasts and videos alike.
+OutroKit writes the titles, descriptions, chapters, and SRT subtitles for your episode from its transcript, video, or audio, using AI powered by the Microsoft Copilot SDK. It works for podcasts and videos alike.
 
 > OutroKit was called Podcast Metadata Generator, and its NuGet package is now `OutroKit`. The old `PodcastMetadataGenerator` package still works and tells you how to switch: run `dnx OutroKit`, or if you installed it as a tool, run `dotnet tool uninstall -g PodcastMetadataGenerator` and then `dotnet tool install -g OutroKit`. Your settings carry over.
 
 ![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![GitHub Copilot](https://img.shields.io/badge/GitHub%20Copilot-SDK-000?logo=github)
+![Microsoft Copilot SDK](https://img.shields.io/badge/Microsoft%20Copilot-SDK-000)
 
 **New here?** The [step-by-step install and usage guide](https://outrokit.com/) at **outrokit.com** walks through everything, starting from opening a terminal.
 
@@ -44,7 +44,7 @@ OutroKit writes the titles, descriptions, chapters, and SRT subtitles for your e
 - [ffmpeg](https://ffmpeg.org/download.html) available on `PATH`, or its executable path configured in Settings (only needed to transcribe video or audio files and to burn captions into video)
   - Burning captions needs an ffmpeg built with libass, which provides the `subtitles` filter. Homebrew's standard `ffmpeg` formula leaves it out; `brew install ffmpeg-full` includes it
 
-The app reaches Copilot through the Copilot CLI installed on your computer, on every system and whether you run the NuGet tool or build from source. It does not bundle a Copilot runtime. Make sure `copilot` is on your `PATH`, or set `COPILOT_CLI_PATH` to the executable. If the app cannot find it, it shows how to install it. The noninteractive transcription, caption, subtitle conversion, audio, and Whisper model commands run without a Copilot readiness check or authentication.
+The app reaches Copilot through the Copilot CLI installed on your computer, on every system and whether you run the NuGet tool or build from source. It does not bundle a Copilot runtime. Make sure `copilot` is on your `PATH`, or set `COPILOT_CLI_PATH` to the executable. If the app cannot find it, it shows how to install it. Keep the CLI up to date: if the app says your Copilot CLI is too old, run `copilot update` (or upgrade it with the package manager you installed it with). The noninteractive transcription, caption, subtitle conversion, audio, and Whisper model commands run without a Copilot readiness check or authentication.
 
 ### Installing GitHub Copilot CLI
 
@@ -100,7 +100,7 @@ dotnet build PodcastMetadataGenerator.sln
 
 ## 📚 Additional Docs
 
-- [Using GitHub Copilot SDK built-in APIs in .NET](docs/copilot-sdk-dotnet-built-in-apis.md)
+- [Using Microsoft Copilot SDK built-in APIs in .NET](docs/copilot-sdk-dotnet-built-in-apis.md)
 
 ## Agent skills in the NuGet package
 
@@ -518,6 +518,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- [GitHub Copilot SDK](https://github.com/github/copilot-sdk) for AI integration
+- [Microsoft Copilot SDK](https://github.com/microsoft/copilot-sdk) for AI integration
 - [Spectre.Console](https://spectreconsole.net/) for the beautiful terminal UI
 - Inspired by [jamesmontemagno/app-podcast-assistant](https://github.com/jamesmontemagno/app-podcast-assistant)

@@ -1,5 +1,7 @@
-using GitHub.Copilot;
+using Microsoft.Copilot;
+using System.Globalization;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 
 namespace PodcastMetadataGenerator.Core.Copilot;
 
@@ -20,23 +22,64 @@ public static class CopilotClientFactory
     public static bool IsCliInstalled => !string.IsNullOrWhiteSpace(ResolveCliPath());
 
     /// <summary>
-    /// Creates a CopilotClient that runs the installed Copilot CLI: the one named by COPILOT_CLI_PATH,
-    /// or else the one on PATH.
+    /// Creates a CopilotClient that runs the installed Copilot CLI as a child process: the one named
+    /// by COPILOT_CLI_PATH, or else the one on PATH.
     /// </summary>
+    /// <remarks>
+    /// The SDK defaults to hosting a bundled runtime in this process, but the app doesn't bundle one,
+    /// so it always spawns the installed CLI over stdio.
+    /// </remarks>
     public static CopilotClient CreateClient()
     {
-        var options = new CopilotClientOptions
-        {
-            ClientInfo = new CopilotClientInfo { ApplicationName = ClientName }
-        };
-
         var cliPath = ResolveCliPath();
-        if (!string.IsNullOrWhiteSpace(cliPath))
+
+        return new CopilotClient(new CopilotClientOptions
         {
-            options.Connection = RuntimeConnection.ForStdio(path: cliPath);
+            Mode = CopilotClientMode.CodingAgent,
+            Runtime = RuntimeConnection.ForSpawnedStdio(path: string.IsNullOrWhiteSpace(cliPath) ? null : cliPath),
+            ClientInfo = new CopilotClientInfo { ApplicationName = ClientName }
+        });
+    }
+
+    /// <summary>
+    /// Shown when the installed Copilot CLI is too old for the SDK protocol this app uses.
+    /// </summary>
+    public const string CliOutdatedMessage =
+        "Your Copilot CLI is too old for this version of OutroKit. Update it with 'copilot update' " +
+        "(or the package manager you installed it with), then try again.";
+
+    /// <summary>
+    /// Shown when the installed Copilot CLI is newer than the SDK protocol this app supports.
+    /// </summary>
+    public const string AppOutdatedMessage =
+        "This version of OutroKit is too old for your Copilot CLI. Update OutroKit with " +
+        "'dotnet tool update -g OutroKit', then try again.";
+
+    private static readonly Regex ProtocolMismatch = new(
+        @"protocol version mismatch: SDK supports versions \d+-(?<max>\d+), but server (?:reports version (?<server>\d+)|does not report)",
+        RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+
+    /// <summary>
+    /// Explains a startup failure caused by the installed Copilot CLI and this app speaking different
+    /// SDK protocol versions, or returns null for any other failure.
+    /// </summary>
+    public static string? DescribeVersionMismatch(Exception exception)
+    {
+        for (Exception? current = exception; current is not null; current = current.InnerException)
+        {
+            var match = ProtocolMismatch.Match(current.Message);
+            if (!match.Success)
+            {
+                continue;
+            }
+
+            var cliIsNewer = match.Groups["server"].Success
+                && int.Parse(match.Groups["server"].Value, CultureInfo.InvariantCulture)
+                    > int.Parse(match.Groups["max"].Value, CultureInfo.InvariantCulture);
+            return cliIsNewer ? AppOutdatedMessage : CliOutdatedMessage;
         }
 
-        return new CopilotClient(options);
+        return null;
     }
 
     private static string ResolveCliPath()

@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 using System.Text;
-using GitHub.Copilot;
+using Microsoft.Copilot;
 using Spectre.Console;
 using Spectre.Console.Rendering;
 using PodcastMetadataGenerator.Core.Models;

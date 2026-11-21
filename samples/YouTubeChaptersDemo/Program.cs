@@ -1,6 +1,6 @@
 using System.Text;
 using System.Text.RegularExpressions;
-using GitHub.Copilot;
+using Microsoft.Copilot;
 
 #region Read in transcript
 
@@ -36,7 +36,7 @@ if (string.IsNullOrWhiteSpace(transcriptForPrompt))
 
 #endregion
 
-await using var client = new CopilotClient();
+await using var client = new CopilotClient(new CopilotClientOptions { Mode = CopilotClientMode.CodingAgent });
 await client.StartAsync();
 
 var authStatus = await client.GetAuthStatusAsync();
@@ -55,11 +55,11 @@ if (string.IsNullOrWhiteSpace(selectedModel))
 
 Console.WriteLine($"Using model: {selectedModel}");
 
-var session = await client.CreateSessionAsync(new SessionConfig
+var session = await client.CreateSessionAsync(new CreateSessionOptions
 {
     Model = selectedModel,
-    Streaming = true,
-    OnPermissionRequest = PermissionHandler.ApproveAll,
+    Events = new() { Streaming = true },
+    Permissions = new() { OnRequest = PermissionHandler.ApproveAll },
     SystemMessage = new SystemMessageConfig
     {
         Mode = SystemMessageMode.Replace,
