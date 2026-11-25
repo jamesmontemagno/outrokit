@@ -1,6 +1,6 @@
 # Using Microsoft Copilot SDK built-in APIs in .NET
 
-This note is based on the `v2.0.1` release of [`microsoft/copilot-sdk`](https://github.com/microsoft/copilot-sdk) and its .NET package, `Microsoft.Copilot.SDK`. Version 2 renamed the SDK from GitHub Copilot SDK, moved the namespaces from `GitHub.Copilot` to `Microsoft.Copilot`, and raised the SDK protocol to version 4. See the upstream [v2 breaking changes](https://github.com/microsoft/copilot-sdk/blob/main/docs/v2-breaking-changes.md) guide when migrating from v1.
+This note is based on the `v2.0.2` release of [`microsoft/copilot-sdk`](https://github.com/microsoft/copilot-sdk) and its .NET package, `Microsoft.Copilot.SDK`. Version 2 renamed the SDK from GitHub Copilot SDK, moved the namespaces from `GitHub.Copilot` to `Microsoft.Copilot`, and raised the SDK protocol to version 4. See the upstream [v2 breaking changes](https://github.com/microsoft/copilot-sdk/blob/main/docs/v2-breaking-changes.md) guide when migrating from v1.
 
 ## Prerequisites
 
